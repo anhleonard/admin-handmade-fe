@@ -5,6 +5,11 @@ import "./globals.css";
 import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import localFont from "next/font/local";
+import { ReduxProvider } from "./provider";
+import Modal from "./modal/main-modal";
+import { ThemeProvider } from "@emotion/react";
+// import { theme } from "@/theme/theme";
+import { CssBaseline, createTheme } from "@mui/material";
 
 export const quicksand = localFont({
   src: [
@@ -56,6 +61,12 @@ export const quicksand = localFont({
   ],
 });
 
+const theme = createTheme({
+  typography: {
+    fontFamily: quicksand.style.fontFamily,
+  },
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -73,9 +84,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={quicksand.className}>
-        <div className="dark:bg-boxdark-2 dark:text-bodydark">
-          {loading ? <Loader /> : children}
-        </div>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <ReduxProvider>
+            <div className="dark:bg-boxdark-2 dark:text-bodydark">
+              {loading ? <Loader /> : children}
+            </div>
+            <Modal />
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

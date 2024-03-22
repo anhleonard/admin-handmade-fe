@@ -13,10 +13,12 @@ interface MyTextFieldProps {
   disabledText?: string;
   isError?: boolean;
   helperText?: string | null;
-  width?: string;
+  className?: string;
   value?: string | number;
   defaultValue?: string | number;
   endIcon?: ReactNode;
+  minNumber?: number;
+  maxNumber?: number;
   onChange?: (value: string | number) => void;
 }
 
@@ -30,23 +32,27 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
   disabledText = null,
   isError = false,
   helperText = null,
-  width = "w-full",
+  className = "w-full",
   value,
   defaultValue,
   endIcon = null,
+  minNumber,
+  maxNumber,
   onChange,
 }) => {
   const [focus, setFocus] = useState(false);
 
   return (
-    <div className={`${width}`}>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
-          {title}
-          {isRequired ? (
-            <span className="text-base text-support-c500"> *</span>
-          ) : null}
-        </label>
+    <div className={`${className}`}>
+      <div className="hover:cursor-pointer">
+        {title ? (
+          <label className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
+            {title}
+            {isRequired ? (
+              <span className="text-base text-support-c500"> *</span>
+            ) : null}
+          </label>
+        ) : null}
         <div
           onClick={() => {
             if (!disabled) {
@@ -54,7 +60,7 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
               document.getElementById(id)?.focus();
             }
           }}
-          className={`dark:focus:border-primary flex w-full items-center justify-between gap-1 rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base font-normal text-grey-c900 placeholder-grey-c50 outline-none transition focus:border-primary-c400 ${focus ? "border-primary-c400" : "border-grey-c50"} ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""}  dark:border-form-strokedark dark:bg-form-input dark:text-white ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200" : ""}`}
+          className={`dark:focus:border-primary flex w-full items-center justify-between gap-1 rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base font-normal text-grey-c900 placeholder-grey-c50 outline-none transition ${focus ? "border-primary-c400" : "border-grey-c50 hover:border-primary-c200"} ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""}  dark:border-form-strokedark dark:bg-form-input dark:text-white ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200" : ""}`}
         >
           <div
             className={`w-full ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""} ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200" : ""}`}
@@ -74,6 +80,8 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
               className="w-full bg-transparent outline-none"
               onFocus={() => setFocus(true)}
               onBlur={() => setFocus(false)}
+              min={minNumber}
+              max={maxNumber}
             />
           </div>
           {endIcon ?? null}
