@@ -1,49 +1,16 @@
 "use client";
-import AllItemsTab from "@/app/orders/list-orders/all-items/page";
 import { COLORS } from "@/enum/colors";
+import { productTabs } from "@/enum/constants";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Box, Tab, TabProps } from "@mui/material";
-import { LinkProps } from "next/link";
-import { usePathname } from "next/navigation";
-import { ReactNode, useState } from "react";
-import { useDispatch } from "react-redux";
+import { Box, Tab } from "@mui/material";
+import { useState } from "react";
 
-const labelOptions = [
-  { label: "Tên sản phẩm", value: "ITEM_NAME" },
-  { label: "Mã sản phẩm", value: "PRODUCT_NAME" },
-];
-
-type ListProductsProps = {
-  children: ReactNode;
-};
-
-const ListProductsScreen = ({ children }: ListProductsProps) => {
-  const dispatch = useDispatch();
-  const pathname = usePathname();
-
+const ListProductsScreen = () => {
   const [value, setValue] = useState("1");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
-
-  const productTabs = [
-    {
-      label: "Tất cả",
-      value: "1",
-      content: <AllItemsTab />,
-    },
-    {
-      label: "Đang bán",
-      value: "2",
-      content: <div>table 2</div>,
-    },
-    {
-      label: "Hết hàng",
-      value: "3",
-      content: <div>table 3</div>,
-    },
-  ];
 
   return (
     <div className="w-full rounded-lg bg-white px-4 py-2">
@@ -86,7 +53,11 @@ const ListProductsScreen = ({ children }: ListProductsProps) => {
                 </TabList>
               </Box>
               {productTabs.map((item) => {
-                return <TabPanel value={item.value}>{item.content}</TabPanel>;
+                return (
+                  <TabPanel value={item.value}>
+                    <div className="my-8">{item.content}</div>
+                  </TabPanel>
+                );
               })}
             </TabContext>
           </Box>

@@ -8,7 +8,7 @@ interface MyLabelProps {
   bgColor?: string;
   px?: string;
   py?: string;
-  type?: "primary" | "support" | "success" | "warning" | "progress";
+  type?: "primary" | "error" | "success" | "warning" | "progress" | "delivery";
 }
 
 const MyLabel: React.FC<MyLabelProps> = ({
@@ -36,6 +36,9 @@ const MyLabel: React.FC<MyLabelProps> = ({
 
       case "progress":
         return ColorState.progress;
+
+      case "delivery":
+        return ColorState.delivery;
     }
   };
 

@@ -26,7 +26,7 @@ export default function SmallInputImage({
   onDeleteImage,
 }: SmallInputImageProps) {
   return (
-    <div className="h-[52px] w-[60px]">
+    <div className="h-[52px] w-[52px]">
       {previewImage && (
         <div className="relative">
           <Image

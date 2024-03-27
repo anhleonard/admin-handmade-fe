@@ -60,10 +60,10 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
               document.getElementById(id)?.focus();
             }
           }}
-          className={`dark:focus:border-primary flex w-full items-center justify-between gap-1 rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base font-normal text-grey-c900 placeholder-grey-c50 outline-none transition ${focus ? "border-primary-c400" : "border-grey-c50 hover:border-primary-c200"} ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""}  dark:border-form-strokedark dark:bg-form-input dark:text-white ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200" : ""}`}
+          className={`dark:focus:border-primary flex w-full items-center justify-between gap-1 rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base font-normal text-grey-c900 placeholder-grey-c50 outline-none transition ${focus ? "border-primary-c400" : "border-grey-c50 hover:border-primary-c200"} ${disabled ? "cursor-default bg-grey-c100 text-grey-c500 hover:!border-grey-c50" : ""}  dark:border-form-strokedark dark:bg-form-input dark:text-white ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200 hover:border-support-c500" : ""}`}
         >
           <div
-            className={`w-full ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""} ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200" : ""}`}
+            className={`w-full ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""} ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200 hover:border-support-c500" : ""}`}
           >
             <input
               type={type}

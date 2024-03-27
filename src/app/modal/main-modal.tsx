@@ -16,7 +16,7 @@ export default function Modal() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 ${modalData.isOpen ? "flex items-center justify-center" : "hidden"}`}
+      className={`fixed inset-0 z-[100000] ${modalData.isOpen ? "flex items-center justify-center" : "hidden"}`}
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
@@ -24,13 +24,13 @@ export default function Modal() {
     >
       {modalData.isOpen && (
         <>
-          <div className="absolute inset-0 z-10 bg-white/40"></div>
+          <div className="absolute inset-0 z-[200000] bg-grey-c900 opacity-30"></div>
           <div
-            className={`relative z-50 ${modalData.screen} pointer-events-auto shadow-xl`}
+            className={`relative z-[300000] ${modalData.screen} pointer-events-auto shadow-xl`}
           >
             <div className="transform overflow-hidden rounded-lg bg-white transition-all">
               <div className="sm:overflow-y-auto">
-                <div className="flex items-center justify-between border-b-2 border-b-grey-c100 px-4 py-4 sm:p-4 ">
+                <div className="flex items-center justify-between border-b-2 border-dashed border-b-grey-c50 px-4 py-2">
                   <Typography
                     fontSize={FontSize.LG}
                     fontFamily={FontFamily.BOLD}
@@ -43,7 +43,7 @@ export default function Modal() {
                     className="hover:cursor-pointer"
                   />
                 </div>
-                <div className="max-h-[80vh] overflow-y-auto">
+                <div className="max-h-[80vh] overflow-y-auto px-4 py-2">
                   {modalData.content}
                 </div>
               </div>

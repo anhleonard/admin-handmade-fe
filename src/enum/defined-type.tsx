@@ -37,3 +37,26 @@ export type ModalState = {
   content: React.ReactNode;
   screen?: string;
 };
+
+export type ClassifiedItem = {
+  idItem: string;
+  value: string;
+  inventory_numbers: number;
+  money: string;
+  urlImg: string;
+};
+
+export type ClassifiedClass = {
+  idClass: string;
+  name: string;
+  items: Array<ClassifiedItem>;
+};
+
+// Confirm
+export type ConfirmState = {
+  isOpen?: boolean;
+  title: string;
+  message: string;
+  feature: string;
+  onConfirm?: () => void;
+};

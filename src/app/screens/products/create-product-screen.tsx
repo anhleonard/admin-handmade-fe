@@ -117,40 +117,33 @@ const CreateProductScreen = () => {
         </div>
         {!isClassified && (
           <div>
-            <div className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
-              Thêm hình ảnh mô tả
+            <div>
+              <div className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
+                Thêm hình ảnh mô tả
+              </div>
+              <UploadImage />
             </div>
-            <UploadImage />
+            <div className="flex flex-row items-center justify-between gap-8">
+              <MyTextField
+                id="moneyItem"
+                title="Số tiền"
+                placeholder="Số tiền bán của 1 sản phẩm"
+                type="number"
+                minNumber={1}
+                className="w-1/2"
+              />
+              <MyTextField
+                id="stockNumber"
+                title="Số lượng tồn kho"
+                placeholder="Số lượng tồn của sản phẩm"
+                type="number"
+                minNumber={1}
+                className="w-1/2"
+              />
+            </div>
           </div>
         )}
         {isClassified && <ClassifiedTable />}
-        <div className="flex flex-row items-center justify-between gap-8">
-          <MyTextField
-            id="moneyItem"
-            title="Số tiền"
-            placeholder="Số tiền bán của 1 sản phẩm"
-            type="number"
-            minNumber={1}
-            className="w-1/3"
-          />
-          <MyTextField
-            id="stockNumber"
-            title="Số lượng tồn kho"
-            placeholder="Số lượng tồn của sản phẩm"
-            type="number"
-            minNumber={1}
-            className="w-1/3"
-          />
-          <MyTextField
-            id="maxAmount"
-            title="Số lượng mua tối đa"
-            placeholder="Số lượng sản phẩm tối đa trong 1 lần mua"
-            type="number"
-            isRequired={false}
-            minNumber={1}
-            className="w-1/3"
-          />
-        </div>
         <div className="mt-3 flex flex-row items-center justify-between gap-8">
           <Button
             color="primary"

@@ -37,7 +37,7 @@ const MyDatePicker: React.FC<MyDatePickerProps> = ({
   }, []);
 
   return (
-    <div className="w-[500px]">
+    <div className={className}>
       <label className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
         {label}
         {isRequired ? (
@@ -48,7 +48,7 @@ const MyDatePicker: React.FC<MyDatePickerProps> = ({
         type="date"
         ref={inputRef}
         placeholder={placeholder ?? "yyyy/mm/dd"}
-        className="w-full rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base text-grey-c900 outline-none hover:border-primary-c200 focus:!border-primary-c400 active:!border-primary-c400"
+        className="w-full rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base font-normal text-grey-c900 outline-none hover:border-primary-c200 focus:!border-primary-c400 active:!border-primary-c400"
       />
     </div>
   );
