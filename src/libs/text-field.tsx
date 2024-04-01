@@ -2,6 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import MyIcon from "./my-icon";
+import { formatCurrency } from "@/enum/functions";
 
 interface MyTextFieldProps {
   id: string;
@@ -20,6 +21,7 @@ interface MyTextFieldProps {
   minNumber?: number;
   maxNumber?: number;
   onChange?: (value: string | number) => void;
+  hasInputNumber?: boolean;
 }
 
 const MyTextField: React.FC<MyTextFieldProps> = ({
@@ -39,8 +41,17 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
   minNumber,
   maxNumber,
   onChange,
+  hasInputNumber = false,
 }) => {
   const [focus, setFocus] = useState(false);
+  const [error, setError] = useState(isError);
+
+  const handleKeyPress = (event: any) => {
+    const isNumber = /[0-9]/i.test(event.key);
+    if (!isNumber) {
+      event.preventDefault();
+    }
+  };
 
   return (
     <div className={`${className}`}>
@@ -60,10 +71,10 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
               document.getElementById(id)?.focus();
             }
           }}
-          className={`dark:focus:border-primary flex w-full items-center justify-between gap-1 rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base font-normal text-grey-c900 placeholder-grey-c50 outline-none transition ${focus ? "border-primary-c400" : "border-grey-c50 hover:border-primary-c200"} ${disabled ? "cursor-default bg-grey-c100 text-grey-c500 hover:!border-grey-c50" : ""}  dark:border-form-strokedark dark:bg-form-input dark:text-white ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200 hover:border-support-c500" : ""}`}
+          className={`dark:focus:border-primary flex w-full items-center justify-between gap-1 rounded-2xl border-[2px] border-grey-c50 px-3 py-3 text-base font-normal text-grey-c900 placeholder-grey-c50 outline-none transition ${focus ? "border-primary-c400" : "border-grey-c50 hover:border-primary-c200"} ${disabled ? "cursor-default bg-grey-c100 text-grey-c500 hover:!border-grey-c50" : ""}  dark:border-form-strokedark dark:bg-form-input dark:text-white ${error ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200 hover:border-support-c500" : ""}`}
         >
           <div
-            className={`w-full ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""} ${isError ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200 hover:border-support-c500" : ""}`}
+            className={`w-full ${disabled ? "cursor-default border-grey-c200 bg-grey-c100 text-grey-c500" : ""} ${error ? "border-support-c500 bg-support-c10 text-support-c500 placeholder-support-c200 hover:border-support-c500 focus:border-support-c500" : ""}`}
           >
             <input
               type={type}
@@ -72,6 +83,9 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
               onChange={(e) => {
                 if (onChange) {
                   onChange(e.target.value);
+                }
+                if (error) {
+                  setError(false);
                 }
               }}
               value={value}
@@ -82,12 +96,18 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
               onBlur={() => setFocus(false)}
               min={minNumber}
               max={maxNumber}
+              ref={(input) => {
+                input &&
+                  type === "text" &&
+                  hasInputNumber &&
+                  input.addEventListener("keypress", handleKeyPress);
+              }}
             />
           </div>
           {endIcon ?? null}
         </div>
       </div>
-      {(isError && helperText) || (disabled && disabledText) ? (
+      {(error && helperText) || (disabled && disabledText) ? (
         <div className="mt-1 flex items-center justify-start gap-1">
           <MyIcon width={3} height={3}>
             <path
@@ -96,7 +116,7 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
             />
           </MyIcon>
           <div
-            className={`text-xs font-medium ${isError ? "text-support-c500" : "text-grey-c800"}`}
+            className={`text-xs font-medium ${error ? "text-support-c500" : "text-grey-c800"}`}
           >
             {helperText}
           </div>

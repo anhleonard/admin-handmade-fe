@@ -10,7 +10,7 @@ type Props = {
   type?: "submit" | "button" | "reset";
   variant?: "outline" | "contained" | "other";
   fullWidth?: boolean;
-  color?: "primary" | "secondary" | "error" | "info" | "grey";
+  color?: "primary" | "secondary" | "error" | "info" | "grey" | "black";
   size?: "small" | "normal" | "large";
   disabled?: boolean;
 };
@@ -42,6 +42,7 @@ const Button = forwardRef<
       secondary: `bg-secondary-c900 text-white px-5 py-2 text-sm hover:opacity-90 font-medium border-none`,
       primary: `bg-primary-c900 text-white px-5 py-2 text-sm hover:opacity-90 font-medium border-none`,
       info: `bg-blue-c900 text-white px-5 py-2 text-sm hover:opacity-90 font-medium border-none`,
+      black: `bg-black text-white px-5 py-2 text-sm hover:opacity-90 font-medium border-none`,
     };
   }, []);
 
@@ -64,9 +65,11 @@ const Button = forwardRef<
                     ${BgColor.GREY_400}
                     ${TextColor.WHITE}
                     ${BorderColor.GREY_400}
+                    !border-0
                 `
                     : `
                     ${colorAttitude[color]}
+                    !border-0
                     hover:scale-105
                     `
                 }

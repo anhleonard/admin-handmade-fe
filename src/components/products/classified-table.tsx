@@ -10,13 +10,20 @@ const ClassifiedTable = () => {
   const [classes, setClasses] = useState<Array<ClassifiedClass>>([
     {
       idClass: Math.random().toString(),
-      name: "",
+      name: "màu sắc",
       items: [
         {
           idItem: Math.random().toString(),
-          value: "",
+          value: "đen",
           inventory_numbers: 1,
-          money: "",
+          money: "1234",
+          urlImg: "",
+        },
+        {
+          idItem: Math.random().toString(),
+          value: "xanh",
+          inventory_numbers: 1,
+          money: "1234",
           urlImg: "",
         },
       ],

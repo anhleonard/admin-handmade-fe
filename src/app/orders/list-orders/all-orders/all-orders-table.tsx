@@ -8,13 +8,17 @@ import {
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import Image from "next/image";
-import { FontFamily, FontSize } from "@/enum/setting";
+import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import { Tooltip } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import { COLORS } from "@/enum/colors";
+import { useDispatch } from "react-redux";
+import DetailOrderModal from "../../modals/detail-order-modal";
+import { openModal } from "@/redux/slices/modalSlice";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -22,6 +26,42 @@ const labelOptions = [
 ];
 
 const AllOrdersTable = () => {
+  const dispatch = useDispatch();
+
+  const handleOpenDetailModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chi tiết đơn hàng",
+      content: <DetailOrderModal />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleConfirmOrder = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN ĐƠN HÀNG",
+      message: "Bạn có chắc chắn xác nhận đơn hàng này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleConfirmCancelOrder = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "HỦY ĐƠN HÀNG",
+      message: "Bạn có chắc chắn hủy đơn hàng này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -72,18 +112,27 @@ const AllOrdersTable = () => {
                 <td className="px-1 py-4">
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Tooltip title="Xem chi tiết đơn hàng">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleOpenDetailModal()}
+                      >
                         <DetailIcon />
                       </div>
                     </Tooltip>
                     <Tooltip title="Xác nhận">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleConfirmOrder()}
+                      >
                         <CheckCircleOutlineIcon
                           sx={{ fontSize: 20, color: COLORS.blue.c900 }}
                         />
                       </div>
                     </Tooltip>
-                    <Tooltip title="Từ chối">
+                    <Tooltip
+                      title="Từ chối"
+                      onClick={() => handleConfirmCancelOrder()}
+                    >
                       <div className="hover:cursor-pointer">
                         <DoNotDisturbOnOutlinedIcon
                           sx={{ fontSize: 20, color: COLORS.support.c500 }}

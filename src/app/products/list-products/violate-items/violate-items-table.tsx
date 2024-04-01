@@ -19,6 +19,10 @@ import { Tooltip, Typography } from "@mui/material";
 import MyTextAction from "@/libs/text-action";
 import MyCutOffText from "@/libs/cutoff-text";
 import { COLORS } from "@/enum/colors";
+import DetailProductModal from "../../modals/detail-product-modal";
+import EditProductModal from "../../modals/edit-product-modal";
+import EditViolateProductModal from "../../modals/edit-violate-product";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -28,14 +32,36 @@ const labelOptions = [
 const ViolateItemsTable = () => {
   const dispatch = useDispatch();
 
-  const handleOpenModal = () => {
+  const handleOpenDetailModal = () => {
     const modal = {
       isOpen: true,
-      title: "Ticket detail",
-      content: <div>hello cac ban</div>,
-      screen: SCREEN.XS,
+      title: "Chi tiết sản phẩm & lỗi",
+      content: <DetailProductModal type="VIOLATE_ITEMS" />,
+      screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
+  };
+
+  const handleOpenEditModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chỉnh sửa sản phẩm & lỗi",
+      content: <EditViolateProductModal />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleConfirmDeleteItem = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÓA SẢN PHẨM",
+      message: "Bạn có chắc chắn xóa sản phẩm này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
   };
 
   return (
@@ -121,7 +147,7 @@ const ViolateItemsTable = () => {
                     <Tooltip title="Xem chi tiết lỗi">
                       <div
                         className="hover:cursor-pointer"
-                        onClick={() => handleOpenModal()}
+                        onClick={() => handleOpenDetailModal()}
                       >
                         <ErrorOutlineIcon
                           sx={{ color: COLORS.primary.c700, fontSize: 22 }}
@@ -129,12 +155,18 @@ const ViolateItemsTable = () => {
                       </div>
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleOpenEditModal()}
+                      >
                         <EditIcon />
                       </div>
                     </Tooltip>
                     <Tooltip title="Xóa">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleConfirmDeleteItem()}
+                      >
                         <DeleteIcon />
                       </div>
                     </Tooltip>

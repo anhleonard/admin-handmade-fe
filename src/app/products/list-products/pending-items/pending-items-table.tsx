@@ -14,6 +14,8 @@ import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
+import DetailProductModal from "../../modals/detail-product-modal";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -23,14 +25,26 @@ const labelOptions = [
 const PendingItemsTable = () => {
   const dispatch = useDispatch();
 
-  const handleOpenModal = () => {
+  const handleOpenDetailModal = () => {
     const modal = {
       isOpen: true,
-      title: "Ticket detail",
-      content: <div>hello cac ban</div>,
-      screen: SCREEN.XS,
+      title: "Chi tiết sản phẩm",
+      content: <DetailProductModal type="PENDING_ITEMS" />,
+      screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
+  };
+
+  const handleConfirmDeleteItem = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "HỦY CHỜ DUYỆT SẢN PHẨM",
+      message: "Bạn có chắc chắn hủy chờ duyệt cho sản phẩm này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
   };
 
   return (
@@ -95,13 +109,24 @@ const PendingItemsTable = () => {
                 </td>
                 <td className="px-1 py-4">Quà tặng</td>
                 <td className="px-1 py-4">2653</td>
-                <td className="px-1 py-4">120.000</td>
+                <td className="px-1 py-4">120.000 - 150.000</td>
                 <td className="px-1 py-4">16:38 - 22/3/2024</td>
                 <td className="px-1 py-4">16:38 - 29/3/2024</td>
                 <td className="px-1 py-4">
                   <div className="flex flex-row items-center justify-center gap-2">
+                    <Tooltip title="Xem chi tiết">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleOpenDetailModal()}
+                      >
+                        <DetailIcon />
+                      </div>
+                    </Tooltip>
                     <Tooltip title="Xóa">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleConfirmDeleteItem()}
+                      >
                         <DeleteIcon />
                       </div>
                     </Tooltip>

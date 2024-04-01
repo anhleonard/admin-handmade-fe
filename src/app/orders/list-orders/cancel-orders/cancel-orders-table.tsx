@@ -7,12 +7,16 @@ import {
 } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
-import { FontFamily, FontSize } from "@/enum/setting";
+import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import { Tooltip } from "@mui/material";
 import OutlinedFlagIcon from "@mui/icons-material/OutlinedFlag";
 import { COLORS } from "@/enum/colors";
+import { useDispatch } from "react-redux";
+import DetailOrderModal from "../../modals/detail-order-modal";
+import { openModal } from "@/redux/slices/modalSlice";
+import ReasonCancelOrder from "@/components/orders/reason-cancel-order";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -20,6 +24,28 @@ const labelOptions = [
 ];
 
 const CancelOrdersTable = () => {
+  const dispatch = useDispatch();
+
+  const handleOpenDetailModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chi tiết đơn hàng",
+      content: <DetailOrderModal type="CANCEL_ORDERS" />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleOpenDetailReason = () => {
+    const modal = {
+      isOpen: true,
+      title: "Lí do hủy",
+      content: <ReasonCancelOrder />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -34,7 +60,7 @@ const CancelOrdersTable = () => {
           />
         </div>
         <div className="flex flex-row items-center justify-center gap-3">
-          <div>Ngày đặt hàng</div>
+          <div>Ngày hủy</div>
           <MyDatePicker />
         </div>
       </div>
@@ -70,12 +96,18 @@ const CancelOrdersTable = () => {
                 <td className="px-1 py-4">
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Tooltip title="Xem chi tiết đơn hàng">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleOpenDetailModal()}
+                      >
                         <DetailIcon />
                       </div>
                     </Tooltip>
                     <Tooltip title="Xem lý do hủy">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleOpenDetailReason()}
+                      >
                         <OutlinedFlagIcon
                           sx={{ fontSize: 22, color: COLORS.support.c500 }}
                         />

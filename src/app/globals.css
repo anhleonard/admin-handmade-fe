@@ -213,3 +213,7 @@ body {
 }
 
 /* fix style for upload image by antd */
+
+.flatpickr-calendar.open {
+  z-index: 9999999 !important;
+}

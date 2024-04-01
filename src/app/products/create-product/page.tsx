@@ -1,5 +1,5 @@
-import CreateProductScreen from "@/app/screens/products/create-product-screen";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import CreateProductScreen from "@/screens/products/create-product-screen";
 
 const CreateProduct = () => {
   return (

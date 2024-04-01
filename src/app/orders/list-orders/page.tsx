@@ -1,7 +1,6 @@
 "use client";
-import ListOrdersScreen from "@/app/screens/orders/list-orders-screen";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { ReactNode } from "react";
+import ListOrdersScreen from "@/screens/orders/list-orders-screen";
 
 const MainListOrders = () => {
   return (

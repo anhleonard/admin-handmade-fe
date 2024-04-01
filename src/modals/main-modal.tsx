@@ -1,7 +1,7 @@
 "use client";
 import { FontFamily, FontSize, TextColor } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../redux/store";
+import type { RootState } from "../redux/store";
 import CloseIcon from "@mui/icons-material/Close";
 import { closeModal } from "@/redux/slices/modalSlice";
 import Typography from "@/libs/typography";
@@ -29,10 +29,10 @@ export default function Modal() {
             className={`relative z-[300000] ${modalData.screen} pointer-events-auto shadow-xl`}
           >
             <div className="transform overflow-hidden rounded-lg bg-white transition-all">
-              <div className="sm:overflow-y-auto">
+              <div className=" sm:overflow-y-auto">
                 <div className="flex items-center justify-between border-b-2 border-dashed border-b-grey-c50 px-4 py-2">
                   <Typography
-                    fontSize={FontSize.LG}
+                    fontSize={FontSize.BASE}
                     fontFamily={FontFamily.BOLD}
                     textColor={TextColor.PRIMARY_900}
                   >

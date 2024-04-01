@@ -3,7 +3,7 @@ import RecommendIcon from "@mui/icons-material/Recommend";
 import { FontFamily, FontSize, TextColor } from "@/enum/setting";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../redux/store";
+import type { RootState } from "../redux/store";
 import CheckIcon from "@mui/icons-material/Check";
 // import {
 //   DELETE_SYSTEM_USER,

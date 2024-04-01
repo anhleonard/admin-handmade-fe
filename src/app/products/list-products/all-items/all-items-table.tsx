@@ -13,10 +13,21 @@ import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
-import { Tooltip } from "@mui/material";
+import {
+  Box,
+  Collapse,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+} from "@mui/material";
 import EditProductModal from "../../modals/edit-product-modal";
 import DetailProductModal from "../../modals/detail-product-modal";
 import { openConfirm } from "@/redux/slices/confirmSlice";
+import { useState } from "react";
+import GiftCollapse from "@/components/gifts/gift-collapse";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -25,11 +36,12 @@ const labelOptions = [
 
 const AllItemsTable = () => {
   const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
 
   const handleOpenDetailModal = () => {
     const modal = {
       isOpen: true,
-      title: "Ticket detail",
+      title: "Chi tiết sản phẩm",
       content: <DetailProductModal />,
       screen: SCREEN.BASE,
     };
@@ -49,8 +61,20 @@ const AllItemsTable = () => {
   const handleConfirmDeleteItem = () => {
     const confirm: any = {
       isOpen: true,
-      title: "CONFIRM TO DO NEXT STEP",
-      message: "Do you want to change contact information?",
+      title: "XÓA SẢN PHẨM",
+      message: "Bạn có chắc chắn xóa sản phẩm này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleConfirmOffItem = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "TẮT SẢN PHẨM",
+      message: "Bạn có chắc chắn tắt sản phẩm này không?",
       feature: "CONFIRM_CONTACT_US",
       onConfirm: () => {},
     };
@@ -98,6 +122,7 @@ const AllItemsTable = () => {
               </tr>
             </thead>
             <tbody>
+              {/* row 1 */}
               <tr className="hover:bg-primary-c100 hover:text-grey-c700">
                 <td className="py-4 pl-3">38BEE27</td>
                 <td className="px-1 py-4">
@@ -156,7 +181,10 @@ const AllItemsTable = () => {
                       </div>
                     </Tooltip>
                     <Tooltip title="Tắt sản phẩm">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleConfirmOffItem()}
+                      >
                         <OffIcon />
                       </div>
                     </Tooltip>

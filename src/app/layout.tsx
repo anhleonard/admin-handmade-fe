@@ -6,11 +6,11 @@ import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import localFont from "next/font/local";
 import { ReduxProvider } from "./provider";
-import Modal from "./modal/main-modal";
 import { ThemeProvider } from "@emotion/react";
 // import { theme } from "@/theme/theme";
 import { CssBaseline, createTheme } from "@mui/material";
-import ConfirmModal from "./modal/confirm-modal";
+import Modal from "@/modals/main-modal";
+import ConfirmModal from "@/modals/confirm-modal";
 
 export const quicksand = localFont({
   src: [

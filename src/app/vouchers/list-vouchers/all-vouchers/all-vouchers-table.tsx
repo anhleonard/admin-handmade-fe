@@ -2,8 +2,13 @@ import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import { Tooltip } from "@mui/material";
-import { FontFamily, FontSize } from "@/enum/setting";
+import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyLabel from "@/libs/label";
+import { useDispatch } from "react-redux";
+import DetailVoucherModal from "../../modals/detail-voucher-modal";
+import { openModal } from "@/redux/slices/modalSlice";
+import EditHappeningVoucher from "../../modals/edit-happening-voucher";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Tên voucher", value: "VOUCHER_NAME" },
@@ -11,6 +16,40 @@ const labelOptions = [
 ];
 
 const AllVouchersTable = () => {
+  const dispatch = useDispatch();
+
+  const handleOpenDetailModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chi tiết voucher",
+      content: <DetailVoucherModal />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleOpenEditHappeningVoucherModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chỉnh sửa voucher",
+      content: <EditHappeningVoucher />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleConfirmCancelVoucher = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "KẾT THÚC VOUCHER",
+      message: "Bạn có chắc chắn kết thúc voucher này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -69,17 +108,26 @@ const AllVouchersTable = () => {
                 <td className="px-1 py-4">
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Tooltip title="Xem chi tiết">
-                      <div className="pt-1 hover:cursor-pointer">
+                      <div
+                        className="pt-1 hover:cursor-pointer"
+                        onClick={() => handleOpenDetailModal()}
+                      >
                         <DetailIcon />
                       </div>
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleOpenEditHappeningVoucherModal()}
+                      >
                         <EditIcon />
                       </div>
                     </Tooltip>
                     <Tooltip title="Kết thúc voucher">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleConfirmCancelVoucher()}
+                      >
                         <OffIcon />
                       </div>
                     </Tooltip>

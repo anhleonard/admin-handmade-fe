@@ -8,13 +8,16 @@ import {
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import Image from "next/image";
-import { FontFamily, FontSize } from "@/enum/setting";
+import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import { Tooltip } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import { COLORS } from "@/enum/colors";
+import DetailOrderModal from "../../modals/detail-order-modal";
+import { useDispatch } from "react-redux";
+import { openModal } from "@/redux/slices/modalSlice";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -22,6 +25,18 @@ const labelOptions = [
 ];
 
 const WaitingOrdersTable = () => {
+  const dispatch = useDispatch();
+
+  const handleOpenDetailModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chi tiết đơn hàng",
+      content: <DetailOrderModal type="WAITING_ORDERS" />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -72,7 +87,10 @@ const WaitingOrdersTable = () => {
                 <td className="px-1 py-4">
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Tooltip title="Xem chi tiết đơn hàng">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleOpenDetailModal()}
+                      >
                         <DetailIcon />
                       </div>
                     </Tooltip>

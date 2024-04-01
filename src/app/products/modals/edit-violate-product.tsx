@@ -10,65 +10,64 @@ import Button from "@/libs/button";
 import { useState } from "react";
 import { yesNoOptions } from "@/enum/constants";
 import ClassifiedTable from "@/components/products/classified-table";
+import MyRadioButtonsGroup from "@/libs/radio-button-group";
+import MyPrimaryTextField from "@/libs/primary-text-field";
 
-const CreateProductScreen = () => {
+const EditViolateProductModal = () => {
   const [isClassified, setIsClassified] = useState(false);
 
   return (
-    <div className="w-3/4 rounded-lg bg-white px-4 py-2">
-      <div className="mb-5 flex flex-col gap-3">
-        <div className="text-lg font-bold text-grey-c900">Tạo sản phẩm mới</div>
-        <div className="item-start flex gap-1 md:items-center">
-          <WarningIcon />
-          <div className="text-xs font-normal">
-            Vui lòng nhập chính xác các thông tin dưới đây để ban kiểm duyệt có
-            thể thông qua sản phẩm, tránh các vấn đề vi phạm.
-          </div>
-        </div>
-      </div>
+    <div className="w-full">
       <div className="flex flex-col gap-3">
-        <MyTextField
+        <MyPrimaryTextField
           id="nameItem"
           title="Tên sản phẩm"
-          placeholder="Nhập tên sản phẩm"
+          defaultValue={"Máy sấy tóc Philips BHC010/10 - Hàng Chính Hãng"}
+          isError
+          helperText={"Vui lòng nhập tên theo quy định."}
+          isRequired
         />
         <div className="flex flex-row items-center justify-between gap-8">
-          <MyTextField
+          <MyPrimaryTextField
             id="codeItem"
             title="Mã sản phẩm"
-            placeholder="Nhập mã sản phẩm"
             className="w-1/2"
+            defaultValue={"QT123456789"}
+            isRequired
           />
           <MySelect
             title="Danh mục"
             placeholder="Chọn danh mục cho sản phẩm"
-            isRequired
             wrapClassName="w-1/2"
-            options={[
-              { label: "USA", value: "USA" },
-              { label: "Việt Nam", value: "VIET NAM" },
-            ]}
+            options={yesNoOptions}
+            selected={yesNoOptions[0].value}
+            isRequired
           />
         </div>
         <MyTextArea
           id="descItem"
           title="Mô tả sản phẩm"
-          placeholder="Nhập mô tả cho sản phẩm của bạn"
+          defaultValue={"xin chao"}
+          isRequired
+          isError
         />
-        <MyTextField
+        <MyPrimaryTextField
           id="materialItem"
           title="Chất liệu"
-          placeholder="Nhập các chất liệu tạo nên sản phẩm"
+          isError
+          defaultValue={"Len; Kẽm Nhung"}
         />
-        <MyTextField
+        <MyPrimaryTextField
           id="colorItem"
           title="Màu sắc chủ đạo"
-          placeholder="Nhập màu sắc chủ đạo của sản phẩm"
+          isError
+          defaultValue={"Hồng bạch"}
         />
-        <MyTextField
+        <MyPrimaryTextField
           id="useItem"
           title="Công dụng"
-          placeholder="Nhập công dụng của sản phẩm"
+          isError
+          defaultValue={"Quà tặng"}
         />
         <div className="flex flex-row items-center gap-8">
           <MyDatePicker
@@ -83,42 +82,30 @@ const CreateProductScreen = () => {
           />
         </div>
         <div className="my-1 flex flex-row gap-8">
-          <MyRadioGroup
-            className="w-1/3"
+          <MyRadioButtonsGroup
             label="Có phải hàng hóa nặng không?"
             isRequired
-            options={[
-              { label: "Có", value: "YES", index: 0 },
-              { label: "Không", value: "NO", index: 1 },
-            ]}
-            selectedIndex={1}
+            options={yesNoOptions}
+            defaultValue={yesNoOptions[1].value}
           />
-          <MyRadioGroup
-            className="w-1/3"
-            label="Giao nhanh trong 4h?"
-            isRequired
-            options={[
-              { label: "Có", value: "YES", index: 0 },
-              { label: "Không", value: "NO", index: 1 },
-            ]}
-            selectedIndex={1}
-          />
-          <MyRadioGroup
-            className="w-1/3"
+          <MyRadioButtonsGroup
             label="Có nhiều phân loại không?"
             isRequired
             options={yesNoOptions}
-            selectedIndex={yesNoOptions[1].index}
-            onChanged={(item) => {
-              if (item.value === "YES") setIsClassified(true);
-              else if (item.value === "NO") setIsClassified(false);
+            defaultValue={yesNoOptions[1].value}
+            onChanged={(value) => {
+              if (value === yesNoOptions[0].value) {
+                setIsClassified(true);
+              } else {
+                setIsClassified(false);
+              }
             }}
           />
         </div>
         {!isClassified && (
           <div>
             <div>
-              <div className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
+              <div className="mb-2 block text-sm font-medium text-grey-c600 dark:text-white">
                 Thêm hình ảnh mô tả
               </div>
               <UploadImage />
@@ -146,22 +133,16 @@ const CreateProductScreen = () => {
         {isClassified && <ClassifiedTable />}
         <div className="mt-3 flex flex-row items-center justify-between gap-8">
           <Button
-            color="primary"
-            className="h-12 w-1/3 text-xs md:text-sm lg:text-base"
+            color="black"
+            className="h-12 !w-1/2 text-xs md:text-sm lg:text-base"
           >
-            Lưu nháp
+            Gửi kiểm duyệt và tắt
           </Button>
           <Button
             color="primary"
-            className="h-12 w-1/3 text-xs md:text-sm lg:text-base"
+            className="h-12 !w-1/2 text-xs md:text-sm lg:text-base"
           >
-            Kiểm duyệt và tắt
-          </Button>
-          <Button
-            color="primary"
-            className="h-12 w-1/3 text-xs md:text-sm lg:text-base"
-          >
-            Kiểm duyệt và bật bán
+            Gửi kiểm duyệt và bật bán
           </Button>
         </div>
       </div>
@@ -169,4 +150,4 @@ const CreateProductScreen = () => {
   );
 };
 
-export default CreateProductScreen;
+export default EditViolateProductModal;

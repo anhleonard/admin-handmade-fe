@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Modal, Upload } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
+import { Typography } from "@mui/material";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -39,7 +40,9 @@ const UploadImage: React.FC = () => {
   const uploadButton = (
     <button style={{ border: 0, background: "none" }} type="button">
       <PlusOutlined />
-      <div className="mt-2">Upload</div>
+      <Typography className="text-sm font-medium text-grey-c900">
+        Upload
+      </Typography>
     </button>
   );
   return (

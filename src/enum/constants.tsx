@@ -5,16 +5,23 @@ import ProcessingOrdersTable from "@/app/orders/list-orders/processing-orders/pr
 import TransportOrdersTable from "@/app/orders/list-orders/transport-orders/transport-orders-table";
 import WaitingOrdersTable from "@/app/orders/list-orders/waiting-orders/waiting-orders-table";
 import AllItemsTable from "@/app/products/list-products/all-items/all-items-table";
-import DraftItemsTable from "@/app/products/list-products/draft-items/draft-items-table";
 import NoItemsTable from "@/app/products/list-products/no-items/no-items-table";
 import OffItemsTable from "@/app/products/list-products/off-items/off-items-table";
 import PendingItemsTable from "@/app/products/list-products/pending-items/pending-items-table";
 import SellingItemsTable from "@/app/products/list-products/selling-items/selling-items-table";
 import ViolateItemsTable from "@/app/products/list-products/violate-items/violate-items-table";
+import AllReviewsTable from "@/app/reviews/all-reviews/all-reviews-table";
+import FiveStarTable from "@/app/reviews/five-star/five-star-table";
 import AllVouchersTable from "@/app/vouchers/list-vouchers/all-vouchers/all-vouchers-table";
 import FinishedVouchersTable from "@/app/vouchers/list-vouchers/finished-vouchers/finished-vouchers-table";
 import HappenningVouchersTable from "@/app/vouchers/list-vouchers/happening-vouchers/happening-vouchers-table";
 import UpcomingVouchersTable from "@/app/vouchers/list-vouchers/upcoming-vouchers/upcoming-vouchers-table";
+import StarIcon from "@mui/icons-material/Star";
+import { COLORS } from "./colors";
+import FourStarTable from "@/app/reviews/four-star/four-star-table";
+import ThreeStarTable from "@/app/reviews/three-star/three-star-table";
+import TwoStarTable from "@/app/reviews/two-star/two-star-table";
+import OneStarTable from "@/app/reviews/one-star/one-star-table";
 
 export enum ColorState {
   primary = "bg-primary-c800 text-white text-xs font-medium",
@@ -39,11 +46,6 @@ export const itemStatuses = [
   {
     label: "Hết hàng",
     value: "OUT_STOCK",
-    href: "/",
-  },
-  {
-    label: "Nháp",
-    value: "DRAFT",
     href: "/",
   },
   {
@@ -115,11 +117,6 @@ export const productTabs = [
     label: "Hết hàng",
     value: "3",
     content: <NoItemsTable />,
-  },
-  {
-    label: "Nháp",
-    value: "4",
-    content: <DraftItemsTable />,
   },
   {
     label: "Chờ duyệt",
@@ -220,5 +217,64 @@ export const voucherTabs = [
     label: "Đã kết thúc",
     value: "4",
     content: <FinishedVouchersTable />,
+  },
+];
+
+// review tabs
+export const reviewTabs = [
+  {
+    label: "Tất cả",
+    value: "1",
+    content: <AllReviewsTable />,
+  },
+  {
+    label: (
+      <div className="flex flex-row items-center gap-1">
+        <div>5</div>
+        <StarIcon sx={{ color: COLORS.yellow.c900, fontSize: 18 }} />
+      </div>
+    ),
+    value: "2",
+    content: <FiveStarTable />,
+  },
+  {
+    label: (
+      <div className="flex flex-row items-center gap-1">
+        <div>4</div>
+        <StarIcon sx={{ color: COLORS.yellow.c900, fontSize: 18 }} />
+      </div>
+    ),
+    value: "3",
+    content: <FourStarTable />,
+  },
+  {
+    label: (
+      <div className="flex flex-row items-center gap-1">
+        <div>3</div>
+        <StarIcon sx={{ color: COLORS.yellow.c900, fontSize: 18 }} />
+      </div>
+    ),
+    value: "4",
+    content: <ThreeStarTable />,
+  },
+  {
+    label: (
+      <div className="flex flex-row items-center gap-1">
+        <div>2</div>
+        <StarIcon sx={{ color: COLORS.yellow.c900, fontSize: 18 }} />
+      </div>
+    ),
+    value: "5",
+    content: <TwoStarTable />,
+  },
+  {
+    label: (
+      <div className="flex flex-row items-center gap-1">
+        <div>1</div>
+        <StarIcon sx={{ color: COLORS.yellow.c900, fontSize: 18 }} />
+      </div>
+    ),
+    value: "6",
+    content: <OneStarTable />,
   },
 ];

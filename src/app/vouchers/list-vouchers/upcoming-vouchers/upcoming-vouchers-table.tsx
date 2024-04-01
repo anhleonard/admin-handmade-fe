@@ -8,8 +8,12 @@ import {
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import { Tooltip } from "@mui/material";
-import { FontFamily, FontSize } from "@/enum/setting";
+import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyLabel from "@/libs/label";
+import { useDispatch } from "react-redux";
+import DetailVoucherModal from "../../modals/detail-voucher-modal";
+import { openModal } from "@/redux/slices/modalSlice";
+import EditUpcomingVoucher from "../../modals/edit-upcoming-voucher";
 
 const labelOptions = [
   { label: "Tên voucher", value: "VOUCHER_NAME" },
@@ -17,6 +21,28 @@ const labelOptions = [
 ];
 
 const UpcomingVouchersTable = () => {
+  const dispatch = useDispatch();
+
+  const handleOpenDetailModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chi tiết voucher",
+      content: <DetailVoucherModal type="UPCOMING" />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleEditUpcomingVoucherModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Chỉnh sửa voucher",
+      content: <EditUpcomingVoucher />,
+      screen: SCREEN.LG,
+    };
+    dispatch(openModal(modal));
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -76,12 +102,18 @@ const UpcomingVouchersTable = () => {
                 <td className="px-1 py-4">
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Tooltip title="Xem chi tiết">
-                      <div className="pt-1 hover:cursor-pointer">
+                      <div
+                        className="pt-1 hover:cursor-pointer"
+                        onClick={() => handleOpenDetailModal()}
+                      >
                         <DetailIcon />
                       </div>
                     </Tooltip>
                     <Tooltip title="Chỉnh sửa">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleEditUpcomingVoucherModal()}
+                      >
                         <EditIcon />
                       </div>
                     </Tooltip>

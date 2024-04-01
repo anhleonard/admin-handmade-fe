@@ -1,19 +1,19 @@
 import ClassifiedTable from "@/components/products/classified-table";
 import Button from "@/libs/button";
+import MyPrimaryTextField from "@/libs/primary-text-field";
 import SwitchButton from "@/libs/switch-button";
 import MyTextField from "@/libs/text-field";
 import { useState } from "react";
 
 const EditProductModal = () => {
-  const [hasMuiltipleClass, setHasMultipleClass] = useState(true);
+  const [hasMuiltipleClass, setHasMultipleClass] = useState(false);
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-row items-center justify-between gap-4 md:gap-0">
-        <MyTextField
+        <MyPrimaryTextField
           id="nameItem"
           title="Tên sản phẩm"
-          placeholder="Nhập tên sản phẩm"
           defaultValue={"Nồi Chiên Không Dầu Điện Tử Lock&Lock"}
           className="w-full md:!w-[88%]"
         />

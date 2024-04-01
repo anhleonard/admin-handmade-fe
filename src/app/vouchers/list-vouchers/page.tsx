@@ -1,6 +1,6 @@
 "use client";
-import ListVouchersScreen from "@/app/screens/vouchers/list-vouchers-screen";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import ListVouchersScreen from "@/screens/vouchers/list-vouchers-screen";
 
 const MainListVouchers = () => {
   return (

@@ -7,6 +7,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "salt.tikicdn.com",
       },
+      {
+        protocol: "https",
+        hostname: "buffer.com",
+      },
     ],
   },
 };
