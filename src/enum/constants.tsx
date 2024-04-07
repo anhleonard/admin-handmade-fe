@@ -22,6 +22,10 @@ import FourStarTable from "@/app/reviews/four-star/four-star-table";
 import ThreeStarTable from "@/app/reviews/three-star/three-star-table";
 import TwoStarTable from "@/app/reviews/two-star/two-star-table";
 import OneStarTable from "@/app/reviews/one-star/one-star-table";
+import AllAuctionsTab from "@/app/auctions/my-auctions/all-auctions/all-auctions-table";
+import ProcessingAuctionsTab from "@/app/auctions/my-auctions/processing-auctions/processing-auctions-table";
+import FinishedAuctionsTab from "@/app/auctions/my-auctions/finished-auctions/finished-auctions-table";
+import CanceledAuctionsTab from "@/app/auctions/my-auctions/canceled-auctions/canceled-auctions-table";
 
 export enum ColorState {
   primary = "bg-primary-c800 text-white text-xs font-medium",
@@ -169,6 +173,7 @@ export const orderTabs = [
   },
 ];
 
+//status of order
 export const statusOrders = [
   {
     label: "Tất cả",
@@ -276,5 +281,29 @@ export const reviewTabs = [
     ),
     value: "6",
     content: <OneStarTable />,
+  },
+];
+
+// my auctions tabs
+export const sellerAuctionTabs = [
+  {
+    label: "Tất cả",
+    value: "1",
+    content: <AllAuctionsTab />,
+  },
+  {
+    label: "Đang làm",
+    value: "2",
+    content: <ProcessingAuctionsTab />,
+  },
+  {
+    label: "Đã hoàn thành",
+    value: "3",
+    content: <FinishedAuctionsTab />,
+  },
+  {
+    label: "Đã hủy",
+    value: "4",
+    content: <CanceledAuctionsTab />,
   },
 ];

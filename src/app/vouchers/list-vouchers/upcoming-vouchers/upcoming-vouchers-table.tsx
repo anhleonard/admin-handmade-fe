@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import DetailVoucherModal from "../../modals/detail-voucher-modal";
 import { openModal } from "@/redux/slices/modalSlice";
 import EditUpcomingVoucher from "../../modals/edit-upcoming-voucher";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Tên voucher", value: "VOUCHER_NAME" },
@@ -41,6 +42,18 @@ const UpcomingVouchersTable = () => {
       screen: SCREEN.LG,
     };
     dispatch(openModal(modal));
+  };
+
+  const handleConfirmCancelVoucher = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "HỦY VOUCHER",
+      message: "Bạn có chắc chắn hủy voucher này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
   };
 
   return (
@@ -118,7 +131,10 @@ const UpcomingVouchersTable = () => {
                       </div>
                     </Tooltip>
                     <Tooltip title="Hủy voucher">
-                      <div className="hover:cursor-pointer">
+                      <div
+                        className="hover:cursor-pointer"
+                        onClick={() => handleConfirmCancelVoucher()}
+                      >
                         <DeleteIcon />
                       </div>
                     </Tooltip>

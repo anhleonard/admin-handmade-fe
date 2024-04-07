@@ -5,6 +5,7 @@ import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import ExpandLessRoundedIcon from "@mui/icons-material/ExpandLessRounded";
 import ShoppingBagRoundedIcon from "@mui/icons-material/ShoppingBagRounded";
 import { COLORS } from "@/enum/colors";
+import { formatCurrency } from "@/enum/functions";
 
 const VoucherItemsPackage = () => {
   const [open, setOpen] = useState(true);
@@ -53,10 +54,10 @@ const VoucherItemsPackage = () => {
                     Tồn kho: 300
                   </div>
                   <div className="text-xs font-medium text-grey-c900">
-                    Giá hiện tại: 250.000
+                    Giá hiện tại: {formatCurrency(250000)}
                   </div>
                   <div className="text-xs font-medium text-grey-c900">
-                    Giá sau giảm: 200.000
+                    Giá sau giảm: {formatCurrency(200000)}
                   </div>
                 </div>
               </div>
@@ -83,10 +84,10 @@ const VoucherItemsPackage = () => {
                     Tồn kho: 300
                   </div>
                   <div className="text-xs font-medium text-grey-c900">
-                    Giá hiện tại: 250.000
+                    Giá hiện tại: {formatCurrency(250000)}
                   </div>
                   <div className="text-xs font-medium text-grey-c900">
-                    Giá sau giảm: 200.000
+                    Giá sau giảm: {formatCurrency(200000)}
                   </div>
                 </div>
               </div>

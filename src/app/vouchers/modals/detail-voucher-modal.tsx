@@ -2,6 +2,7 @@ import ShowingRating from "@/components/reviews/showing-rate";
 import VoucherItemsPackage from "@/components/vouchers/voucher-items-package";
 import { COLORS } from "@/enum/colors";
 import { applicableProductTypes } from "@/enum/constants";
+import { formatCurrency } from "@/enum/functions";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import MyPrimaryTextField from "@/libs/primary-text-field";
@@ -81,14 +82,14 @@ const DetailVoucherModal = ({ type = "ALL" }: DetailVoucherModalProps) => {
           type="text"
           id="moneyDiscount"
           title="Lượng giảm"
-          defaultValue={"50.000"}
+          defaultValue={formatCurrency(50000)}
           disabled
         />
         <MyPrimaryTextField
           type="text"
           id="minOrderValue"
           title="Giá trị đơn hàng tối thiểu"
-          defaultValue={"Không giới hạn/ 250.000"}
+          defaultValue={formatCurrency(250000)}
           disabled
         />
         <MyPrimaryTextField

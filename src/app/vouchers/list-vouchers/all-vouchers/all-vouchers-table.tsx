@@ -86,6 +86,7 @@ const AllVouchersTable = () => {
                   </Tooltip>
                 </th>
                 <th className="px-1 py-4">Đã dùng</th>
+                <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Thời hạn</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
@@ -102,6 +103,9 @@ const AllVouchersTable = () => {
                 <td className="px-1 py-4">59.000</td>
                 <td className="px-1 py-4">500</td>
                 <td className="px-1 py-4">240</td>
+                <td className="px-1 py-4">
+                  <MyLabel type="delivery">Đang diễn ra</MyLabel>
+                </td>
                 <td className="px-1 py-4">
                   <MyLabel type="warning">23:59 26/03/2024</MyLabel>
                 </td>

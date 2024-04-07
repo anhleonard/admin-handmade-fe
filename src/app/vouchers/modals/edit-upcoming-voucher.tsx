@@ -12,6 +12,8 @@ import MyRadioButtonsGroup from "@/libs/radio-button-group";
 import MyPrimaryTextField from "@/libs/primary-text-field";
 import MyTextField from "@/libs/text-field";
 import { formatCurrency } from "@/enum/functions";
+import FormatEndCurrencyIcon from "@/libs/format-end-currency-icon";
+import Button from "@/libs/button";
 
 const EditUpcomingVoucher = () => {
   const [discountType, setDiscountType] = useState(discountTypes[0].value);
@@ -44,6 +46,7 @@ const EditUpcomingVoucher = () => {
             placeholder="Nhập mã voucher"
             defaultValue={"241115K2"}
             isRequired
+            disabled
           />
         </div>
         <div className="flex flex-row items-center gap-8">
@@ -53,6 +56,7 @@ const EditUpcomingVoucher = () => {
             isRequired
             className="w-full"
             defaultDate={"2022/27/06"}
+            disabled
           />
           <MyDatePicker
             label="Ngày kết thúc"
@@ -99,26 +103,38 @@ const EditUpcomingVoucher = () => {
             />
           )}
           {discountType == discountTypes[1].value && (
-            <MyTextField
-              type="number"
-              id="percentageDiscount"
-              title="Phần trăm giảm"
-              placeholder="Nhập số lượng % giảm (Min: 2% - Max: 99%)"
-              minNumber={2}
-              maxNumber={99}
-              isRequired
-              defaultValue={percentageDiscount}
-              onChange={(value) => {
-                setPercentageDiscount(value as number);
-              }}
-              endIcon={
-                <span className="pl-2 text-xs font-bold text-primary-c900">
-                  {percentageDiscount
-                    ? percentageDiscount.toString() + "%"
-                    : "0%"}
-                </span>
-              }
-            />
+            <div className="flex flex-col gap-4">
+              <MyTextField
+                type="number"
+                id="percentageDiscount"
+                title="Phần trăm giảm"
+                placeholder="Nhập số lượng % giảm (Min: 2% - Max: 99%)"
+                minNumber={2}
+                maxNumber={99}
+                isRequired
+                defaultValue={percentageDiscount}
+                onChange={(value) => {
+                  setPercentageDiscount(value as number);
+                }}
+                endIcon={
+                  <span className="pl-2 text-xs font-bold text-primary-c900">
+                    {percentageDiscount
+                      ? percentageDiscount.toString() + "%"
+                      : "0%"}
+                  </span>
+                }
+              />
+              <MyTextField
+                type="text"
+                id="percentageDiscount"
+                title="Số tiền giảm tối đa"
+                placeholder="Nhập số tiền giảm tối đa"
+                isRequired
+                hasInputNumber
+                defaultValue={50000}
+                endIcon={<FormatEndCurrencyIcon value={50000} />}
+              />
+            </div>
           )}
         </div>
         <div className="flex flex-col gap-4">
@@ -227,8 +243,8 @@ const EditUpcomingVoucher = () => {
                       </div>
                     </td>
                     <td className="px-1 py-4">300</td>
-                    <td className="px-1 py-4">250000</td>
-                    <td className="px-1 py-4">210.000</td>
+                    <td className="px-1 py-4">{formatCurrency(250000)}</td>
+                    <td className="px-1 py-4">{formatCurrency(210000)}</td>
                     <td className="px-1 py-4 text-center">
                       <MySingleCheckBox
                         isChecked={isCheckedItem}
@@ -242,6 +258,8 @@ const EditUpcomingVoucher = () => {
           </div>
         )}
       </div>
+
+      <Button className="mx-auto mt-2 w-[180px] md:w-[200px]">Cập nhật</Button>
     </div>
   );
 };

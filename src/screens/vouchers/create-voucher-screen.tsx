@@ -10,6 +10,8 @@ import { useState } from "react";
 import MySingleCheckBox from "@/libs/single-checkbox";
 import MyRadioButtonsGroup from "@/libs/radio-button-group";
 import MyPrimaryTextField from "@/libs/primary-text-field";
+import MyTextField from "@/libs/text-field";
+import FormatEndCurrencyIcon from "@/libs/format-end-currency-icon";
 
 const CreateVoucherScreen = () => {
   const [discountType, setDiscountType] = useState(discountTypes[0].value);
@@ -75,26 +77,45 @@ const CreateVoucherScreen = () => {
               }}
             />
             {discountType == discountTypes[0].value && (
-              <MyPrimaryTextField
-                type="number"
+              <MyTextField
                 id="moneyDiscount"
+                type="text"
                 title="Lượng tiền giảm"
                 placeholder="Nhập số lượng tiền giảm (Min: 5.000 - Max: 30.000.000)"
-                minNumber={5000}
-                maxNumber={30000000}
                 isRequired
+                hasInputNumber
+                defaultValue={50000}
+                endIcon={<FormatEndCurrencyIcon value={50000} />}
               />
             )}
             {discountType == discountTypes[1].value && (
-              <MyPrimaryTextField
-                type="number"
-                id="percentageDiscount"
-                title="Phần trăm giảm"
-                placeholder="Nhập số lượng % giảm (Min: 2% - Max: 99%)"
-                minNumber={2}
-                maxNumber={99}
-                isRequired
-              />
+              <div className="flex flex-col gap-4">
+                <MyTextField
+                  type="number"
+                  id="percentageDiscount"
+                  title="Phần trăm giảm"
+                  placeholder="Nhập số lượng % giảm (Min: 2% - Max: 99%)"
+                  minNumber={2}
+                  maxNumber={99}
+                  isRequired
+                  defaultValue={12}
+                  endIcon={
+                    <span className="pl-2 text-xs font-bold text-primary-c900">
+                      12%
+                    </span>
+                  }
+                />
+                <MyTextField
+                  type="text"
+                  id="percentageDiscount"
+                  title="Số tiền giảm tối đa"
+                  placeholder="Nhập số tiền giảm tối đa"
+                  isRequired
+                  hasInputNumber
+                  defaultValue={50000}
+                  endIcon={<FormatEndCurrencyIcon value={50000} />}
+                />
+              </div>
             )}
           </div>
           <div className="flex flex-col gap-4">

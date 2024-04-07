@@ -11,6 +11,7 @@ import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import { useDispatch } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import DetailReviewModal from "../modals/detail-review-modal";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -36,6 +37,18 @@ const AllReviewsTable = () => {
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
+  };
+
+  const handleReportReview = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "BÁO CÁO BÌNH LUẬN",
+      message: "Bạn có chắc chắn báo cáo bình luận này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
   };
 
   return (
@@ -147,7 +160,10 @@ const AllReviewsTable = () => {
                           </div>
                         </Tooltip>
                         <Tooltip title="Báo cáo bình luận">
-                          <div className="hover:cursor-pointer">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleReportReview()}
+                          >
                             <FlagOutlinedIcon
                               sx={{ fontSize: 20, color: COLORS.support.c500 }}
                             />
