@@ -11,6 +11,8 @@ import { ThemeProvider } from "@emotion/react";
 import { CssBaseline, createTheme } from "@mui/material";
 import Modal from "@/modals/main-modal";
 import ConfirmModal from "@/modals/confirm-modal";
+import Loading from "@/modals/loading";
+import AlertModal from "@/modals/alert";
 
 export const quicksand = localFont({
   src: [
@@ -93,6 +95,8 @@ export default function RootLayout({
             </div>
             <Modal />
             <ConfirmModal />
+            <Loading></Loading>
+            <AlertModal></AlertModal>
           </ReduxProvider>
         </ThemeProvider>
       </body>

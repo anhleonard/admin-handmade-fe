@@ -124,17 +124,17 @@ export const productTabs = [
   },
   {
     label: "Chờ duyệt",
-    value: "5",
+    value: "4",
     content: <PendingItemsTable />,
   },
   {
     label: "Vi phạm",
-    value: "6",
+    value: "5",
     content: <ViolateItemsTable />,
   },
   {
     label: "Tắt bởi Nhà bán",
-    value: "7",
+    value: "6",
     content: <OffItemsTable />,
   },
 ];
@@ -307,3 +307,10 @@ export const sellerAuctionTabs = [
     content: <CanceledAuctionsTab />,
   },
 ];
+
+export enum AlertStatus {
+  ERROR = "error",
+  SUCCESS = "success",
+  INFO = "info",
+  WARNING = "warning",
+}

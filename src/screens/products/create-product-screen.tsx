@@ -11,6 +11,7 @@ import { useState } from "react";
 import { yesNoOptions } from "@/enum/constants";
 import ClassifiedTable from "@/components/products/classified-table";
 import MyRadioButtonsGroup from "@/libs/radio-button-group";
+import CheckboxesGroup from "@/components/checkboxes/checkboxes";
 
 const CreateProductScreen = () => {
   const [isClassified, setIsClassified] = useState(false);
@@ -29,55 +30,55 @@ const CreateProductScreen = () => {
       </div>
       <div className="flex flex-col gap-3">
         <MyTextField
-          id="nameItem"
+          id="name"
+          name="name"
           title="Tên sản phẩm"
           placeholder="Nhập tên sản phẩm"
         />
-        <div className="flex flex-row items-center justify-between gap-8">
-          <MyTextField
-            id="codeItem"
-            title="Mã sản phẩm"
-            placeholder="Nhập mã sản phẩm"
-            className="w-1/2"
-          />
-          <MySelect
-            title="Danh mục"
-            placeholder="Chọn danh mục cho sản phẩm"
-            isRequired
-            wrapClassName="w-1/2"
-            options={[
-              { label: "USA", value: "USA" },
-              { label: "Việt Nam", value: "VIET NAM" },
-            ]}
-          />
-        </div>
+        <MyTextField
+          id="code"
+          name="code"
+          title="Mã sản phẩm"
+          placeholder="Nhập mã sản phẩm"
+          className="w-full"
+        />
+
+        <CheckboxesGroup />
+
         <MyTextArea
-          id="descItem"
+          id="desc"
+          name="desc"
           title="Mô tả sản phẩm"
           placeholder="Nhập mô tả cho sản phẩm của bạn"
         />
         <MyTextField
-          id="materialItem"
+          id="materials"
+          name="materials"
           title="Chất liệu"
           placeholder="Nhập các chất liệu tạo nên sản phẩm"
         />
         <MyTextField
-          id="colorItem"
+          id="color"
+          name="color"
           title="Màu sắc chủ đạo"
           placeholder="Nhập màu sắc chủ đạo của sản phẩm"
         />
         <MyTextField
-          id="useItem"
+          id="uses"
+          name="uses"
           title="Công dụng"
           placeholder="Nhập công dụng của sản phẩm"
         />
+
         <div className="flex flex-row items-center gap-8">
           <MyDatePicker
+            id=""
             label="Ngày sản xuất"
             placeholder="-- Lựa chọn NSX --"
             isRequired
           />
           <MyDatePicker
+            id=""
             label="Ngày sản xuất"
             placeholder="-- Lựa chọn HSD --"
             isRequired

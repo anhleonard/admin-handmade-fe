@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Url } from "url";
+import { AlertStatus } from "./constants";
 
 export type ColTabItem = {
   href: any;
@@ -59,4 +60,11 @@ export type ConfirmState = {
   message: string;
   feature: string;
   onConfirm?: () => void;
+};
+
+export type AlertState = {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: AlertStatus;
 };

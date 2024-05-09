@@ -293,6 +293,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               <div className="text-sm">Tạo sản phẩm</div>
                             </Link>
                           </li>
+
                           <li>
                             <Link
                               href="/products/list-products"
@@ -302,6 +303,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               } `}
                             >
                               <div className="text-sm">Danh sách sản phẩm</div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/products/classifications"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/products/classifications" &&
+                                "text-white"
+                              }`}
+                            >
+                              <div className="text-sm">Danh mục</div>
                             </Link>
                           </li>
                         </ul>
