@@ -23,6 +23,7 @@ interface MyTextFieldProps {
   minNumber?: number;
   maxNumber?: number;
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement & HTMLInputElement>;
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement> | undefined;
   hasInputNumber?: boolean;
 }
 
@@ -44,6 +45,7 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
   minNumber,
   maxNumber,
   onChange = () => null,
+  onKeyDown,
   hasInputNumber = false,
 }) => {
   const [focus, setFocus] = useState(false);
@@ -118,6 +120,7 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
                   hasInputNumber &&
                   input.addEventListener("keypress", handleKeyPress);
               }}
+              onKeyDown={onKeyDown}
             />
           </div>
           {endIcon ?? null}
@@ -126,7 +129,7 @@ const MyTextField: React.FC<MyTextFieldProps> = ({
       {(isError && helperText) || (disabled && disabledText) ? (
         <div className="mt-1 flex items-start justify-start gap-1">
           <WarningAmberRoundedIcon
-            sx={{ color: COLORS.support.c500, fontSize: 14, marginTop: "2px" }}
+            sx={{ color: COLORS.support.c500, fontSize: 14 }}
           />
           <div
             className={`text-xs font-medium ${

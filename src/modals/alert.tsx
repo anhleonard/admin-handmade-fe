@@ -16,9 +16,10 @@ const AlertModal = () => {
   return (
     <Snackbar
       open={alertData.isOpen}
-      autoHideDuration={6000}
+      autoHideDuration={50000000}
       onClose={handleCloseAlert}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      className="z-[500000]"
     >
       {alertData.isOpen ? (
         <Alert
@@ -45,7 +46,7 @@ const AlertModal = () => {
             },
           }}
         >
-          <div className="font-bold text-base">{alertData.title}</div>
+          <div className="text-base font-bold">{alertData.title}</div>
           <div className="mt-1.5 font-medium">{alertData.message}</div>
         </Alert>
       ) : (

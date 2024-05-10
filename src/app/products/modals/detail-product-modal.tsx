@@ -117,6 +117,7 @@ const DetailProductModal = ({
           </MyDefaultText>
           <div className="flex flex-row items-center gap-8">
             <MyDatePicker
+              id=""
               label="Ngày sản xuất"
               defaultDate={"2024-04-30"}
               className="w-1/2"
@@ -124,6 +125,7 @@ const DetailProductModal = ({
               disabled={type !== "VIOLATE_ITEMS"}
             />
             <MyDatePicker
+              id=""
               label="Hạn sử dụng"
               defaultDate={"2024/05/01"}
               className="w-1/2"

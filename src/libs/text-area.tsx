@@ -17,7 +17,7 @@ interface MyTextAreaProps {
   width?: string;
   value?: string | number;
   defaultValue?: string | number;
-  onChange?: (value: string | number) => void;
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement & HTMLInputElement>;
 }
 
 const MyTextArea: React.FC<MyTextAreaProps> = ({
@@ -34,7 +34,7 @@ const MyTextArea: React.FC<MyTextAreaProps> = ({
   width = "w-full",
   value,
   defaultValue,
-  onChange,
+  onChange = () => null,
 }) => {
   return (
     <div className={`${width}`}>
@@ -50,11 +50,7 @@ const MyTextArea: React.FC<MyTextAreaProps> = ({
           name={name}
           rows={3}
           placeholder={placeholder}
-          onChange={(e) => {
-            if (onChange) {
-              onChange(e.target.value);
-            }
-          }}
+          onChange={onChange}
           value={value}
           defaultValue={defaultValue}
           disabled={disabled}

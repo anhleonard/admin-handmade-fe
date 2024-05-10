@@ -13,7 +13,6 @@ interface MyRadioButtonsGroupProps {
   isRequired?: boolean;
   options?: Array<RadioItem>;
   defaultValue: string;
-  selectedIndex?: number;
   onChanged?: (value: string) => void;
   disabled?: boolean;
 }
