@@ -1,5 +1,5 @@
 "use client";
-import { AlertStatus, mainCategories } from "@/enum/constants";
+import { AlertStatus, ProductStatus, mainCategories } from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -14,17 +14,22 @@ import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
-import { getSellingProducts } from "@/apis/services/product";
+import {
+  getSellingProducts,
+  updateProductBySeller,
+} from "@/apis/services/product";
 import storage from "@/apis/storage";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Product } from "@/enum/defined-type";
-import { openAlert } from "@/redux/slices/alertSlice";
+import { closeAlert, openAlert } from "@/redux/slices/alertSlice";
 import { RootState } from "@/redux/store";
 import { headerUrl } from "@/apis/services/authentication";
 import { formatCurrency } from "@/enum/functions";
 import DetailProductModal from "../../modals/detail-product-modal";
 import EditProductModal from "../../modals/edit-product-modal";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -76,6 +81,48 @@ const SellingItemsTable = () => {
     } finally {
       dispatch(closeLoading());
     }
+  };
+
+  const handleConfirmOffItem = (id: number) => {
+    const confirm: any = {
+      isOpen: true,
+      title: "TẮT SẢN PHẨM",
+      message: "Bạn có chắc chắn tắt sản phẩm này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: async () => {
+        try {
+          dispatch(openLoading());
+          const token = storage.getLocalAccessToken();
+          const variables = {
+            status: ProductStatus?.OFF,
+          };
+          const res = await updateProductBySeller(id, variables, token);
+          if (res) {
+            dispatch(closeConfirm());
+            let alert: AlertState = {
+              isOpen: true,
+              title: "THÀNH CÔNG",
+              message: "Sản phẩm đã được tắt",
+              type: AlertStatus.SUCCESS,
+            };
+            dispatch(openAlert(alert));
+            dispatch(refetchComponent());
+          }
+        } catch (error: any) {
+          let alert: AlertState = {
+            isOpen: true,
+            title: "LỖI",
+            message: error?.response?.data?.message,
+            type: AlertStatus.ERROR,
+          };
+          dispatch(openAlert(alert));
+        } finally {
+          dispatch(closeLoading());
+        }
+      },
+    };
+
+    dispatch(openConfirm(confirm));
   };
 
   useEffect(() => {
@@ -200,7 +247,10 @@ const SellingItemsTable = () => {
                           </div>
                         </Tooltip>
                         <Tooltip title="Tắt sản phẩm">
-                          <div className="hover:cursor-pointer">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleConfirmOffItem(product?.id)}
+                          >
                             <OffIcon />
                           </div>
                         </Tooltip>

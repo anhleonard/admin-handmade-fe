@@ -211,7 +211,7 @@ const ClassifiedTable = () => {
               {classes.length > 1 && (
                 <Button
                   type="button"
-                  className="!w-fit !py-2 md:!text-xs"
+                  className="!w-fit !py-1 md:!text-xs"
                   color="error"
                   onClick={() => handleDeleteClass(classItem.idClass)}
                 >

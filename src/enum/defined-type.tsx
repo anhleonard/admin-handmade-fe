@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Url } from "url";
 import { AlertStatus, ProductStatus } from "./constants";
+import { Item } from "@/libs/select";
 
 export type ColTabItem = {
   href: any;
@@ -69,10 +70,23 @@ export type AlertState = {
   type: AlertStatus;
 };
 
+// VD: {Kích cỡ: {value: 29, label: '4XL'}}
+export interface SelectedItem {
+  [key: string]: { value: number; label: string };
+}
+
 //Product
 export type VariantCategory = {
   id: number;
   variantName: string;
+  variantItems: Array<VariantItem>;
+};
+
+//item format to fit select lib
+export type ItemVariantCategory = {
+  id: number;
+  variantName: string;
+  variantItems: Array<Item>;
 };
 
 export type VariantItem = {
@@ -114,6 +128,8 @@ export type Product = {
   category: Category[];
   soldNumber: number;
   profitMoney: number;
+  rejectReason: string;
+  editHint: string;
 };
 
 export type Category = {

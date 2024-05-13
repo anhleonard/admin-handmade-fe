@@ -3,7 +3,7 @@ import { singleProduct } from "@/apis/services/product";
 import GiftCollapse from "@/components/gifts/gift-collapse";
 import { AlertStatus } from "@/enum/constants";
 import { AlertState, Category, Product } from "@/enum/defined-type";
-import { formatCurrency } from "@/enum/functions";
+import { formatCurrency, formatDate } from "@/enum/functions";
 import Button from "@/libs/button";
 import MyDatePicker from "@/libs/date-picker";
 import MyDefaultText from "@/libs/default-text";
@@ -58,7 +58,7 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
     <div className="py-2">
       <div className="relative mb-4">
         <div className="flex flex-col gap-4">
-          <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row">
             <div className="flex flex-row items-center gap-6">
               <div className="flex flex-row items-center gap-2">
                 <div>Là hàng hóa nặng?</div>
@@ -80,7 +80,9 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
             {type === "VIOLATE_ITEMS" && (
               <div className="text-sm5">
                 Ngày phát hiện vi phạm:{" "}
-                <span className="font-bold text-primary-c900">26/12/2024</span>
+                <span className="font-bold text-primary-c900">
+                  {formatDate(product?.updatedAt)}
+                </span>
               </div>
             )}
             {type !== "VIOLATE_ITEMS" && (
@@ -97,15 +99,13 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
             title="Tên sản phẩm"
             defaultValue={product?.productName}
             helperText={"Vui lòng đặt tên sản phẩm khoa học và dễ hiểu."}
-            isError={type === "VIOLATE_ITEMS"}
-            disabled={type !== "VIOLATE_ITEMS"}
+            disabled
           />
           <MyPrimaryTextField
             id="productCode"
             title="Mã sản phẩm"
             defaultValue={product?.productCode}
-            isError={type === "VIOLATE_ITEMS"}
-            disabled={type !== "VIOLATE_ITEMS"}
+            disabled
           />
           <div>
             <div className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
@@ -117,30 +117,22 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
               })}
             </div>
           </div>
-          <MyDefaultText
-            title="Mô tả sản phẩm"
-            type={type === "VIOLATE_ITEMS" ? "error" : "disabled"}
-          >
+          <MyDefaultText title="Mô tả sản phẩm" type="disabled">
             {product?.description}
           </MyDefaultText>
           <MyPrimaryTextField
             id="productMaterial"
             title="Chất liệu"
             defaultValue={product?.materials}
-            isError={type === "VIOLATE_ITEMS"}
-            disabled={type !== "VIOLATE_ITEMS"}
+            disabled
           />
           <MyPrimaryTextField
             id="productMainColor"
             title="Màu sắc chủ đạo"
             defaultValue={product?.mainColors}
-            isError={type === "VIOLATE_ITEMS"}
-            disabled={type !== "VIOLATE_ITEMS"}
+            disabled
           />
-          <MyDefaultText
-            title="Công dụng"
-            type={type === "VIOLATE_ITEMS" ? "error" : "disabled"}
-          >
+          <MyDefaultText title="Công dụng" type="disabled">
             {product?.uses}
           </MyDefaultText>
           {product?.productionDate && product?.expirationDate && (
@@ -150,16 +142,14 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
                 label="Ngày sản xuất"
                 defaultDate={"2024-04-30"}
                 className="w-1/2"
-                isError={type === "VIOLATE_ITEMS"}
-                disabled={type !== "VIOLATE_ITEMS"}
+                disabled
               />
               <MyDatePicker
                 id=""
                 label="Hạn sử dụng"
                 defaultDate={"2024/05/01"}
                 className="w-1/2"
-                isError={type === "VIOLATE_ITEMS"}
-                disabled={type !== "VIOLATE_ITEMS"}
+                disabled
               />
             </div>
           )}
@@ -170,8 +160,7 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
                 product?.isMultipleClasses ? "Giá bán thấp nhất" : "Giá bán"
               }
               defaultValue={formatCurrency(product.price)}
-              isError={type === "VIOLATE_ITEMS"}
-              disabled={type !== "VIOLATE_ITEMS"}
+              disabled
             />
           )}
 
@@ -197,18 +186,16 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
             />
           )}
           {type === "VIOLATE_ITEMS" && (
+            <MyDefaultText title="Chi tiết lỗi" type="error">
+              {product?.rejectReason}
+            </MyDefaultText>
+          )}
+          {type === "VIOLATE_ITEMS" && (
             <MyDefaultText title="Gợi ý chỉnh sửa" type="success">
-              Máy sấy tóc có 3 chế độ sấy đáp ứng được nhu cầu khác nhau của
-              người dùng. Sấy mát dùng cho những ngày nóng bức, giảm thiểu sự hư
-              tổn cho tóc. Sấy nhanh tăng nhiệt độ và cường độ không khí, giảm
-              thời gian sấy tóc cho bạn. Sấy chăm tóc tóc cung cấp nhiệt độ tối
-              ưu để vừa làm khô tóc nhanh, đồng thời tăng cường bảo vệ tóc.
+              {product?.editHint}
             </MyDefaultText>
           )}
         </div>
-        {type === "VIOLATE_ITEMS" && (
-          <div className="absolute inset-0 z-10 cursor-default bg-transparent"></div>
-        )}
       </div>
     </div>
   );

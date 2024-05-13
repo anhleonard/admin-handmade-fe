@@ -1,5 +1,5 @@
 "use client";
-import { mainCategories } from "@/enum/constants";
+import { AlertStatus, mainCategories } from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -23,6 +23,14 @@ import DetailProductModal from "../../modals/detail-product-modal";
 import EditProductModal from "../../modals/edit-product-modal";
 import EditViolateProductModal from "../../modals/edit-violate-product";
 import { openConfirm } from "@/redux/slices/confirmSlice";
+import { useEffect, useState } from "react";
+import { AlertState, Product } from "@/enum/defined-type";
+import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
+import storage from "@/apis/storage";
+import { getViolateProducts } from "@/apis/services/product";
+import { openAlert } from "@/redux/slices/alertSlice";
+import { headerUrl } from "@/apis/services/authentication";
+import { formatDate } from "@/enum/functions";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -31,12 +39,15 @@ const labelOptions = [
 
 const ViolateItemsTable = () => {
   const dispatch = useDispatch();
+  const [violateProducts, setViolateProducts] = useState<Product[]>([]);
 
-  const handleOpenDetailModal = () => {
+  const handleOpenDetailModal = (productId: number) => {
     const modal = {
       isOpen: true,
       title: "Chi tiết sản phẩm & lỗi",
-      content: <DetailProductModal type="VIOLATE_ITEMS" />,
+      content: (
+        <DetailProductModal type="VIOLATE_ITEMS" productId={productId} />
+      ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -63,6 +74,30 @@ const ViolateItemsTable = () => {
 
     dispatch(openConfirm(confirm));
   };
+
+  // get all violate products by seller token
+  const getAllViolateProducts = async () => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const res = await getViolateProducts(token);
+      setViolateProducts(res);
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
+  useEffect(() => {
+    getAllViolateProducts();
+  }, []);
 
   return (
     <div className="flex flex-col gap-8">
@@ -97,82 +132,77 @@ const ViolateItemsTable = () => {
                 <th className="px-1 py-4">Sản phẩm</th>
                 <th className="px-1 py-4">Ngày phát hiện vi phạm</th>
                 <th className="px-1 py-4">Lý do</th>
-                <th className="px-1 py-4">Diễn giải</th>
                 <th className="px-1 py-4">Gợi ý chỉnh sửa</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="hover:bg-primary-c100 hover:text-grey-c700">
-                <td className="py-4 pl-3">38BEE27</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-start gap-2">
-                    <Image
-                      alt="Laptop"
-                      width={60}
-                      height={60}
-                      className="rounded-lg"
-                      src={
-                        "https://salt.tikicdn.com/cache/350x350/ts/product/34/ea/17/24907f37b8c0896ef083d630284663df.png.webp"
-                      }
-                    />
-                    <div className="flex flex-col justify-start">
-                      <div className=" overflow-ellipsis break-words ">
-                        Thiết bị tivi giải trí xách tay LG StanbyME Go 27 inch
-                      </div>
-                      <div>
-                        <span className="text-[10px]">Đã bán:</span>{" "}
-                        <span className="text-[10px] font-bold text-primary-c900">
-                          1052
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-1 py-4">17:08 - 22/3/2024</td>
-                <td className="px-1 py-4 align-top">
-                  <MyCutOffText content="Hình ảnh không khớp với mô tả" />
-                </td>
-                <td className="px-1 py-4 align-top">
-                  <MyCutOffText
-                    content="Hiển thị các sản phẩm duyệt không thành công, vi phạm trong
-                    quá trình bán hàng (Khoá hoặc bị cấm hiển thị)."
-                  />
-                </td>
-                <td className="px-1 py-4 align-top">
-                  <MyCutOffText content="Hiển thị các sản phẩm duyệt không thành công" />
-                </td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-center justify-center gap-2">
-                    <Tooltip title="Xem chi tiết lỗi">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleOpenDetailModal()}
-                      >
-                        <ErrorOutlineIcon
-                          sx={{ color: COLORS.primary.c700, fontSize: 22 }}
+              {violateProducts?.map((product: Product, index: number) => {
+                return (
+                  <tr className="hover:bg-primary-c100 hover:text-grey-c700">
+                    <td className="py-4 pl-3">{product?.productCode}</td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-start gap-2">
+                        <img
+                          src={`${headerUrl}/products/${product.images[0]}`}
+                          alt="product-image"
+                          className="h-15 w-15 rounded-lg object-cover"
                         />
+                        <div className="flex flex-col justify-start">
+                          <div className=" overflow-ellipsis break-words ">
+                            {product?.productName}
+                          </div>
+                          <div>
+                            <span className="text-[10px]">Đã bán:</span>{" "}
+                            <span className="text-[10px] font-bold text-primary-c900">
+                              {product?.soldNumber}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleOpenEditModal()}
-                      >
-                        <EditIcon />
+                    </td>
+                    <td className="px-1 py-4 align-top">
+                      {formatDate(product?.updatedAt)}
+                    </td>
+                    <td className="px-1 py-4 align-top">
+                      {product?.rejectReason}
+                    </td>
+                    <td className="max-w-[200px] px-1 py-4 align-top">
+                      {product?.editHint}
+                    </td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <Tooltip title="Xem chi tiết lỗi">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleOpenDetailModal(product?.id)}
+                          >
+                            <ErrorOutlineIcon
+                              sx={{ color: COLORS.primary.c700, fontSize: 22 }}
+                            />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Chỉnh sửa">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleOpenEditModal()}
+                          >
+                            <EditIcon />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Xóa">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleConfirmDeleteItem()}
+                          >
+                            <DeleteIcon />
+                          </div>
+                        </Tooltip>
                       </div>
-                    </Tooltip>
-                    <Tooltip title="Xóa">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleConfirmDeleteItem()}
-                      >
-                        <DeleteIcon />
-                      </div>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -49,6 +49,18 @@ export const getSellingProducts = async (token: string) => {
     .then((res) => res.data);
 };
 
+export const  getViolateProducts = async (token: string) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .post(`${headerUrl}/products/violate-products`, null, config)
+    .then((res) => res.data);
+};
+
 export const singleProduct = async (id: number) => {
   return await axios.get(`${headerUrl}/products/${id}`).then((res) => res.data);
 };
@@ -62,5 +74,21 @@ export const deleteProduct = async (id: number, token: string) => {
 
   return await axios
     .delete(`${headerUrl}/products/delete/${id}`, config)
+    .then((res) => res.data);
+};
+
+export const updateProductBySeller = async (
+  id: number,
+  variables: any,
+  token: string,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/products/update/${id}`, variables, config)
     .then((res) => res.data);
 };

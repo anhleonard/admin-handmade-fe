@@ -5,16 +5,31 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControl from "@mui/material/FormControl";
 import MySelect, { Item } from "@/libs/select";
 import { Grid } from "@mui/material";
+import {
+  ItemVariantCategory,
+  SelectedItem,
+  VariantCategory,
+} from "@/enum/defined-type";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 type Props = {
-  data: any;
-  selectedItems: any;
+  data: ItemVariantCategory[];
+  selectedItems: SelectedItem;
+  chosenVariants?: string[];
   setSelectedItems: any;
 };
 
-const SelectedVariants = ({ data, selectedItems, setSelectedItems }: Props) => {
-  const [selectedVariants, setSelectedVariants] = useState<string[]>([]);
-  // const [selectedItems, setSelectedItems] = useState({});
+const SelectedVariants = ({
+  data,
+  selectedItems,
+  setSelectedItems,
+  chosenVariants,
+}: Props) => {
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [selectedVariants, setSelectedVariants] = useState<string[]>(
+    chosenVariants ?? [],
+  );
 
   const handleVariantChange = (event: any) => {
     const variantName = event.target.name;
@@ -53,34 +68,42 @@ const SelectedVariants = ({ data, selectedItems, setSelectedItems }: Props) => {
             rowSpacing={10}
             columnSpacing={{ xs: 1, sm: 2, md: 4 }}
           >
-            {data?.map((variant: any) => (
-              <Grid item xs={6}>
-                <div key={variant.id} className="w-full">
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedVariants.includes(variant.variantName)}
-                        onChange={handleVariantChange}
-                        name={variant.variantName}
-                      />
-                    }
-                    label={variant.variantName}
-                  />
-                  {selectedVariants.includes(variant.variantName) && (
-                    <MySelect
-                      id=""
-                      name=""
-                      placeholder="-- Lựa chọn --"
-                      options={variant?.variantItems}
-                      wrapClassName="!w-full"
-                      onSelectItem={(item: Item) => {
-                        handleItemChange(item, variant?.variantName);
-                      }}
+            {data?.map((cate: ItemVariantCategory, index: number) => {
+              const variantName = cate?.variantName;
+              return (
+                <Grid item xs={6} key={index}>
+                  <div key={cate.id} className="w-full">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedVariants.includes(variantName)}
+                          onChange={handleVariantChange}
+                          name={variantName}
+                        />
+                      }
+                      label={variantName}
                     />
-                  )}
-                </div>
-              </Grid>
-            ))}
+                    {selectedVariants.includes(variantName) && (
+                      <MySelect
+                        id=""
+                        name=""
+                        placeholder="-- Lựa chọn --"
+                        options={cate?.variantItems}
+                        wrapClassName="!w-full"
+                        onSelectItem={(item: Item) => {
+                          handleItemChange(item, cate?.variantName);
+                        }}
+                        selected={
+                          selectedVariants.includes(variantName)
+                            ? selectedItems[variantName]?.value
+                            : null
+                        }
+                      />
+                    )}
+                  </div>
+                </Grid>
+              );
+            })}
           </Grid>
         </FormGroup>
       </FormControl>

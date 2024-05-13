@@ -1,37 +1,54 @@
 import { singleProduct } from "@/apis/services/product";
 import ClassifiedTable from "@/components/products/classified-table";
 import { AlertStatus, ProductStatus } from "@/enum/constants";
-import { AlertState, Product } from "@/enum/defined-type";
+import { AlertState, Product, Variant } from "@/enum/defined-type";
 import Button from "@/libs/button";
 import MyPrimaryTextField from "@/libs/primary-text-field";
 import SwitchButton from "@/libs/switch-button";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import { useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import { Form, Formik, getIn } from "formik";
 import FormatEndCurrencyIcon from "@/libs/format-end-currency-icon";
+import BuildClassificationsModal from "@/components/products/build-classifications";
+import MyLabel from "@/libs/label";
+import MyTextAction from "@/libs/text-action";
+import { COLORS } from "@/enum/colors";
+import UpdateClassifications from "@/components/products/update-classifications";
+import { Chip } from "@mui/material";
+import { formatVariant } from "@/enum/functions";
+import { openModal } from "@/redux/slices/modalSlice";
+import { SCREEN } from "@/enum/setting";
 
 const validationSchema = yup.object({
   productName: yup.string().required("Vui lòng không để trống trường này."),
-  price: yup.number().when("isMultipleClasses", ([isMultipleClasses], sch) => {
-    return isMultipleClasses === false
-      ? sch
-          .min(1, "Số lượng phải lớn hơn 0")
-          .required("Vui lòng không để trống trường này.")
-      : sch.notRequired();
-  }),
+  price: yup
+    .number()
+    .min(1, "Vui lòng nhập số lượng lớn hơn 1")
+    .required("Vui lòng không để trống trường này."),
   inventoryNumber: yup
     .number()
-    .when("isMultipleClasses", ([isMultipleClasses], sch) => {
-      return isMultipleClasses === false
-        ? sch
-            .min(1, "Số lượng phải lớn hơn 0")
-            .required("Vui lòng không để trống trường này.")
-        : sch.notRequired();
-    }),
+    .min(1, "Vui lòng nhập số lượng lớn hơn 1")
+    .required("Vui lòng không để trống trường này."),
+  // price: yup.number().when("isMultipleClasses", ([isMultipleClasses], sch) => {
+  //   return isMultipleClasses === false
+  //     ? sch
+  //         .min(1, "Số lượng phải lớn hơn 0")
+  //         .required("Vui lòng không để trống trường này.")
+  //     : sch.notRequired();
+  // }),
+  // inventoryNumber: yup
+  //   .number()
+  //   .when("isMultipleClasses", ([isMultipleClasses], sch) => {
+  //     return isMultipleClasses === false
+  //       ? sch
+  //           .min(1, "Số lượng phải lớn hơn 0")
+  //           .required("Vui lòng không để trống trường này.")
+  //       : sch.notRequired();
+  //   }),
 });
 
 type Props = {
@@ -76,6 +93,16 @@ const EditProductModal = ({ productId }: Props) => {
 
   const onSubmit = async () => {};
 
+  const handleOpenEditVariantModal = (content: ReactNode) => {
+    const modal = {
+      isOpen: true,
+      title: "Chỉnh sửa phân loại",
+      content: content,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -86,7 +113,9 @@ const EditProductModal = ({ productId }: Props) => {
       {(formik) => (
         <Form>
           <div className="flex flex-col gap-3">
-            <div className="flex flex-row items-center justify-between gap-4 md:gap-0">
+            <div
+              className={`flex flex-row justify-between gap-4 md:gap-0 ${formik?.errors.productName ? "items-start" : "items-center"}`}
+            >
               <MyPrimaryTextField
                 id="productName"
                 name="productName"
@@ -113,9 +142,36 @@ const EditProductModal = ({ productId }: Props) => {
               />
             </div>
             {product?.isMultipleClasses ? (
-              <ClassifiedTable />
+              // <ClassifiedTable />
+              <div className="flex flex-row items-center gap-4">
+                {product?.variants?.map((variant: Variant, index: number) => {
+                  return (
+                    <div key={index}>
+                      <Chip
+                        label={formatVariant(variant?.variantItems)}
+                        onClick={() =>
+                          handleOpenEditVariantModal(
+                            <UpdateClassifications variant={variant} />,
+                          )
+                        }
+                        onDelete={() => {}}
+                        color="warning"
+                      ></Chip>
+                      {/* <div className="flex flex-row justify-between">
+                        <MyLabel children={`Phân loại ${1}`} type="warning" />
+                        <MyTextAction
+                          label="Xóa"
+                          color="text-support-c500"
+                        ></MyTextAction>
+                      </div>
+                      <UpdateClassifications variant={variant} index={index} /> */}
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <div className="mb-4 flex flex-row items-center justify-between gap-8">
+              // <BuildClassificationsModal />
+              <div className="mb-4 flex flex-row items-start justify-between gap-8">
                 <MyTextField
                   id="inventoryNumber"
                   name="inventoryNumber"
