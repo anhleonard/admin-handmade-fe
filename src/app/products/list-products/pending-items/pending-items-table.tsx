@@ -1,5 +1,5 @@
 "use client";
-import { mainCategories } from "@/enum/constants";
+import { AlertStatus, mainCategories } from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -16,6 +16,14 @@ import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
 import DetailProductModal from "../../modals/detail-product-modal";
 import { openConfirm } from "@/redux/slices/confirmSlice";
+import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
+import { getPendingProducts } from "@/apis/services/product";
+import storage from "@/apis/storage";
+import { AlertState, Category, Product } from "@/enum/defined-type";
+import { openAlert } from "@/redux/slices/alertSlice";
+import { useEffect, useState } from "react";
+import { formatDate } from "@/enum/functions";
+import { headerUrl } from "@/apis/services/authentication";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -24,12 +32,15 @@ const labelOptions = [
 
 const PendingItemsTable = () => {
   const dispatch = useDispatch();
+  const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
 
-  const handleOpenDetailModal = () => {
+  const handleOpenDetailModal = (productId: number) => {
     const modal = {
       isOpen: true,
       title: "Chi tiết sản phẩm",
-      content: <DetailProductModal type="PENDING_ITEMS" />,
+      content: (
+        <DetailProductModal type="PENDING_ITEMS" productId={productId} />
+      ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -46,6 +57,30 @@ const PendingItemsTable = () => {
 
     dispatch(openConfirm(confirm));
   };
+
+  // get all pending products by seller token
+  const getAllPendingProducts = async () => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const res = await getPendingProducts(token);
+      setPendingProducts(res);
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
+  useEffect(() => {
+    getAllPendingProducts();
+  }, []);
 
   return (
     <div className="flex flex-col gap-8">
@@ -87,52 +122,75 @@ const PendingItemsTable = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="hover:bg-primary-c100 hover:text-grey-c700">
-                <td className="py-4 pl-3">38BEE27</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-start gap-2">
-                    <Image
-                      alt="Laptop"
-                      width={60}
-                      height={60}
-                      className="rounded-lg"
-                      src={
-                        "https://salt.tikicdn.com/cache/350x350/ts/product/34/ea/17/24907f37b8c0896ef083d630284663df.png.webp"
-                      }
-                    />
-                    <div className="flex flex-col justify-start">
-                      <div className="w-[160px] overflow-ellipsis break-words md:w-[200px] ">
-                        Thiết bị tivi giải trí xách tay LG StanbyME Go 27 inch
+              {pendingProducts?.map((product: Product, index: number) => {
+                return (
+                  <tr
+                    className="hover:bg-primary-c100 hover:text-grey-c700"
+                    key={index}
+                  >
+                    <td className="py-4 pl-3">{product.productCode}</td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-start gap-2">
+                        <Image
+                          alt="Laptop"
+                          width={60}
+                          height={60}
+                          className="rounded-lg"
+                          src={`${headerUrl}/products/${product.images[0]}`} // show product image
+                        />
+                        <div className="flex flex-col justify-start">
+                          <div className="w-[160px] overflow-ellipsis break-words md:w-[200px] ">
+                            {product.productName}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-1 py-4">Quà tặng</td>
-                <td className="px-1 py-4">2653</td>
-                <td className="px-1 py-4">120.000 - 150.000</td>
-                <td className="px-1 py-4">16:38 - 22/3/2024</td>
-                <td className="px-1 py-4">16:38 - 29/3/2024</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-center justify-center gap-2">
-                    <Tooltip title="Xem chi tiết">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleOpenDetailModal()}
-                      >
-                        <DetailIcon />
+                    </td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-col items-start justify-start gap-1">
+                        {product.category?.map(
+                          (cate: Category, index: number) => {
+                            return <div key={index}>{cate?.title}</div>;
+                          },
+                        )}
                       </div>
-                    </Tooltip>
-                    <Tooltip title="Xóa">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleConfirmDeleteItem()}
-                      >
-                        <DeleteIcon />
+                    </td>
+                    <td className="px-1 py-4">{product.inventoryNumber}</td>
+                    <td className="px-1 py-4">{product.price}</td>
+                    <td className="px-1 py-4">
+                      {formatDate(product.createdAt)}
+                    </td>
+                    <td className="px-1 py-4">
+                      {product?.expirationAt ? (
+                        formatDate(product?.expirationAt)
+                      ) : (
+                        <div className="flex flex-row items-center justify-center">
+                          -
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <Tooltip title="Xem chi tiết">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleOpenDetailModal(product?.id)}
+                          >
+                            <DetailIcon />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Xóa">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleConfirmDeleteItem()}
+                          >
+                            <DeleteIcon />
+                          </div>
+                        </Tooltip>
                       </div>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

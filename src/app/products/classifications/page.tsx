@@ -1,6 +1,6 @@
 "use client";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import CreateClassificationModal from "@/components/products/create-classification";
+import CreateVariantCategoriesModal from "@/components/products/create-variant-categories";
 import { SCREEN } from "@/enum/setting";
 import Button from "@/libs/button";
 import { openModal } from "@/redux/slices/modalSlice";
@@ -13,7 +13,7 @@ const ClassificationPage = () => {
     const modal = {
       isOpen: true,
       title: "Tạo phân loại",
-      content: <CreateClassificationModal />,
+      content: <CreateVariantCategoriesModal />,
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));

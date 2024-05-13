@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Url } from "url";
-import { AlertStatus } from "./constants";
+import { AlertStatus, ProductStatus } from "./constants";
 
 export type ColTabItem = {
   href: any;
@@ -67,4 +67,55 @@ export type AlertState = {
   title: string;
   message: string;
   type: AlertStatus;
+};
+
+//Product
+export type VariantCategory = {
+  id: number;
+  variantName: string;
+};
+
+export type VariantItem = {
+  id: number;
+  name: string;
+  variantCategory?: VariantCategory;
+};
+
+export type Variant = {
+  id: number;
+  unitPrice: number;
+  inventoryNumber: number;
+  image: string;
+  variantItems: Array<VariantItem>;
+};
+
+export type Product = {
+  id: number;
+  productName: string;
+  productCode: string;
+  description: string;
+  materials: string;
+  mainColors: string;
+  uses: string;
+  productionDate?: Date;
+  expirationDate?: Date;
+  isHeavyGood: boolean;
+  isMultipleClasses: boolean;
+  inventoryNumber?: number;
+  price?: number;
+  images: string[];
+  discount?: number;
+  variants: Variant[];
+  isAccepted: boolean;
+  status: ProductStatus;
+  createdAt: any;
+  updatedAt: any;
+  expirationAt: any;
+  category: Category[];
+};
+
+export type Category = {
+  id: number;
+  title: string;
+  description: string;
 };

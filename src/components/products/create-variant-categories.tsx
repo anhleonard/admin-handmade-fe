@@ -18,7 +18,7 @@ const validationSchema = yup.object({
   // tags: yup.array().min(1, "Vui lòng nhập ít nhất là 1 tag."),
 });
 
-const CreateClassificationModal = () => {
+const CreateVariantCategoriesModal = () => {
   const dispatch = useDispatch();
   const [tags, setTags] = useState<any>([]);
   const [inputValue, setInputValue] = useState("");
@@ -155,4 +155,4 @@ const CreateClassificationModal = () => {
   );
 };
 
-export default CreateClassificationModal;
+export default CreateVariantCategoriesModal;

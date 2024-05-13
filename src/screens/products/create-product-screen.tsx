@@ -2,22 +2,17 @@
 import { WarningIcon } from "@/enum/icons";
 import MyDatePicker from "@/libs/date-picker";
 import MyTextField from "@/libs/text-field";
-import MySelect from "@/libs/select";
 import MyTextArea from "@/libs/text-area";
-import MyRadioGroup from "@/libs/radio-group";
 import UploadImage from "@/libs/upload-image";
 import Button from "@/libs/button";
 import { useEffect, useState } from "react";
 import { AlertStatus, yesNoOptions } from "@/enum/constants";
-import ClassifiedTable from "@/components/products/classified-table";
 import MyRadioButtonsGroup from "@/libs/radio-button-group";
-import CheckboxesGroup from "@/components/checkboxes/checkboxes";
 import { UploadFile } from "antd";
-import axios from "axios";
 import * as yup from "yup";
 import { Form, Formik, getIn } from "formik";
 import CateGoriesPicker, { Label } from "./selected-categories";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import { getCategories } from "@/apis/services/categories";
 import { AlertState } from "@/enum/defined-type";
@@ -27,6 +22,14 @@ import { createProduct, uploadImages } from "@/apis/services/product";
 import storage from "@/apis/storage";
 import { useRouter } from "next/navigation";
 import { getVariantCategoriesByUser } from "@/apis/services/variant-category";
+import { Checkbox, Chip, FormControlLabel, FormGroup } from "@mui/material";
+import SelectedVariants from "./selected-variants";
+import BuildClassificationsModal from "@/components/products/build-classifications";
+import { SCREEN } from "@/enum/setting";
+import { openModal } from "@/redux/slices/modalSlice";
+import { RootState } from "@/redux/store";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import { deleteVariant } from "@/apis/services/variants";
 
 const validationSchema = yup.object({
   productName: yup.string().required("Vui lòng không để trống trường này."),
@@ -35,18 +38,37 @@ const validationSchema = yup.object({
   materials: yup.string().required("Vui lòng không để trống trường này."),
   mainColors: yup.string().required("Vui lòng không để trống trường này."),
   uses: yup.string().required("Vui lòng không để trống trường này."),
-  price: yup.number().min(1, "Vui lòng nhập số tiền lượng hơn 0"),
-  inventoryNumber: yup.number().min(1, "Vui lòng nhập số lượng lớn hơn 0"),
+  isMultipleClasses: yup.boolean(),
+  isHeavyGood: yup.boolean(),
+  price: yup.number().when("isMultipleClasses", ([isMultipleClasses], sch) => {
+    return isMultipleClasses === false
+      ? sch
+          .min(1, "Số lượng phải lớn hơn 0")
+          .required("Vui lòng không để trống trường này.")
+      : sch.notRequired();
+  }),
+  inventoryNumber: yup
+    .number()
+    .when("isMultipleClasses", ([isMultipleClasses], sch) => {
+      return isMultipleClasses === false
+        ? sch
+            .min(1, "Số lượng phải lớn hơn 0")
+            .required("Vui lòng không để trống trường này.")
+        : sch.notRequired();
+    }),
 });
 
 const CreateProductScreen = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
   const [isClassified, setIsClassified] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [labels, setLabels] = useState<Label[]>([]);
   const [selectedLabels, setSelectedLabels] = useState<number[]>([]);
-  const dispatch = useDispatch();
+  const [variants, setVariants] = useState<any>([]);
 
   const initialValues = {
     productName: "",
@@ -65,25 +87,35 @@ const CreateProductScreen = () => {
     try {
       dispatch(openLoading());
 
-      const formData = new FormData();
+      let variables = {};
 
-      if (fileList && fileList.length >= 1) {
-        for (let i = 0; i < fileList.length; i++) {
-          const fileObj = fileList[i].originFileObj;
-          if (fileObj) {
-            formData.append(`files`, fileObj);
+      if (variants?.length !== 0) {
+        //check xem variants có rỗng không
+        variables = {
+          ...values,
+          categoryId: selectedLabels,
+          sampleVariants: variants,
+        };
+      } else {
+        const formData = new FormData();
+
+        if (fileList && fileList.length >= 1) {
+          for (let i = 0; i < fileList.length; i++) {
+            const fileObj = fileList[i].originFileObj;
+            if (fileObj) {
+              formData.append(`files`, fileObj);
+            }
           }
         }
+
+        const res = await uploadImages(formData); // get images url
+        variables = {
+          ...values,
+          price: parseInt(values?.price),
+          categoryId: selectedLabels,
+          images: res,
+        };
       }
-
-      const res = await uploadImages(formData); // get images url
-
-      const variables = {
-        ...values,
-        price: parseInt(values?.price),
-        categoryId: selectedLabels,
-        images: res,
-      };
 
       const token = storage.getLocalAccessToken();
 
@@ -131,12 +163,40 @@ const CreateProductScreen = () => {
     }
   };
 
-  const getAllVariantCategoriesByUser = async () => {
+  useEffect(() => {
+    getAllCategories();
+  }, []);
+
+  const showAddClassModal = () => {
+    const modal = {
+      isOpen: true,
+      title: "Thêm phân loại cho sản phẩm",
+      content: (
+        <BuildClassificationsModal
+          onSubmitCallback={(res: any) => handleClassificationAdded(res)}
+        />
+      ),
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleClassificationAdded = (res: any) => {
+    if (res) {
+      variants.push(res);
+      setVariants(variants);
+    }
+    dispatch(refetchComponent());
+  };
+
+  const handleDeleteVariantItem = async (id: number, index: number) => {
+    //index thứ tự của variant đó trong mảng state variants
     try {
       dispatch(openLoading());
-      const token = storage.getLocalAccessToken();
-      const res = await getVariantCategoriesByUser(token);
-      console.log(res);
+      await deleteVariant(id);
+      variants.splice(index, 1);
+      setVariants(variants);
+      dispatch(refetchComponent());
     } catch (error: any) {
       let alert: AlertState = {
         isOpen: true,
@@ -150,13 +210,7 @@ const CreateProductScreen = () => {
     }
   };
 
-  useEffect(() => {
-    getAllCategories();
-  }, []);
-
-  useEffect(() => {
-    getAllVariantCategoriesByUser();
-  }, []);
+  console.log(variants);
 
   return (
     <div className="w-full rounded-lg bg-white px-4 py-2">
@@ -340,7 +394,7 @@ const CreateProductScreen = () => {
                       setFileList={setFileList}
                     />
                   </div>
-                  <div className="flex flex-row items-center justify-between gap-8">
+                  <div className="flex flex-row items-start justify-between gap-8">
                     <MyTextField
                       type="text"
                       id="price"
@@ -352,7 +406,6 @@ const CreateProductScreen = () => {
                       endIcon={
                         <FormatEndCurrencyIcon value={formik.values.price} />
                       }
-                      minNumber={1}
                       className="w-1/2"
                       onChange={formik.handleChange}
                       value={formik.values.price}
@@ -371,7 +424,6 @@ const CreateProductScreen = () => {
                       title="Số lượng tồn kho"
                       placeholder="Số lượng tồn của sản phẩm"
                       type="number"
-                      minNumber={1}
                       className="w-1/2"
                       onChange={formik.handleChange}
                       value={formik.values.inventoryNumber}
@@ -389,13 +441,34 @@ const CreateProductScreen = () => {
               )}
               {/* {isClassified && <ClassifiedTable />} */}
               {isClassified && (
-                <div className="border-t-2 border-dashed border-grey-c50 py-3">
-                  <div className="text-sm font-semibold text-grey-c900">
-                    Tạo phân loại cho sản phẩm
+                <div className={`flex flex-col ${variants?.length && "gap-4"}`}>
+                  <Button
+                    className="!w-fit !px-3 !text-xs"
+                    color="info"
+                    onClick={() => showAddClassModal()}
+                  >
+                    Thêm phân loại
+                  </Button>
+                  <div className="flex flex-row flex-wrap items-center gap-3">
+                    {variants?.map((variant: any, index: number) => {
+                      const names = variant?.variantItems?.map(
+                        (variantItem: any) => variantItem?.name,
+                      );
+                      const result = names.join(" - ");
+                      return (
+                        <Chip
+                          label={result}
+                          onDelete={() =>
+                            handleDeleteVariantItem(variant?.id, index)
+                          }
+                          color="warning"
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}
-              <div className="mt-3 flex flex-row items-center justify-between gap-8">
+              <div className="mt-4 flex flex-row items-center justify-between gap-8 border-t-2 border-dashed border-t-grey-c100 py-8">
                 <Button
                   color="primary"
                   className="h-12 w-1/3 text-xs md:text-sm lg:text-base"

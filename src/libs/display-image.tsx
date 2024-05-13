@@ -26,6 +26,7 @@ const MyDisplayImage = ({
         fill
         style={{ objectFit: "cover", borderRadius: rounded }}
         className="hover:opacity-90"
+        sizes="100px"
       />
     </div>
   );

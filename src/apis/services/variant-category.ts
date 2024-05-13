@@ -21,6 +21,10 @@ export const getVariantCategoriesByUser = async (token: string) => {
   };
 
   return await axios
-    .post(`${headerUrl}/variant-categories/seller-variant-categories`, config)
+    .post(
+      `${headerUrl}/variant-categories/seller-variant-categories`,
+      null,
+      config,
+    )
     .then((res) => res.data);
 };

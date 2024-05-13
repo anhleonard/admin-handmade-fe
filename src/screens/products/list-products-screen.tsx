@@ -33,9 +33,10 @@ const ListProductsScreen = () => {
                     },
                   }}
                 >
-                  {productTabs.map((item) => {
+                  {productTabs.map((item, index: number) => {
                     return (
                       <Tab
+                        key={index}
                         label={item.label}
                         value={item.value}
                         sx={{
@@ -52,9 +53,9 @@ const ListProductsScreen = () => {
                   })}
                 </TabList>
               </Box>
-              {productTabs.map((item) => {
+              {productTabs.map((item, index: number) => {
                 return (
-                  <TabPanel value={item.value}>
+                  <TabPanel value={item.value} key={index}>
                     <div className="my-8">{item.content}</div>
                   </TabPanel>
                 );

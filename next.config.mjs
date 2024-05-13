@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "buffer.com",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
     ],
   },
 };

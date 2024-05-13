@@ -1,4 +1,9 @@
+import { headerUrl } from "@/apis/services/authentication";
+import { singleProduct } from "@/apis/services/product";
 import GiftCollapse from "@/components/gifts/gift-collapse";
+import { AlertStatus } from "@/enum/constants";
+import { AlertState, Category, Product } from "@/enum/defined-type";
+import { formatCurrency } from "@/enum/functions";
 import Button from "@/libs/button";
 import MyDatePicker from "@/libs/date-picker";
 import MyDefaultText from "@/libs/default-text";
@@ -7,22 +12,48 @@ import MyDisplayImage from "@/libs/display-image";
 import MyPrimaryTextField from "@/libs/primary-text-field";
 import MySelect from "@/libs/select";
 import MySingleCheckBox from "@/libs/single-checkbox";
-import Image from "next/image";
-import { useState } from "react";
+import { openAlert } from "@/redux/slices/alertSlice";
+import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
+import { Chip } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 const all_options = [
   { value: "ITEM_1", label: "Item 1" },
   { value: "ITEM_2", label: "Item 2" },
 ];
 
-type DetailProductModalProps = {
+type Props = {
+  productId: number;
   type?: "ALL_ITEMS" | "PENDING_ITEMS" | "VIOLATE_ITEMS";
 };
 
-const DetailProductModal = ({
-  type = "ALL_ITEMS",
-}: DetailProductModalProps) => {
-  const [hasMultipleChoices, setHasMultipleChoices] = useState(true);
+const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
+  const dispatch = useDispatch();
+  const [product, setProduct] = useState<Product>();
+
+  const getSingleProduct = async () => {
+    try {
+      dispatch(openLoading());
+      const res = await singleProduct(productId);
+      console.log(res);
+      setProduct(res);
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
+  useEffect(() => {
+    getSingleProduct();
+  }, []);
 
   return (
     <div className="py-2">
@@ -32,13 +63,17 @@ const DetailProductModal = ({
             <div className="flex flex-row items-center gap-6">
               <div className="flex flex-row items-center gap-2">
                 <div>Là hàng hóa nặng?</div>
-                <MySingleCheckBox isChecked disabled size={20} />
+                <MySingleCheckBox
+                  isChecked={product?.isHeavyGood}
+                  disabled
+                  size={20}
+                />
               </div>
               <div className="flex flex-row items-center gap-2">
                 <div>Có nhiều lựa chọn?</div>
                 <MySingleCheckBox
                   size={20}
-                  isChecked={hasMultipleChoices}
+                  isChecked={product?.isMultipleClasses}
                   disabled
                 />
               </div>
@@ -52,58 +87,54 @@ const DetailProductModal = ({
             {type !== "VIOLATE_ITEMS" && (
               <div className="text-sm5">
                 Tồn kho:{" "}
-                <span className="font-bold text-primary-c900">122</span>
+                <span className="font-bold text-primary-c900">
+                  {product?.inventoryNumber}
+                </span>
               </div>
             )}
           </div>
           <MyPrimaryTextField
             id="productName"
             title="Tên sản phẩm"
-            defaultValue={
-              "Nồi Chiên Không Dầu Điện Tử Lock&Lock EJF357BLK (5.2 Lít) - Hàng Chính Hãng"
-            }
-            isError={type === "VIOLATE_ITEMS"}
+            defaultValue={product?.productName}
             helperText={"Vui lòng đặt tên sản phẩm khoa học và dễ hiểu."}
+            isError={type === "VIOLATE_ITEMS"}
             disabled={type !== "VIOLATE_ITEMS"}
           />
-          <div className="flex flex-row items-center gap-8">
-            <MyPrimaryTextField
-              id="productCode"
-              title="Mã sản phẩm"
-              defaultValue={"QT123456789"}
-              className="w-1/2"
-              isError={type === "VIOLATE_ITEMS"}
-              disabled={type !== "VIOLATE_ITEMS"}
-            />
-            <MySelect
-              id="productCategory"
-              title="Danh mục"
-              options={all_options}
-              selected={all_options[0].value}
-              wrapClassName="!w-1/2"
-              error={type === "VIOLATE_ITEMS"}
-              disabled={type !== "VIOLATE_ITEMS"}
-            />
+          <MyPrimaryTextField
+            id="productCode"
+            title="Mã sản phẩm"
+            defaultValue={product?.productCode}
+            isError={type === "VIOLATE_ITEMS"}
+            disabled={type !== "VIOLATE_ITEMS"}
+          />
+          <div>
+            <div className="mb-1 block text-sm font-medium text-grey-c600 dark:text-white">
+              Danh mục
+            </div>
+            <div className="flex flex-row items-center gap-3">
+              {product?.category.map((cate: Category, index: number) => {
+                return <Chip label={cate.title} color="warning"></Chip>;
+              })}
+            </div>
           </div>
           <MyDefaultText
             title="Mô tả sản phẩm"
             type={type === "VIOLATE_ITEMS" ? "error" : "disabled"}
           >
-            Nồi Chiên Không Dầu Điện Tử Lock&Lock EJF357BLK có kết cấu gọn gàng,
-            thiết kế chắc chắn, màu đen lịch lãm bao phủ mọi mặt của nồi chiên
-            không dầu, kết hợp hoàn hảo với mọi không gian nội thất.
+            {product?.description}
           </MyDefaultText>
           <MyPrimaryTextField
             id="productMaterial"
             title="Chất liệu"
-            defaultValue={"Len, Sắt"}
+            defaultValue={product?.materials}
             isError={type === "VIOLATE_ITEMS"}
             disabled={type !== "VIOLATE_ITEMS"}
           />
           <MyPrimaryTextField
             id="productMainColor"
             title="Màu sắc chủ đạo"
-            defaultValue={"Than tím"}
+            defaultValue={product?.mainColors}
             isError={type === "VIOLATE_ITEMS"}
             disabled={type !== "VIOLATE_ITEMS"}
           />
@@ -111,71 +142,60 @@ const DetailProductModal = ({
             title="Công dụng"
             type={type === "VIOLATE_ITEMS" ? "error" : "disabled"}
           >
-            Nồi Chiên Không Dầu Điện Tử Lock&Lock EJF357BLK có kết cấu gọn gàng,
-            thiết kế chắc chắn, màu đen lịch lãm bao phủ mọi mặt của nồi chiên
-            không dầu, kết hợp hoàn hảo với mọi không gian nội thất.
+            {product?.uses}
           </MyDefaultText>
-          <div className="flex flex-row items-center gap-8">
-            <MyDatePicker
-              id=""
-              label="Ngày sản xuất"
-              defaultDate={"2024-04-30"}
-              className="w-1/2"
-              isError={type === "VIOLATE_ITEMS"}
-              disabled={type !== "VIOLATE_ITEMS"}
-            />
-            <MyDatePicker
-              id=""
-              label="Hạn sử dụng"
-              defaultDate={"2024/05/01"}
-              className="w-1/2"
-              isError={type === "VIOLATE_ITEMS"}
-              disabled={type !== "VIOLATE_ITEMS"}
-            />
-          </div>
-          <div className="flex flex-row items-center gap-8">
-            <MyPrimaryTextField
-              id="productMax"
-              title="Số lượng mua tối đa"
-              defaultValue={"2"}
-              isError={type === "VIOLATE_ITEMS"}
-              disabled={type !== "VIOLATE_ITEMS"}
-            />
-            {!hasMultipleChoices && (
-              <MyPrimaryTextField
-                id="productInventory"
-                title="Tồn kho"
-                defaultValue={"76"}
+          {product?.productionDate && product?.expirationDate && (
+            <div className="flex flex-row items-center gap-8">
+              <MyDatePicker
+                id=""
+                label="Ngày sản xuất"
+                defaultDate={"2024-04-30"}
+                className="w-1/2"
+                isError={type === "VIOLATE_ITEMS"}
                 disabled={type !== "VIOLATE_ITEMS"}
               />
-            )}
-          </div>
-
-          {!hasMultipleChoices && (
-            <div className="flex flex-row items-center gap-3">
-              <MyDisplayImage
-                src="https://salt.tikicdn.com/cache/750x750/ts/product/f6/1a/e5/a74a03ec03cce80bfceb6be69af2820d.jpg.webp"
-                alt=""
-              />
-              <MyDisplayImage
-                src="https://buffer.com/library/content/images/size/w1200/2023/10/free-images.jpg"
-                alt=""
-              />
-              <MyDisplayImage
-                src="https://salt.tikicdn.com/cache/750x750/ts/product/f6/1a/e5/a74a03ec03cce80bfceb6be69af2820d.jpg.webp"
-                alt=""
+              <MyDatePicker
+                id=""
+                label="Hạn sử dụng"
+                defaultDate={"2024/05/01"}
+                className="w-1/2"
+                isError={type === "VIOLATE_ITEMS"}
+                disabled={type !== "VIOLATE_ITEMS"}
               />
             </div>
           )}
+          {product?.price && (
+            <MyPrimaryTextField
+              id="productPrice"
+              title={
+                product?.isMultipleClasses ? "Giá bán thấp nhất" : "Giá bán"
+              }
+              defaultValue={formatCurrency(product.price)}
+              isError={type === "VIOLATE_ITEMS"}
+              disabled={type !== "VIOLATE_ITEMS"}
+            />
+          )}
 
-          {hasMultipleChoices && (
+          {!product?.isMultipleClasses && (
+            <div className="flex flex-row items-center gap-3">
+              {product?.images.map((path: string, index: number) => {
+                return (
+                  <MyDisplayImage
+                    key={index}
+                    src={`${headerUrl}/products/${path}`}
+                    alt="product-image"
+                  />
+                );
+              })}
+            </div>
+          )}
+
+          {product?.isMultipleClasses && product?.variants && (
             <MyDisabledMultipleChoices
+              variants={product?.variants}
               isError={type === "VIOLATE_ITEMS"}
               helperText="Vui lòng điều chỉnh giá của bạn"
             />
-          )}
-          {type !== "PENDING_ITEMS" && type !== "VIOLATE_ITEMS" && (
-            <GiftCollapse />
           )}
           {type === "VIOLATE_ITEMS" && (
             <MyDefaultText title="Gợi ý chỉnh sửa" type="success">

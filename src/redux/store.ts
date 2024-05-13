@@ -3,6 +3,7 @@ import modalSlice from "./slices/modalSlice";
 import confirmSlice from "./slices/confirmSlice";
 import loadingSlice from "./slices/loadingSlice";
 import alertSlice from "./slices/alertSlice";
+import refetchSlice from "./slices/refetchSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     confirm: confirmSlice,
     loading: loadingSlice,
     alert: alertSlice,
+    refetch: refetchSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
