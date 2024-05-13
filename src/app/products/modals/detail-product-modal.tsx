@@ -25,7 +25,7 @@ const all_options = [
 
 type Props = {
   productId: number;
-  type?: "ALL_ITEMS" | "PENDING_ITEMS" | "VIOLATE_ITEMS";
+  type?: "ALL_ITEMS" | "PENDING_ITEMS" | "VIOLATE_ITEMS" | "SELLING_ITEMS";
 };
 
 const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
@@ -36,7 +36,6 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
     try {
       dispatch(openLoading());
       const res = await singleProduct(productId);
-      console.log(res);
       setProduct(res);
     } catch (error: any) {
       let alert: AlertState = {

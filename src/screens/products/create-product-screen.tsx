@@ -468,19 +468,7 @@ const CreateProductScreen = () => {
                   </div>
                 </div>
               )}
-              <div className="mt-4 flex flex-row items-center justify-between gap-8 border-t-2 border-dashed border-t-grey-c100 py-8">
-                <Button
-                  color="primary"
-                  className="h-12 w-1/3 text-xs md:text-sm lg:text-base"
-                >
-                  Lưu nháp
-                </Button>
-                <Button
-                  color="primary"
-                  className="h-12 w-1/3 text-xs md:text-sm lg:text-base"
-                >
-                  Kiểm duyệt và tắt
-                </Button>
+              <div className="mt-4 flex flex-row items-center justify-center border-t-2 border-dashed border-t-grey-c100 py-8">
                 <Button
                   color="primary"
                   type="submit"

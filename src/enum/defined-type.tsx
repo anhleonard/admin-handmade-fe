@@ -112,6 +112,8 @@ export type Product = {
   updatedAt: any;
   expirationAt: any;
   category: Category[];
+  soldNumber: number;
+  profitMoney: number;
 };
 
 export type Category = {

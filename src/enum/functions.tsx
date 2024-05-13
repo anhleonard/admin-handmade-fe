@@ -26,7 +26,7 @@ export function formatVariant(data: Array<VariantItem>) {
   return result;
 }
 
-export function formatDate(timestamp: any) {
+export function formatDate(timestamp: Date) {
   const date = moment(timestamp).format("DD-MM-YYYY HH:mm:ss");
   return date;
 }

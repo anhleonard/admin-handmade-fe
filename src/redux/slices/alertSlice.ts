@@ -7,7 +7,7 @@ const initialState: AlertState = {
   isOpen: false,
   title: "Error",
   message: "This is an error",
-  type: AlertStatus.ERROR,
+  type: AlertStatus?.ERROR,
 };
 
 export const alertSlice = createSlice({
@@ -16,7 +16,7 @@ export const alertSlice = createSlice({
   reducers: {
     closeAlert: (state) => {
       state.isOpen = false;
-      state.type = AlertStatus.ERROR;
+      state.type = AlertStatus?.ERROR;
       state.title = "";
       state.message = "";
     },

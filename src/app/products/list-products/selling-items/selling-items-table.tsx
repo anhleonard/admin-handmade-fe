@@ -1,5 +1,5 @@
 "use client";
-import { mainCategories } from "@/enum/constants";
+import { AlertStatus, mainCategories } from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -11,9 +11,20 @@ import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
+import { getSellingProducts } from "@/apis/services/product";
+import storage from "@/apis/storage";
+import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
+import { useEffect, useState } from "react";
+import { AlertState, Product } from "@/enum/defined-type";
+import { openAlert } from "@/redux/slices/alertSlice";
+import { RootState } from "@/redux/store";
+import { headerUrl } from "@/apis/services/authentication";
+import { formatCurrency } from "@/enum/functions";
+import DetailProductModal from "../../modals/detail-product-modal";
+import EditProductModal from "../../modals/edit-product-modal";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -22,16 +33,54 @@ const labelOptions = [
 
 const SellingItemsTable = () => {
   const dispatch = useDispatch();
+  const [sellingProducts, setSellingProducts] = useState<Product[]>();
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
-  const handleOpenModal = () => {
+  const handleOpenDetailModal = (productId: number) => {
     const modal = {
       isOpen: true,
-      title: "Ticket detail",
-      content: <div>hello cac ban</div>,
-      screen: SCREEN.XS,
+      title: "Chi tiết sản phẩm",
+      content: (
+        <DetailProductModal type="SELLING_ITEMS" productId={productId} />
+      ),
+      screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
   };
+
+  const handleOpenEditModal = (productId: number) => {
+    const modal = {
+      isOpen: true,
+      title: "Chỉnh sửa sản phẩm",
+      content: <EditProductModal productId={productId} />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  // get all selling products by seller token
+  const getAllSellingProducts = async () => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const res = await getSellingProducts(token);
+      setSellingProducts(res);
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
+  useEffect(() => {
+    getAllSellingProducts();
+  }, [refetchQueries]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -65,7 +114,6 @@ const SellingItemsTable = () => {
                 <th className="py-4 pl-3">Mã sản phẩm</th>
                 <th className="px-1 py-4">Sản phẩm</th>
                 <th className="px-1 py-4">Tồn kho</th>
-                <th className="px-1 py-4">Quà tặng</th>
                 <th className="px-1 py-4">Giá bán</th>
                 <th className="px-1 py-4">Phí Handmade thu</th>
                 <th className="px-1 py-4">Lợi nhuận</th>
@@ -73,65 +121,94 @@ const SellingItemsTable = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="hover:bg-primary-c100 hover:text-grey-c700">
-                <td className="py-4 pl-3">38BEE27</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-start gap-2">
-                    <Image
-                      alt="Laptop"
-                      width={60}
-                      height={60}
-                      className="rounded-lg"
-                      src={
-                        "https://salt.tikicdn.com/cache/350x350/ts/product/34/ea/17/24907f37b8c0896ef083d630284663df.png.webp"
-                      }
-                    />
-                    <div className="flex flex-col justify-start">
-                      <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
-                        Thiết bị tivi giải trí xách tay LG StanbyME Go 27 inch
+              {sellingProducts?.map((product: Product, index: number) => {
+                return (
+                  <tr
+                    key={index}
+                    className="hover:bg-primary-c100 hover:text-grey-c700"
+                  >
+                    <td className="py-4 pl-3">{product?.productCode}</td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-start gap-2">
+                        <img
+                          src={`${headerUrl}/products/${product.images[0]}`}
+                          alt="product-image"
+                          className="h-15 w-15 rounded-lg object-cover"
+                        />
+                        <div className="flex flex-col justify-start">
+                          <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
+                            {product?.productName}
+                          </div>
+                          <div>
+                            <span className="text-[10px]">Đã bán:</span>{" "}
+                            <span className="text-[10px] font-bold text-primary-c900">
+                              {product?.soldNumber}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px]">Đã bán:</span>{" "}
-                        <span className="text-[10px] font-bold text-primary-c900">
-                          1052
-                        </span>
+                    </td>
+                    <td className="px-1 py-4">{product?.inventoryNumber}</td>
+                    <td className="px-1 py-4">
+                      {product?.price ? (
+                        formatCurrency(product?.price)
+                      ) : (
+                        <div className="flex flex-row items-center justify-center">
+                          -
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-1 py-4">
+                      {product?.profitMoney ? (
+                        formatCurrency(product?.profitMoney)
+                      ) : (
+                        <div className="flex flex-row items-center justify-center">
+                          -
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-1 py-4">
+                      {product?.profitMoney && product?.price ? (
+                        formatCurrency(product?.price - product?.profitMoney)
+                      ) : (
+                        <div className="flex flex-row items-center justify-center">
+                          -
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <Tooltip title="Xem chi tiết">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleOpenDetailModal(product?.id)}
+                          >
+                            <DetailIcon />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Chỉnh sửa">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleOpenEditModal(product?.id)}
+                          >
+                            <EditIcon />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Xóa">
+                          <div className="hover:cursor-pointer">
+                            <DeleteIcon />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Tắt sản phẩm">
+                          <div className="hover:cursor-pointer">
+                            <OffIcon />
+                          </div>
+                        </Tooltip>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-1 py-4">100</td>
-                <td className="px-1 py-4">2</td>
-                <td className="px-1 py-4">260.000</td>
-                <td className="px-1 py-4">20.000</td>
-                <td className="px-1 py-4">240.000</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-center justify-center gap-2">
-                    <Tooltip title="Xem chi tiết">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleOpenModal()}
-                      >
-                        <DetailIcon />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
-                      <div className="hover:cursor-pointer">
-                        <EditIcon />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Xóa">
-                      <div className="hover:cursor-pointer">
-                        <DeleteIcon />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Tắt sản phẩm">
-                      <div className="hover:cursor-pointer">
-                        <OffIcon />
-                      </div>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

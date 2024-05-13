@@ -11,19 +11,21 @@ import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
 import DetailProductModal from "../../modals/detail-product-modal";
-import { openConfirm } from "@/redux/slices/confirmSlice";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import { getPendingProducts } from "@/apis/services/product";
+import { deleteProduct, getPendingProducts } from "@/apis/services/product";
 import storage from "@/apis/storage";
 import { AlertState, Category, Product } from "@/enum/defined-type";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { useEffect, useState } from "react";
-import { formatDate } from "@/enum/functions";
+import { formatCurrency, formatDate } from "@/enum/functions";
 import { headerUrl } from "@/apis/services/authentication";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import { RootState } from "@/redux/store";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -33,6 +35,7 @@ const labelOptions = [
 const PendingItemsTable = () => {
   const dispatch = useDispatch();
   const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
   const handleOpenDetailModal = (productId: number) => {
     const modal = {
@@ -46,16 +49,47 @@ const PendingItemsTable = () => {
     dispatch(openModal(modal));
   };
 
-  const handleConfirmDeleteItem = () => {
+  const handleConfirmDeleteItem = (id: number) => {
     const confirm: any = {
       isOpen: true,
       title: "HỦY CHỜ DUYỆT SẢN PHẨM",
       message: "Bạn có chắc chắn hủy chờ duyệt cho sản phẩm này không?",
       feature: "CONFIRM_CONTACT_US",
-      onConfirm: () => {},
+      onConfirm: async () => {
+        try {
+          dispatch(openLoading());
+          const res = await handleDeleteProduct(id); //call api to delete product
+          if (res) {
+            dispatch(closeConfirm());
+            let alert: AlertState = {
+              isOpen: true,
+              title: "XÓA THÀNH CÔNG",
+              message: "Đã xóa sản phẩm khỏi danh sách chờ duyệt thành công",
+              type: AlertStatus.SUCCESS,
+            };
+            dispatch(openAlert(alert));
+            dispatch(refetchComponent());
+          }
+        } catch (error: any) {
+          let alert: AlertState = {
+            isOpen: true,
+            title: "LỖI",
+            message: error?.response?.data?.message,
+            type: AlertStatus.ERROR,
+          };
+          dispatch(openAlert(alert));
+        } finally {
+          dispatch(closeLoading());
+        }
+      },
     };
 
     dispatch(openConfirm(confirm));
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    const token = storage.getLocalAccessToken();
+    return await deleteProduct(id, token);
   };
 
   // get all pending products by seller token
@@ -80,7 +114,7 @@ const PendingItemsTable = () => {
 
   useEffect(() => {
     getAllPendingProducts();
-  }, []);
+  }, [refetchQueries]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -131,12 +165,10 @@ const PendingItemsTable = () => {
                     <td className="py-4 pl-3">{product.productCode}</td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-start gap-2">
-                        <Image
-                          alt="Laptop"
-                          width={60}
-                          height={60}
-                          className="rounded-lg"
-                          src={`${headerUrl}/products/${product.images[0]}`} // show product image
+                        <img
+                          src={`${headerUrl}/products/${product.images[0]}`}
+                          alt="product-image"
+                          className="h-15 w-15 rounded-lg object-cover"
                         />
                         <div className="flex flex-col justify-start">
                           <div className="w-[160px] overflow-ellipsis break-words md:w-[200px] ">
@@ -155,13 +187,26 @@ const PendingItemsTable = () => {
                       </div>
                     </td>
                     <td className="px-1 py-4">{product.inventoryNumber}</td>
-                    <td className="px-1 py-4">{product.price}</td>
+                    <td className="px-1 py-4">
+                      {product?.price ? (
+                        formatCurrency(product?.price)
+                      ) : (
+                        <div className="flex flex-row items-center justify-center">
+                          -
+                        </div>
+                      )}
+                    </td>
                     <td className="px-1 py-4">
                       {formatDate(product.createdAt)}
                     </td>
                     <td className="px-1 py-4">
-                      {product?.expirationAt ? (
-                        formatDate(product?.expirationAt)
+                      {product?.createdAt ? (
+                        formatDate(
+                          new Date(
+                            new Date(product.createdAt).getTime() +
+                              7 * 24 * 60 * 60 * 1000,
+                          ),
+                        )
                       ) : (
                         <div className="flex flex-row items-center justify-center">
                           -
@@ -181,7 +226,7 @@ const PendingItemsTable = () => {
                         <Tooltip title="Xóa">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleConfirmDeleteItem()}
+                            onClick={() => handleConfirmDeleteItem(product?.id)}
                           >
                             <DeleteIcon />
                           </div>
