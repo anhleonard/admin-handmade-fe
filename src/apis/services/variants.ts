@@ -18,3 +18,19 @@ export const deleteVariant = async (id: number) => {
     .delete(`${headerUrl}/variants/delete/${id}`)
     .then((res) => res.data);
 };
+
+export const updateVariant = async (
+  id: number,
+  variables: any,
+  token: string,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/variants/update/${id}`, variables, config)
+    .then((res) => res.data);
+};

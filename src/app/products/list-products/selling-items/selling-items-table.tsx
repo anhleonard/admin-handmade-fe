@@ -46,7 +46,10 @@ const SellingItemsTable = () => {
       isOpen: true,
       title: "Chi tiết sản phẩm",
       content: (
-        <DetailProductModal type="SELLING_ITEMS" productId={productId} />
+        <DetailProductModal
+          type={ProductStatus.SELLING}
+          productId={productId}
+        />
       ),
       screen: SCREEN.BASE,
     };

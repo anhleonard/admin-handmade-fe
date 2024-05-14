@@ -25,6 +25,20 @@ export const createProduct = async (variables: any, token: string) => {
     .then((res) => res.data);
 };
 
+export const getSellerProducts = async (token: string, query: any) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const queryString = new URLSearchParams(query).toString();
+
+  return await axios
+    .post(`${headerUrl}/products/seller-products?${queryString}`, null, config)
+    .then((res) => res.data);
+};
+
 export const getPendingProducts = async (token: string) => {
   const config = {
     headers: {
@@ -49,7 +63,7 @@ export const getSellingProducts = async (token: string) => {
     .then((res) => res.data);
 };
 
-export const  getViolateProducts = async (token: string) => {
+export const getViolateProducts = async (token: string) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -58,6 +72,18 @@ export const  getViolateProducts = async (token: string) => {
 
   return await axios
     .post(`${headerUrl}/products/violate-products`, null, config)
+    .then((res) => res.data);
+};
+
+export const getOffProducts = async (token: string) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .post(`${headerUrl}/products/off-products`, null, config)
     .then((res) => res.data);
 };
 

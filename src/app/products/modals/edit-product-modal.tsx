@@ -1,4 +1,4 @@
-import { singleProduct } from "@/apis/services/product";
+import { singleProduct, updateProductBySeller } from "@/apis/services/product";
 import ClassifiedTable from "@/components/products/classified-table";
 import { AlertStatus, ProductStatus } from "@/enum/constants";
 import { AlertState, Product, Variant } from "@/enum/defined-type";
@@ -8,8 +8,8 @@ import SwitchButton from "@/libs/switch-button";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import { ReactNode, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import { Form, Formik, getIn } from "formik";
 import FormatEndCurrencyIcon from "@/libs/format-end-currency-icon";
@@ -20,8 +20,12 @@ import { COLORS } from "@/enum/colors";
 import UpdateClassifications from "@/components/products/update-classifications";
 import { Chip } from "@mui/material";
 import { formatVariant } from "@/enum/functions";
-import { openModal } from "@/redux/slices/modalSlice";
+import { closeModal, openModal } from "@/redux/slices/modalSlice";
 import { SCREEN } from "@/enum/setting";
+import storage from "@/apis/storage";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import { RootState } from "@/redux/store";
+import { openSecondModal } from "@/redux/slices/secondModalSlice";
 
 const validationSchema = yup.object({
   productName: yup.string().required("Vui lòng không để trống trường này."),
@@ -56,8 +60,10 @@ type Props = {
 };
 
 const EditProductModal = ({ productId }: Props) => {
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
   const dispatch = useDispatch();
   const [isChecked, setIsChecked] = useState<boolean>(true);
+  const [modalContent, setModalContent] = useState<any>(null);
 
   const [product, setProduct] = useState<Product>();
 
@@ -89,9 +95,53 @@ const EditProductModal = ({ productId }: Props) => {
 
   useEffect(() => {
     getSingleProduct();
-  }, []);
+  }, [refetchQueries]);
 
-  const onSubmit = async () => {};
+  console.log(product);
+
+  const onSubmit = async (values: any) => {
+    try {
+      dispatch(openLoading());
+      let variables = {};
+      if (!product?.isMultipleClasses) {
+        variables = {
+          status: isChecked ? ProductStatus.SELLING : ProductStatus.OFF,
+          productName: values?.productName,
+          inventoryNumber: values?.inventoryNumber,
+          price: parseInt(values?.price),
+        };
+      } else {
+        variables = {
+          status: isChecked ? ProductStatus.SELLING : ProductStatus.OFF,
+          productName: values?.productName,
+        };
+      }
+
+      const token = storage.getLocalAccessToken();
+      const res = await updateProductBySeller(productId, variables, token);
+      if (res) {
+        dispatch(closeModal());
+        let alert: AlertState = {
+          isOpen: true,
+          title: "THÀNH CÔNG",
+          message: "Cập nhật thông tin sản phẩm thành công",
+          type: AlertStatus.SUCCESS,
+        };
+        dispatch(openAlert(alert));
+        dispatch(refetchComponent());
+      }
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
 
   const handleOpenEditVariantModal = (content: ReactNode) => {
     const modal = {
@@ -100,7 +150,7 @@ const EditProductModal = ({ productId }: Props) => {
       content: content,
       screen: SCREEN.BASE,
     };
-    dispatch(openModal(modal));
+    dispatch(openSecondModal(modal));
   };
 
   return (
@@ -149,22 +199,20 @@ const EditProductModal = ({ productId }: Props) => {
                     <div key={index}>
                       <Chip
                         label={formatVariant(variant?.variantItems)}
-                        onClick={() =>
-                          handleOpenEditVariantModal(
-                            <UpdateClassifications variant={variant} />,
-                          )
-                        }
+                        onClick={() => {
+                          const content = (
+                            <UpdateClassifications
+                              variant={variant}
+                              onSubmitCallback={(res: any) => {
+                                dispatch(refetchComponent());
+                              }}
+                            />
+                          );
+                          handleOpenEditVariantModal(content);
+                        }}
                         onDelete={() => {}}
                         color="warning"
                       ></Chip>
-                      {/* <div className="flex flex-row justify-between">
-                        <MyLabel children={`Phân loại ${1}`} type="warning" />
-                        <MyTextAction
-                          label="Xóa"
-                          color="text-support-c500"
-                        ></MyTextAction>
-                      </div>
-                      <UpdateClassifications variant={variant} index={index} /> */}
                     </div>
                   );
                 })}

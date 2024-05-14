@@ -4,10 +4,12 @@ import confirmSlice from "./slices/confirmSlice";
 import loadingSlice from "./slices/loadingSlice";
 import alertSlice from "./slices/alertSlice";
 import refetchSlice from "./slices/refetchSlice";
+import secondModalSlice from "./slices/secondModalSlice";
 
 export const store = configureStore({
   reducer: {
     modal: modalSlice,
+    secondModal: secondModalSlice,
     confirm: confirmSlice,
     loading: loadingSlice,
     alert: alertSlice,

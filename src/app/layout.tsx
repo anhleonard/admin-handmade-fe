@@ -13,6 +13,7 @@ import Modal from "@/modals/main-modal";
 import ConfirmModal from "@/modals/confirm-modal";
 import Loading from "@/modals/loading";
 import AlertModal from "@/modals/alert";
+import SecondModal from "@/modals/second-modal";
 
 export const quicksand = localFont({
   src: [
@@ -94,6 +95,7 @@ export default function RootLayout({
               {loading ? <Loader /> : children}
             </div>
             <Modal />
+            <SecondModal />
             <ConfirmModal />
             <Loading></Loading>
             <AlertModal></AlertModal>

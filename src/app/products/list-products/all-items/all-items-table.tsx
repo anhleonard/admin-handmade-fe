@@ -1,5 +1,11 @@
 "use client";
-import { mainCategories } from "@/enum/constants";
+import {
+  AlertStatus,
+  Page,
+  ProductStatus,
+  mainCategories,
+  rowsPerPage,
+} from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -11,7 +17,7 @@ import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import {
   Box,
@@ -26,8 +32,19 @@ import {
 import EditProductModal from "../../modals/edit-product-modal";
 import DetailProductModal from "../../modals/detail-product-modal";
 import { openConfirm } from "@/redux/slices/confirmSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GiftCollapse from "@/components/gifts/gift-collapse";
+import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
+import storage from "@/apis/storage";
+import { getSellerProducts } from "@/apis/services/product";
+import { AlertState, Product } from "@/enum/defined-type";
+import { openAlert } from "@/redux/slices/alertSlice";
+import { RootState } from "@/redux/store";
+import { headerUrl } from "@/apis/services/authentication";
+import { formatCurrency } from "@/enum/functions";
+import MyLabel from "@/libs/label";
+import MyStatus from "@/libs/status";
+import { MyPagination } from "@/libs/pagination";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -36,51 +53,62 @@ const labelOptions = [
 
 const AllItemsTable = () => {
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
+  const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
-  const handleOpenDetailModal = () => {
+  const handleOpenDetailModal = (productId: number, status: ProductStatus) => {
     const modal = {
       isOpen: true,
       title: "Chi tiết sản phẩm",
-      content: <DetailProductModal />,
+      content: <DetailProductModal productId={productId} type={status} />,
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
   };
 
-  const handleOpenEditModal = () => {
-    const modal = {
-      isOpen: true,
-      title: "Chỉnh sửa sản phẩm",
-      content: <EditProductModal />,
-      screen: SCREEN.BASE,
-    };
-    dispatch(openModal(modal));
+  // get all seller products by seller token
+  const getAllSellerProducts = async () => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const res = await getSellerProducts(token, {
+        limit: rowsPage,
+        page: page,
+      });
+      setCount(res?.total ?? 0);
+      setSellerProducts(res?.data);
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
   };
 
-  const handleConfirmDeleteItem = () => {
-    const confirm: any = {
-      isOpen: true,
-      title: "XÓA SẢN PHẨM",
-      message: "Bạn có chắc chắn xóa sản phẩm này không?",
-      feature: "CONFIRM_CONTACT_US",
-      onConfirm: () => {},
-    };
+  useEffect(() => {
+    getAllSellerProducts();
+  }, [refetchQueries, page, rowsPage]);
 
-    dispatch(openConfirm(confirm));
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
   };
 
-  const handleConfirmOffItem = () => {
-    const confirm: any = {
-      isOpen: true,
-      title: "TẮT SẢN PHẨM",
-      message: "Bạn có chắc chắn tắt sản phẩm này không?",
-      feature: "CONFIRM_CONTACT_US",
-      onConfirm: () => {},
-    };
-
-    dispatch(openConfirm(confirm));
-  };
+  console.log({
+    page,
+    rowsPage,
+  });
 
   return (
     <div className="flex flex-col gap-8">
@@ -113,88 +141,86 @@ const AllItemsTable = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã sản phẩm</th>
                 <th className="px-1 py-4">Sản phẩm</th>
+                <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Tồn kho</th>
-                <th className="px-1 py-4">Quà tặng</th>
                 <th className="px-1 py-4">Giá bán</th>
-                <th className="px-1 py-4">Phí Handmade thu</th>
-                <th className="px-1 py-4">Lợi nhuận</th>
+                <th className="px-1 py-4">Đã bán</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {/* row 1 */}
-              <tr className="hover:bg-primary-c100 hover:text-grey-c700">
-                <td className="py-4 pl-3">38BEE27</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-start gap-2">
-                    <Image
-                      alt="Laptop"
-                      width={60}
-                      height={60}
-                      className="rounded-lg"
-                      src={
-                        "https://salt.tikicdn.com/cache/350x350/ts/product/34/ea/17/24907f37b8c0896ef083d630284663df.png.webp"
-                      }
-                    />
-                    <div className="flex flex-col justify-start">
-                      <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
-                        Thiết bị tivi giải trí xách tay LG StanbyME Go 27 inch
+              {sellerProducts?.map((product: Product, index: number) => {
+                return (
+                  <tr
+                    className="hover:bg-primary-c100 hover:text-grey-c700"
+                    key={index}
+                  >
+                    <td className="py-4 pl-3">{product?.productCode}</td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-start gap-2">
+                        <img
+                          src={`${headerUrl}/products/${product.images[0]}`}
+                          alt="product-image"
+                          className="h-15 w-15 rounded-lg object-cover"
+                        />
+                        <div className="flex flex-col justify-start">
+                          <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
+                            {product.productName}
+                          </div>
+                          <div>
+                            <span className="text-[10px]">Đã bán:</span>{" "}
+                            <span className="text-[10px] font-bold text-primary-c900">
+                              {product?.soldNumber}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px]">Đã bán:</span>{" "}
-                        <span className="text-[10px] font-bold text-primary-c900">
-                          1052
-                        </span>
+                    </td>
+                    <td className="px-1 py-4">
+                      <MyStatus status={product?.status}></MyStatus>
+                    </td>
+                    <td className="px-1 py-4">{product?.inventoryNumber}</td>
+                    <td className="px-1 py-4">
+                      {product?.price ? (
+                        formatCurrency(product?.price)
+                      ) : (
+                        <div className="flex flex-row items-center justify-center">
+                          -
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-1 py-4">{product?.soldNumber}</td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <Tooltip title="Xem chi tiết">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() =>
+                              handleOpenDetailModal(
+                                product?.id,
+                                product?.status,
+                              )
+                            }
+                          >
+                            <DetailIcon />
+                          </div>
+                        </Tooltip>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-1 py-4">6433</td>
-                <td className="px-1 py-4">1</td>
-                <td className="px-1 py-4">260.000</td>
-                <td className="px-1 py-4">20.000</td>
-                <td className="px-1 py-4">240.000</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-center justify-center gap-2">
-                    <Tooltip title="Xem chi tiết">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleOpenDetailModal()}
-                      >
-                        <DetailIcon />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Chỉnh sửa">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleOpenEditModal()}
-                      >
-                        <EditIcon />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Xóa">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleConfirmDeleteItem()}
-                      >
-                        <DeleteIcon />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Tắt sản phẩm">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleConfirmOffItem()}
-                      >
-                        <OffIcon />
-                      </div>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };

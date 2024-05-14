@@ -63,48 +63,42 @@ const SelectedVariants = ({
     <div>
       <FormControl component="div" className="w-full">
         <FormGroup>
-          <Grid
-            container
-            rowSpacing={10}
-            columnSpacing={{ xs: 1, sm: 2, md: 4 }}
-          >
+          <div className="grid grid-cols-2 gap-x-8 gap-y-2">
             {data?.map((cate: ItemVariantCategory, index: number) => {
               const variantName = cate?.variantName;
               return (
-                <Grid item xs={6} key={index}>
-                  <div key={cate.id} className="w-full">
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={selectedVariants.includes(variantName)}
-                          onChange={handleVariantChange}
-                          name={variantName}
-                        />
-                      }
-                      label={variantName}
-                    />
-                    {selectedVariants.includes(variantName) && (
-                      <MySelect
-                        id=""
-                        name=""
-                        placeholder="-- Lựa chọn --"
-                        options={cate?.variantItems}
-                        wrapClassName="!w-full"
-                        onSelectItem={(item: Item) => {
-                          handleItemChange(item, cate?.variantName);
-                        }}
-                        selected={
-                          selectedVariants.includes(variantName)
-                            ? selectedItems[variantName]?.value
-                            : null
-                        }
+                <div key={cate.id} className="w-full">
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedVariants.includes(variantName)}
+                        onChange={handleVariantChange}
+                        name={variantName}
                       />
-                    )}
-                  </div>
-                </Grid>
+                    }
+                    label={variantName}
+                  />
+                  {selectedVariants.includes(variantName) && (
+                    <MySelect
+                      id=""
+                      name=""
+                      placeholder="-- Lựa chọn --"
+                      options={cate?.variantItems}
+                      wrapClassName="!w-full"
+                      onSelectItem={(item: Item) => {
+                        handleItemChange(item, cate?.variantName);
+                      }}
+                      selected={
+                        selectedVariants.includes(variantName)
+                          ? selectedItems[variantName]?.value
+                          : null
+                      }
+                    />
+                  )}
+                </div>
               );
             })}
-          </Grid>
+          </div>
         </FormGroup>
       </FormControl>
     </div>

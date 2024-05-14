@@ -1,7 +1,7 @@
 import { headerUrl } from "@/apis/services/authentication";
 import { singleProduct } from "@/apis/services/product";
 import GiftCollapse from "@/components/gifts/gift-collapse";
-import { AlertStatus } from "@/enum/constants";
+import { AlertStatus, ProductStatus } from "@/enum/constants";
 import { AlertState, Category, Product } from "@/enum/defined-type";
 import { formatCurrency, formatDate } from "@/enum/functions";
 import Button from "@/libs/button";
@@ -25,10 +25,10 @@ const all_options = [
 
 type Props = {
   productId: number;
-  type?: "ALL_ITEMS" | "PENDING_ITEMS" | "VIOLATE_ITEMS" | "SELLING_ITEMS";
+  type?: ProductStatus;
 };
 
-const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
+const DetailProductModal = ({ productId, type }: Props) => {
   const dispatch = useDispatch();
   const [product, setProduct] = useState<Product>();
 
@@ -77,7 +77,7 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
                 />
               </div>
             </div>
-            {type === "VIOLATE_ITEMS" && (
+            {type === ProductStatus.VIOLATE && (
               <div className="text-sm5">
                 Ngày phát hiện vi phạm:{" "}
                 <span className="font-bold text-primary-c900">
@@ -85,7 +85,7 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
                 </span>
               </div>
             )}
-            {type !== "VIOLATE_ITEMS" && (
+            {type !== ProductStatus.VIOLATE && (
               <div className="text-sm5">
                 Tồn kho:{" "}
                 <span className="font-bold text-primary-c900">
@@ -181,16 +181,16 @@ const DetailProductModal = ({ productId, type = "ALL_ITEMS" }: Props) => {
           {product?.isMultipleClasses && product?.variants && (
             <MyDisabledMultipleChoices
               variants={product?.variants}
-              isError={type === "VIOLATE_ITEMS"}
+              isError={type === ProductStatus.VIOLATE}
               helperText="Vui lòng điều chỉnh giá của bạn"
             />
           )}
-          {type === "VIOLATE_ITEMS" && (
+          {type === ProductStatus.VIOLATE && (
             <MyDefaultText title="Chi tiết lỗi" type="error">
               {product?.rejectReason}
             </MyDefaultText>
           )}
-          {type === "VIOLATE_ITEMS" && (
+          {type === ProductStatus.VIOLATE && (
             <MyDefaultText title="Gợi ý chỉnh sửa" type="success">
               {product?.editHint}
             </MyDefaultText>

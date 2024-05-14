@@ -22,12 +22,13 @@ import * as yup from "yup";
 import { Form, Formik, getIn } from "formik";
 import axios from "axios";
 import { uploadSingleImage } from "@/apis/services/product";
-import { createVariants } from "@/apis/services/variants";
+import { createVariants, updateVariant } from "@/apis/services/variants";
 import { closeModal } from "@/redux/slices/modalSlice";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import { Item } from "@/libs/select";
 import { RootState } from "@/redux/store";
 import { headerUrl } from "@/apis/services/authentication";
+import { closeSecondModal } from "@/redux/slices/secondModalSlice";
 
 const validationSchema = yup.object({
   unitPrice: yup
@@ -67,7 +68,7 @@ const UpdateClassifications = ({ onSubmitCallback, variant }: Props) => {
     transformedData ?? {},
   );
   const [previewImage, setPreviewImage] = useState(
-    `${headerUrl}/products/${variant?.image}`,
+    `${headerUrl}/products/${variant?.image}` ?? "",
   );
   const [fileImage, setFileImage] = useState<File | null>();
 
@@ -132,37 +133,57 @@ const UpdateClassifications = ({ onSubmitCallback, variant }: Props) => {
   };
 
   const onSubmit = async (values: any) => {
-    const formData = new FormData();
+    let imageFile: string = "";
 
-    if (fileImage) {
-      formData.append("image", fileImage);
+    if (previewImage === `${headerUrl}/products/${variant?.image}`) {
+      imageFile = variant?.image;
     } else {
-      let alert: AlertState = {
-        isOpen: true,
-        title: "LỖI",
-        message: "Không thể upload ảnh!",
-        type: AlertStatus.ERROR,
-      };
-      dispatch(openAlert(alert));
-      return;
+      const formData = new FormData();
+      if (fileImage) {
+        formData.append("image", fileImage);
+        imageFile = await uploadSingleImage(formData);
+      } else {
+        let alert: AlertState = {
+          isOpen: true,
+          title: "LỖI",
+          message: "Không thể upload ảnh!",
+          type: AlertStatus.ERROR,
+        };
+        dispatch(openAlert(alert));
+        return;
+      }
     }
 
     try {
       dispatch(openLoading());
       const ids = extractVariantItemIds(selectedItems);
-      const file = await uploadSingleImage(formData);
 
       const variables = {
         unitPrice: parseInt(values?.unitPrice),
         inventoryNumber: parseInt(values?.inventoryNumber),
-        image: file,
+        image: imageFile,
         variantItemIds: ids,
       };
 
       const token = storage.getLocalAccessToken();
-      const res = await createVariants(variables, token);
-      onSubmitCallback(res);
-      dispatch(closeModal());
+      if (variant) {
+        const res = await updateVariant(variant?.id, variables, token);
+        if (res) {
+          dispatch(closeSecondModal());
+          onSubmitCallback(res);
+          let alert: AlertState = {
+            isOpen: true,
+            title: "ĐÃ CẬP NHẬT",
+            message: "Đã cập nhật thông tin phân loại",
+            type: AlertStatus.SUCCESS,
+          };
+          dispatch(openAlert(alert));
+        }
+      } else {
+        const res = await createVariants(variables, token);
+        onSubmitCallback(res);
+        dispatch(closeModal());
+      }
     } catch (error: any) {
       let alert: AlertState = {
         isOpen: true,
@@ -184,7 +205,7 @@ const UpdateClassifications = ({ onSubmitCallback, variant }: Props) => {
     >
       {(formik) => (
         <Form>
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 pb-6 pt-2">
             <SelectedVariants
               data={variantCategories}
               selectedItems={selectedItems}

@@ -1,5 +1,5 @@
 "use client";
-import { AlertStatus, mainCategories } from "@/enum/constants";
+import { AlertStatus, ProductStatus, mainCategories } from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -42,7 +42,10 @@ const PendingItemsTable = () => {
       isOpen: true,
       title: "Chi tiết sản phẩm",
       content: (
-        <DetailProductModal type="PENDING_ITEMS" productId={productId} />
+        <DetailProductModal
+          type={ProductStatus.PENDING}
+          productId={productId}
+        />
       ),
       screen: SCREEN.BASE,
     };

@@ -27,6 +27,11 @@ import ProcessingAuctionsTab from "@/app/auctions/my-auctions/processing-auction
 import FinishedAuctionsTab from "@/app/auctions/my-auctions/finished-auctions/finished-auctions-table";
 import CanceledAuctionsTab from "@/app/auctions/my-auctions/canceled-auctions/canceled-auctions-table";
 
+export const Page = 1;
+export const Limit = 5;
+export const rowsPerPage = 5;
+export const optionRowsPerPage = [5, 25, 50, 100, 200];
+
 export enum ColorState {
   primary = "bg-primary-c800 text-white text-xs font-medium",
   error = "bg-support-c10 text-support-c500 text-xs font-medium",
@@ -34,6 +39,7 @@ export enum ColorState {
   warning = "bg-primary-c100 text-primary-c900 text-xs font-medium",
   progress = "bg-blue-c50 text-blue-c900 text-xs font-medium",
   delivery = "bg-purple-c10 text-purple-c900 text-xs font-medium",
+  grey = "bg-grey-c50 text-grey-c900 text-xs font-medium",
 }
 
 export const itemStatuses = [

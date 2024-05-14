@@ -1,5 +1,5 @@
 "use client";
-import { AlertStatus, mainCategories } from "@/enum/constants";
+import { AlertStatus, ProductStatus, mainCategories } from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -46,7 +46,10 @@ const ViolateItemsTable = () => {
       isOpen: true,
       title: "Chi tiết sản phẩm & lỗi",
       content: (
-        <DetailProductModal type="VIOLATE_ITEMS" productId={productId} />
+        <DetailProductModal
+          type={ProductStatus.VIOLATE}
+          productId={productId}
+        />
       ),
       screen: SCREEN.BASE,
     };
