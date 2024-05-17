@@ -1,12 +1,17 @@
 import { COLORS } from "@/enum/colors";
-import MyDisplayImage from "@/libs/display-image";
 import { Collapse, List, ListItem, ListItemButton } from "@mui/material";
 import { useState } from "react";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import ExpandLessRoundedIcon from "@mui/icons-material/ExpandLessRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import { Order, Shipping } from "@/enum/defined-type";
+import { formatShippingAddress } from "@/enum/functions";
 
-const ClientAddress = () => {
+type Props = {
+  shipping: Shipping;
+};
+
+const ClientAddress = ({ shipping }: Props) => {
   const [open, setOpen] = useState(true);
   return (
     <div className="rounded-2xl border-[2px] border-primary-c300">
@@ -31,13 +36,15 @@ const ClientAddress = () => {
       </ListItem>
       <Collapse in={open}>
         <List disablePadding className="flex flex-col gap-4 px-4 py-4">
-          <ListItem className="block w-full" disablePadding>
+          <ListItem
+            className="flex w-full flex-col items-start gap-2"
+            disablePadding
+          >
             <div className="text-base font-bold uppercase text-grey-c900">
-              TRAN THI ANH - 0394356433
+              {shipping?.name} - {shipping?.phone}
             </div>
             <div className="text-sm font-normal text-grey-c900">
-              No. 9, Lane 105, Doan Ke Thien Street, Phường Dịch Vọng Hậu, Quận
-              Cầu Giấy, Thành phố Hà Nội , Việt Nam
+              {formatShippingAddress(shipping)}
             </div>
           </ListItem>
         </List>

@@ -1,3 +1,5 @@
+import { EnumOrderStatus } from "@/enum/constants";
+
 export type LoginFormValues = {
   email: string;
   password: string;
@@ -9,4 +11,8 @@ export type SignUpFormValues = {
   phoneNumber: string;
   password: string;
   confirmPassword: string;
+};
+
+export type OrderStatusValues = {
+  status: EnumOrderStatus;
 };

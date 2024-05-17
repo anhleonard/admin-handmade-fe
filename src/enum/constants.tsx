@@ -329,3 +329,11 @@ export enum ProductStatus {
   SELLING = "SELLING",
   OFF = "OFF",
 }
+
+export enum EnumOrderStatus {
+  WAITING_PAYMENT = "WAITING_PAYMENT",
+  PROCESSING = "PROCESSING",
+  SHIPPED = "SHIPPED",
+  DELIVERED = "DELIVERED",
+  CENCELLED = "CENCELLED",
+}

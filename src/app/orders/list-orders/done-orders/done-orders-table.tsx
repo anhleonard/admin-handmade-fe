@@ -33,7 +33,7 @@ const DoneOrdersTable = () => {
         </div>
         <div className="flex flex-row items-center justify-center gap-3">
           <div>Ngày đặt hàng</div>
-          <MyDatePicker />
+          <MyDatePicker id="" className="flex-1" />
         </div>
       </div>
       {/* table */}

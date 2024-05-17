@@ -18,6 +18,16 @@ import { COLORS } from "@/enum/colors";
 import DetailOrderModal from "../../modals/detail-order-modal";
 import { useDispatch } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
+import { useEffect, useState } from "react";
+import { AlertState, Order } from "@/enum/defined-type";
+import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
+import storage from "@/apis/storage";
+import { ordersByStatus } from "@/apis/services/orders";
+import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
+import { openAlert } from "@/redux/slices/alertSlice";
+import { OrderStatusValues } from "@/apis/types";
+import { formatCommonTime, formatCurrency } from "@/enum/functions";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -26,15 +36,73 @@ const labelOptions = [
 
 const WaitingOrdersTable = () => {
   const dispatch = useDispatch();
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const handleOpenDetailModal = () => {
+  const getSellerOrdersByStatus = async () => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const variables: OrderStatusValues = {
+        status: EnumOrderStatus.WAITING_PAYMENT,
+      };
+      const res = await ordersByStatus(token, variables);
+      if (res) {
+        setOrders(res);
+      }
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
+  useEffect(() => {
+    getSellerOrdersByStatus();
+  }, []);
+
+  const handleOpenDetailModal = (orderId: number) => {
     const modal = {
       isOpen: true,
       title: "Chi tiết đơn hàng",
-      content: <DetailOrderModal type="WAITING_ORDERS" />,
+      content: (
+        <DetailOrderModal
+          type={EnumOrderStatus.WAITING_PAYMENT}
+          orderId={orderId}
+        />
+      ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
+  };
+
+  const handleConfirmOrder = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN ĐƠN HÀNG",
+      message: "Bạn có chắc chắn xác nhận đơn hàng này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleConfirmCancelOrder = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "HỦY ĐƠN HÀNG",
+      message: "Bạn có chắc chắn hủy đơn hàng này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => {},
+    };
+
+    dispatch(openConfirm(confirm));
   };
 
   return (
@@ -52,7 +120,7 @@ const WaitingOrdersTable = () => {
         </div>
         <div className="flex flex-row items-center justify-center gap-3">
           <div>Ngày đặt hàng</div>
-          <MyDatePicker />
+          <MyDatePicker id="" />
         </div>
       </div>
       {/* table */}
@@ -74,43 +142,65 @@ const WaitingOrdersTable = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="hover:bg-primary-c100 hover:text-grey-c700">
-                <td className="py-4 pl-3">38BEE27</td>
-                <td className="px-1 py-4">Anh Leonard</td>
-                <td className="px-1 py-4">
-                  <MyLabel type="warning">Chờ xác nhận</MyLabel>
-                </td>
-                <td className="px-1 py-4">2</td>
-                <td className="px-1 py-4">260.000</td>
-                <td className="px-1 py-4">22:39 25/3/2024</td>
-                <td className="px-1 py-4">22:42 01/04/2024</td>
-                <td className="px-1 py-4">
-                  <div className="flex flex-row items-center justify-center gap-2">
-                    <Tooltip title="Xem chi tiết đơn hàng">
-                      <div
-                        className="hover:cursor-pointer"
-                        onClick={() => handleOpenDetailModal()}
-                      >
-                        <DetailIcon />
+              {orders?.map((order, index) => {
+                if (!order?.orderProducts?.length) return null;
+                return (
+                  <tr
+                    key={index}
+                    className="hover:bg-primary-c100 hover:text-grey-c700"
+                  >
+                    <td className="py-4 pl-3">{order?.code}</td>
+                    <td className="px-1 py-4">{order?.client?.name}</td>
+                    <td className="px-1 py-4">
+                      <MyLabel type="warning">Chờ xác nhận</MyLabel>
+                    </td>
+                    <td className="px-1 py-4">
+                      {order?.orderProducts?.length}
+                    </td>
+                    <td className="px-1 py-4">
+                      {formatCurrency(order?.totalPayment)}
+                    </td>
+                    <td className="px-1 py-4">
+                      {formatCommonTime(order?.orderAt)}
+                    </td>
+                    <td className="px-1 py-4">
+                      {formatCommonTime(order?.orderAt, 7)}
+                    </td>
+                    <td className="px-1 py-4">
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <Tooltip title="Xem chi tiết đơn hàng">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleOpenDetailModal(order?.id)}
+                          >
+                            <DetailIcon />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Xác nhận">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleConfirmOrder()}
+                          >
+                            <CheckCircleOutlineIcon
+                              sx={{ fontSize: 20, color: COLORS.blue.c900 }}
+                            />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Từ chối">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleConfirmCancelOrder()}
+                          >
+                            <DoNotDisturbOnOutlinedIcon
+                              sx={{ fontSize: 20, color: COLORS.support.c500 }}
+                            />
+                          </div>
+                        </Tooltip>
                       </div>
-                    </Tooltip>
-                    <Tooltip title="Xác nhận">
-                      <div className="hover:cursor-pointer">
-                        <CheckCircleOutlineIcon
-                          sx={{ fontSize: 20, color: COLORS.blue.c900 }}
-                        />
-                      </div>
-                    </Tooltip>
-                    <Tooltip title="Từ chối">
-                      <div className="hover:cursor-pointer">
-                        <DoNotDisturbOnOutlinedIcon
-                          sx={{ fontSize: 20, color: COLORS.support.c500 }}
-                        />
-                      </div>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

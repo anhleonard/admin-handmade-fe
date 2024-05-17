@@ -67,7 +67,7 @@ export type AlertState = {
   isOpen: boolean;
   title: string;
   message: string;
-  type: AlertStatus;
+  type: AlertStatus | string;
 };
 
 // VD: {Kích cỡ: {value: 29, label: '4XL'}}
@@ -136,4 +136,74 @@ export type Category = {
   id: number;
   title: string;
   description: string;
+};
+
+export type Store = {
+  id: number;
+  name: string;
+  avatar: string;
+  isBanned: boolean;
+  description: string;
+  mainBusiness: string;
+  productAmount: number;
+  avgStoreRating: number;
+  followerAmount: number;
+};
+
+export type OrderProduct = {
+  id: number;
+  code: string;
+  productUnitPrice: string;
+  productQuantity: number;
+  isSelected: boolean;
+  numberSelectedItem: number; // số lượng product thay đổi
+  amountMoney: number; // số tiền thay đổi sau khi change numberSelectedItem
+  variant: Variant;
+  product: Product;
+};
+
+export type Shipping = {
+  id: number;
+  phone: string;
+  name: string;
+  province: string;
+  district: string;
+  ward: string;
+  detailAddress: string;
+  isDefaultAddress: boolean;
+  receivePlace: string;
+  companyName?: string;
+};
+
+export type Order = {
+  id: number;
+  code: string;
+  totalAmountItem: number;
+  provisionalAmount: number;
+  discountAmount: number;
+  totalPayment: number;
+  orderAt: Date;
+  updatedAt: Date;
+  processingAt: Date;
+  isCanceled: boolean;
+  canceledReason: string;
+  isPaid: boolean;
+  deliveryFee: number;
+  status: string;
+  shippedAt: Date;
+  deliveredAt: Date;
+  shippingAddress: Shipping;
+  orderProducts: OrderProduct[];
+  store: Store;
+  client: User;
+};
+
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  avatar: string;
+  phoneNumber: string;
+  dateOfBirth: Date;
 };

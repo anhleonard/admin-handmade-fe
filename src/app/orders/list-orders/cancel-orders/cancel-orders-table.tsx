@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import DetailOrderModal from "../../modals/detail-order-modal";
 import { openModal } from "@/redux/slices/modalSlice";
 import ReasonCancelOrder from "@/components/orders/reason-cancel-order";
+import { EnumOrderStatus } from "@/enum/constants";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -30,7 +31,7 @@ const CancelOrdersTable = () => {
     const modal = {
       isOpen: true,
       title: "Chi tiết đơn hàng",
-      content: <DetailOrderModal type="CANCEL_ORDERS" />,
+      content: <DetailOrderModal type={EnumOrderStatus.CENCELLED} />,
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -61,7 +62,7 @@ const CancelOrdersTable = () => {
         </div>
         <div className="flex flex-row items-center justify-center gap-3">
           <div>Ngày hủy</div>
-          <MyDatePicker />
+          <MyDatePicker id="" className="flex-1" />
         </div>
       </div>
       {/* table */}

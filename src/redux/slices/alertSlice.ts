@@ -7,7 +7,7 @@ const initialState: AlertState = {
   isOpen: false,
   title: "Error",
   message: "This is an error",
-  type: AlertStatus?.ERROR,
+  type: "error",
 };
 
 export const alertSlice = createSlice({
