@@ -1,5 +1,6 @@
 import moment from "moment";
 import { Shipping, Variant, VariantItem } from "./defined-type";
+import { Role } from "./constants";
 
 export function formatCurrency(price: number) {
   const formatter = new Intl.NumberFormat("vi", {
@@ -53,4 +54,15 @@ export function formatShippingAddress(data: Shipping) {
   if (data?.companyName)
     return `${data?.companyName}, ${data?.detailAddress}, ${data?.ward}, ${data?.district}, ${data?.province}, Việt Nam`;
   return `${data?.detailAddress}, ${data?.ward}, ${data?.district}, ${data?.province}, Việt Nam`;
+}
+
+export function renderWhoCanceled(role: Role) {
+  switch (role) {
+    case Role.USER:
+      return "Khách hàng";
+    case Role.SELLER:
+      return "Nhà bán";
+    case Role.ADMIN:
+      return "Handmade";
+  }
 }

@@ -16,18 +16,21 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import { COLORS } from "@/enum/colors";
 import DetailOrderModal from "../../modals/detail-order-modal";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { ordersByStatus } from "@/apis/services/orders";
+import { ordersByStatus, updateOrder } from "@/apis/services/orders";
 import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { OrderStatusValues } from "@/apis/types";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
-import { openConfirm } from "@/redux/slices/confirmSlice";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { RootState } from "@/redux/store";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import CancelOrderModal from "@/components/orders/cancel-order-modal";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -37,6 +40,7 @@ const labelOptions = [
 const WaitingOrdersTable = () => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
   const getSellerOrdersByStatus = async () => {
     try {
@@ -47,7 +51,7 @@ const WaitingOrdersTable = () => {
       };
       const res = await ordersByStatus(token, variables);
       if (res) {
-        setOrders(res);
+        setOrders(res?.reverse());
       }
     } catch (error: any) {
       let alert: AlertState = {
@@ -64,7 +68,7 @@ const WaitingOrdersTable = () => {
 
   useEffect(() => {
     getSellerOrdersByStatus();
-  }, []);
+  }, [refetchQueries]);
 
   const handleOpenDetailModal = (orderId: number) => {
     const modal = {
@@ -81,28 +85,62 @@ const WaitingOrdersTable = () => {
     dispatch(openModal(modal));
   };
 
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = (orderId: number) => {
     const confirm: any = {
       isOpen: true,
       title: "XÁC NHẬN ĐƠN HÀNG",
       message: "Bạn có chắc chắn xác nhận đơn hàng này không?",
       feature: "CONFIRM_CONTACT_US",
-      onConfirm: () => {},
+      onConfirm: async () => {
+        try {
+          dispatch(openLoading());
+          const token = storage.getLocalAccessToken();
+          const variables = {
+            status: EnumOrderStatus.PROCESSING,
+          };
+          const res = await updateOrder(orderId, token, variables);
+          if (res) {
+            dispatch(closeConfirm());
+            let alert: AlertState = {
+              isOpen: true,
+              title: "DUYỆT THÀNH CÔNG",
+              message: "Đã duyệt đơn hàng thành công!",
+              type: AlertStatus.SUCCESS,
+            };
+            dispatch(openAlert(alert));
+            handleRefetch();
+          }
+        } catch (error: any) {
+          let alert: AlertState = {
+            isOpen: true,
+            title: "LỖI",
+            message: error?.response?.data?.message,
+            type: AlertStatus.ERROR,
+          };
+          dispatch(openAlert(alert));
+        } finally {
+          dispatch(closeLoading());
+        }
+      },
     };
 
     dispatch(openConfirm(confirm));
   };
 
-  const handleConfirmCancelOrder = () => {
-    const confirm: any = {
+  const handleOpenCancelModal = (orderId: number) => {
+    const modal = {
       isOpen: true,
-      title: "HỦY ĐƠN HÀNG",
-      message: "Bạn có chắc chắn hủy đơn hàng này không?",
-      feature: "CONFIRM_CONTACT_US",
-      onConfirm: () => {},
+      title: "Lí do hủy đơn hàng",
+      content: (
+        <CancelOrderModal orderId={orderId} handleRefetch={handleRefetch} />
+      ),
+      screen: SCREEN.BASE,
     };
+    dispatch(openModal(modal));
+  };
 
-    dispatch(openConfirm(confirm));
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
   };
 
   return (
@@ -179,7 +217,7 @@ const WaitingOrdersTable = () => {
                         <Tooltip title="Xác nhận">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleConfirmOrder()}
+                            onClick={() => handleConfirmOrder(order?.id)}
                           >
                             <CheckCircleOutlineIcon
                               sx={{ fontSize: 20, color: COLORS.blue.c900 }}
@@ -189,7 +227,7 @@ const WaitingOrdersTable = () => {
                         <Tooltip title="Từ chối">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleConfirmCancelOrder()}
+                            onClick={() => handleOpenCancelModal(order?.id)}
                           >
                             <DoNotDisturbOnOutlinedIcon
                               sx={{ fontSize: 20, color: COLORS.support.c500 }}

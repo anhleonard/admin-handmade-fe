@@ -2,9 +2,13 @@ import { singleOrder } from "@/apis/services/orders";
 import storage from "@/apis/storage";
 import ClientAddress from "@/components/clients/client-address";
 import OrderPackage from "@/components/orders/order-package";
-import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
+import { AlertStatus, EnumOrderStatus, Role } from "@/enum/constants";
 import { AlertState, Order, OrderProduct } from "@/enum/defined-type";
-import { formatCommonTime, formatCurrency } from "@/enum/functions";
+import {
+  formatCommonTime,
+  formatCurrency,
+  renderWhoCanceled,
+} from "@/enum/functions";
 import Button from "@/libs/button";
 import MyLabel from "@/libs/label";
 import { openAlert } from "@/redux/slices/alertSlice";
@@ -75,6 +79,50 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
 
   const renderInformation = (status: EnumOrderStatus) => {
     switch (status) {
+      case EnumOrderStatus.SHIPPED:
+        return (
+          <>
+            <div>
+              Ngày đặt hàng:{" "}
+              <span className="font-semibold">
+                {order?.orderAt && formatCommonTime(order?.orderAt)}
+              </span>
+            </div>
+            <div>
+              Ngày giao hàng:{" "}
+              <span className="font-semibold">
+                {order?.processingAt && formatCommonTime(order?.shippedAt)}
+              </span>
+            </div>
+            <div className="flex flex-row items-center gap-1">
+              Trạng thái:{" "}
+              {order?.status &&
+                renderStatusLabel(order?.status as EnumOrderStatus)}
+            </div>
+          </>
+        );
+      case EnumOrderStatus.PROCESSING:
+        return (
+          <>
+            <div>
+              Ngày đặt hàng:{" "}
+              <span className="font-semibold">
+                {order?.orderAt && formatCommonTime(order?.orderAt)}
+              </span>
+            </div>
+            <div>
+              Duyệt lúc:{" "}
+              <span className="font-semibold">
+                {order?.processingAt && formatCommonTime(order?.processingAt)}
+              </span>
+            </div>
+            <div className="flex flex-row items-center gap-1">
+              Trạng thái:{" "}
+              {order?.status &&
+                renderStatusLabel(order?.status as EnumOrderStatus)}
+            </div>
+          </>
+        );
       case EnumOrderStatus.WAITING_PAYMENT:
         return (
           <>
@@ -102,7 +150,9 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
           <>
             <div>
               Hủy vào lúc:{" "}
-              <span className="font-semibold">14:13 12/06/2024</span>
+              <span className="font-semibold">
+                {order?.updatedAt && formatCommonTime(order?.updatedAt)}
+              </span>
             </div>
             <div className="flex flex-row items-center gap-1">
               Trạng thái: <MyLabel type="error">Đã hủy</MyLabel>
@@ -127,18 +177,18 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
               <div>
                 Hủy bởi:{" "}
                 <span className="font-semibold text-support-c500">
-                  Khách hàng
+                  {order?.updatedBy?.role &&
+                    renderWhoCanceled(order?.updatedBy?.role)}
                 </span>
               </div>
               <div>
                 Tiền hoàn lại:{" "}
                 <span className="font-semibold text-primary-c900">
-                  250.000đ
+                  {order?.totalPayment && formatCurrency(order?.totalPayment)}
                 </span>
               </div>
               <div className="flex flex-row items-center gap-1">
-                Thanh toán:{" "}
-                <span className="font-semibold">Đã hoàn trả qua Ngân hàng</span>
+                Thanh toán: <span className="font-semibold">Đã hoàn trả</span>
               </div>
             </>
           ) : (

@@ -43,7 +43,7 @@ const AllOrdersTable = () => {
       const token = storage.getLocalAccessToken();
       const res = await ordersByStatus(token);
       if (res) {
-        setOrders(res);
+        setOrders(res?.reverse());
       }
     } catch (error: any) {
       let alert: AlertState = {
@@ -81,11 +81,16 @@ const AllOrdersTable = () => {
     }
   };
 
-  const handleOpenDetailModal = () => {
+  const handleOpenDetailModal = (order: Order) => {
     const modal = {
       isOpen: true,
       title: "Chi tiết đơn hàng",
-      content: <DetailOrderModal />,
+      content: (
+        <DetailOrderModal
+          orderId={order?.id}
+          type={order?.status as EnumOrderStatus}
+        />
+      ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -152,7 +157,7 @@ const AllOrdersTable = () => {
                         <Tooltip title="Xem chi tiết đơn hàng">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleOpenDetailModal()}
+                            onClick={() => handleOpenDetailModal(order)}
                           >
                             <DetailIcon />
                           </div>

@@ -337,3 +337,9 @@ export enum EnumOrderStatus {
   DELIVERED = "DELIVERED",
   CENCELLED = "CENCELLED",
 }
+
+export enum Role {
+  ADMIN = "ADMIN",
+  USER = "USER",
+  SELLER = "SELLER",
+}

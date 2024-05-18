@@ -1,6 +1,6 @@
 import axios from "axios";
 import { headerUrl } from "./authentication";
-import { OrderStatusValues } from "../types";
+import { CancelOrderValues, OrderStatusValues } from "../types";
 
 export const ordersByStatus = async (
   token: string,
@@ -28,5 +28,49 @@ export const singleOrder = async (orderId: number, token: string) => {
 
   return await axios
     .get(`${headerUrl}/orders/${orderId}`, config)
+    .then((res) => res.data);
+};
+
+export const updateOrder = async (
+  orderId: number,
+  token: string,
+  variables: OrderStatusValues,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/orders/update/${orderId}`, variables, config)
+    .then((res) => res.data);
+};
+
+export const updateReadyForAdmin = async (orderId: number, token: string) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/orders/update-ready-delivery/${orderId}`, null, config)
+    .then((res) => res.data);
+};
+
+export const cancelOrder = async (
+  orderId: number,
+  token: string,
+  variables: CancelOrderValues,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/orders/cancel/${orderId}`, variables, config)
     .then((res) => res.data);
 };

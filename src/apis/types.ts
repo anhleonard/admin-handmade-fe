@@ -16,3 +16,8 @@ export type SignUpFormValues = {
 export type OrderStatusValues = {
   status: EnumOrderStatus;
 };
+
+export type CancelOrderValues = {
+  isCanceled: boolean;
+  canceledReason: string;
+};
