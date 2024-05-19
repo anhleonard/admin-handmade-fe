@@ -148,6 +148,7 @@ export type Store = {
   productAmount: number;
   avgStoreRating: number;
   followerAmount: number;
+  owner: User;
 };
 
 export type OrderProduct = {
@@ -209,4 +210,48 @@ export type User = {
   phoneNumber: string;
   dateOfBirth: Date;
   role: Role;
+};
+
+export type FilterTime = {
+  id: string;
+  name: string;
+  min?: number;
+  max?: number;
+};
+
+export type Auction = {
+  id: number;
+  isAccepted: boolean;
+  additionalComment: string;
+  name: string;
+  description: string;
+  images: string[];
+  requiredNumber: number;
+  maxAmount: number;
+  createdAt: Date;
+  closedDate: Date;
+  maxDays: number;
+  deposit: number;
+  readyToLaunch: boolean;
+  status: string;
+  shipping: Shipping;
+  candidates: Bidder[];
+  progresses: Progress[];
+};
+
+export type Bidder = {
+  id: number;
+  bidderMoney: number;
+  estimatedDay: number;
+  selfIntroduce: string;
+  isSelected: boolean;
+  store: Store;
+};
+
+export type Progress = {
+  id: number;
+  percentage: number;
+  comment: string;
+  createdAt: Date;
+  updatedAt: Date;
 };

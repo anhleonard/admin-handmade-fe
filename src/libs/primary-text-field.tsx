@@ -13,6 +13,7 @@ interface MyPrimaryTextFieldProps {
   isError?: boolean;
   helperText?: string | null;
   className?: string;
+  inputClassName?: string;
   value?: string | number;
   defaultValue?: string | number;
   minNumber?: number;
@@ -32,6 +33,7 @@ const MyPrimaryTextField: React.FC<MyPrimaryTextFieldProps> = ({
   isError = false,
   helperText = null,
   className = "w-full",
+  inputClassName,
   value,
   defaultValue,
   minNumber,
@@ -66,7 +68,7 @@ const MyPrimaryTextField: React.FC<MyPrimaryTextFieldProps> = ({
             value={value}
             defaultValue={defaultValue}
             disabled={disabled}
-            className={`no-ring w-full rounded-2xl border-[2px] border-grey-c50 bg-transparent px-3 py-3 text-grey-c900 outline-none placeholder:text-grey-c200 hover:border-primary-c200 focus:border-primary-c400  disabled:cursor-default disabled:border-grey-c200 disabled:bg-grey-c100 disabled:text-grey-c700 disabled:placeholder-grey-c500 ${
+            className={`${inputClassName} no-ring w-full rounded-2xl border-[2px] border-grey-c50 bg-transparent px-3 py-3 text-grey-c900 outline-none placeholder:text-grey-c200 hover:border-primary-c200 focus:border-primary-c400  disabled:cursor-default disabled:border-grey-c200 disabled:bg-grey-c100 disabled:text-grey-c700 disabled:placeholder-grey-c500 ${
               isError
                 ? "border-support-c500 !bg-support-c10 font-medium text-support-c500 placeholder-support-c200 hover:border-support-c500 focus:border-support-c500"
                 : ""

@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Shipping, Variant, VariantItem } from "./defined-type";
+import { Bidder, Shipping, Variant, VariantItem } from "./defined-type";
 import { Role } from "./constants";
 
 export function formatCurrency(price: number) {
@@ -65,4 +65,53 @@ export function renderWhoCanceled(role: Role) {
     case Role.ADMIN:
       return "Handmade";
   }
+}
+
+export function calculateRemainingDays(date: Date) {
+  const targetDate = new Date(date);
+
+  // Ngày hiện tại
+  const currentDate = new Date();
+
+  // Tính số mili giây giữa hai ngày
+  const differenceInMilliseconds = targetDate.getTime() - currentDate.getTime();
+
+  // Chuyển đổi mili giây thành ngày
+  const differenceInDays = Math.ceil(
+    differenceInMilliseconds / (1000 * 60 * 60 * 24),
+  );
+
+  return differenceInDays;
+}
+
+export function hiddenEmail(email: string) {
+  const atIndex = email.indexOf("@");
+  const hiddenEmail = email.replace(email.substring(1, atIndex), "***");
+
+  return hiddenEmail;
+}
+
+export function calculateAverageBidderMoney(candidates: Bidder[]) {
+  const totalBidderMoney = candidates.reduce(
+    (total, candidate) => total + candidate.bidderMoney,
+    0,
+  );
+
+  const averageBidderMoney = totalBidderMoney / candidates.length;
+
+  const roundedAverageBidderMoney = Math.round(averageBidderMoney);
+
+  return roundedAverageBidderMoney;
+}
+
+export function findMinMaxBidderMoney(candidates: Bidder[]) {
+  if (candidates.length === 0) {
+    return []; // Trả về mảng rỗng nếu mảng candidates không có phần tử
+  }
+
+  const bidderMoneyArray = candidates.map((candidate) => candidate.bidderMoney);
+  const min = Math.min(...bidderMoneyArray);
+  const max = Math.max(...bidderMoneyArray);
+
+  return [min, max];
 }

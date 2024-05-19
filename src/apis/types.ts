@@ -21,3 +21,10 @@ export type CancelOrderValues = {
   isCanceled: boolean;
   canceledReason: string;
 };
+
+export type CreateBidderValues = {
+  auctionId: number;
+  bidderMoney: string;
+  estimatedDay: string;
+  selfIntroduce: string;
+};

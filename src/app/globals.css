@@ -113,13 +113,13 @@ body {
 
 /* fix style for upload image by antd */
 
-:where(.css-dev-only-do-not-override-1ae8k9u).ant-upload-wrapper
+:where(.css-dev-only-do-not-override-1r287do).ant-upload-wrapper
   .ant-upload-list.ant-upload-list-picture
   .ant-upload-list-item,
-:where(.css-dev-only-do-not-override-1ae8k9u).ant-upload-wrapper
+:where(.css-dev-only-do-not-override-1r287do).ant-upload-wrapper
   .ant-upload-list.ant-upload-list-picture-card
   .ant-upload-list-item,
-:where(.css-dev-only-do-not-override-1ae8k9u).ant-upload-wrapper
+:where(.css-dev-only-do-not-override-1r287do).ant-upload-wrapper
   .ant-upload-list.ant-upload-list-picture-circle
   .ant-upload-list-item {
   padding: 0 !important;
@@ -127,45 +127,45 @@ body {
 }
 
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload-list.ant-upload-list-picture-card
   .ant-upload-list-item-thumbnail,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-circle-wrapper
   .ant-upload-list.ant-upload-list-picture-card
   .ant-upload-list-item-thumbnail,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload-list.ant-upload-list-picture-circle
   .ant-upload-list-item-thumbnail,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-circle-wrapper
   .ant-upload-list.ant-upload-list-picture-circle
   .ant-upload-list-item-thumbnail,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload-list.ant-upload-list-picture-card
   .ant-upload-list-item-thumbnail
   img,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-circle-wrapper
   .ant-upload-list.ant-upload-list-picture-card
   .ant-upload-list-item-thumbnail
   img,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload-list.ant-upload-list-picture-circle
   .ant-upload-list-item-thumbnail
   img,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-circle-wrapper
   .ant-upload-list.ant-upload-list-picture-circle
   .ant-upload-list-item-thumbnail
@@ -174,22 +174,22 @@ body {
 }
 
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload-list.ant-upload-list-picture-card
   .ant-upload-list-item::before,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-circle-wrapper
   .ant-upload-list.ant-upload-list-picture-card
   .ant-upload-list-item::before,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload-list.ant-upload-list-picture-circle
   .ant-upload-list-item::before,
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-circle-wrapper
   .ant-upload-list.ant-upload-list-picture-circle
   .ant-upload-list-item::before {
@@ -199,14 +199,14 @@ body {
 }
 
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload.ant-upload-select {
   border: 2px dashed #c6c6c6 !important;
 }
 
 :where(
-    .css-dev-only-do-not-override-1ae8k9u
+    .css-dev-only-do-not-override-1r287do
   ).ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload.ant-upload-select:hover {
   border: 2px dashed #ffddb0 !important;

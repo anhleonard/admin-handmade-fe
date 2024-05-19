@@ -26,6 +26,7 @@ import AllAuctionsTab from "@/app/auctions/my-auctions/all-auctions/all-auctions
 import ProcessingAuctionsTab from "@/app/auctions/my-auctions/processing-auctions/processing-auctions-table";
 import FinishedAuctionsTab from "@/app/auctions/my-auctions/finished-auctions/finished-auctions-table";
 import CanceledAuctionsTab from "@/app/auctions/my-auctions/canceled-auctions/canceled-auctions-table";
+import { FilterTime } from "./defined-type";
 
 export const Page = 1;
 export const Limit = 5;
@@ -342,4 +343,20 @@ export enum Role {
   ADMIN = "ADMIN",
   USER = "USER",
   SELLER = "SELLER",
+}
+
+export const DATA_COMPLETED_TIME: FilterTime[] = [
+  { name: "< 1 tuần", min: 0, max: 6, id: "LESS_1_WEEK" },
+  { name: "1 tuần - 2 tuần", min: 7, max: 14, id: "FROM_1_TO_2_WEEKS" },
+  { name: "2 tuần - 4 tuần", min: 14, max: 30, id: "FROM_2_TO_4_WEEKS" },
+  { name: "1 tháng - 2 tháng", min: 30, max: 60, id: "FROM_1_TO_2_MONTHS" },
+  { name: "> 2 tháng", min: 61, id: "MORE_2_MONTHS" },
+];
+
+export enum AuctionStatus {
+  AUCTIONING = "AUCTIONING",
+  PROGRESS = "PROGRESS",
+  DELIVERY = "DELIVERY",
+  COMPLETED = "COMPLETED",
+  CANCELED = "CANCELED",
 }
