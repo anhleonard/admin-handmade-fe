@@ -1,7 +1,11 @@
 import { Collapse, List, ListItem } from "@mui/material";
 import React from "react";
 import MyLabel from "@/libs/label";
-import { calculateRemainingDays, formatCurrency } from "@/enum/functions";
+import {
+  calculateAverageBidderMoney,
+  calculateRemainingDays,
+  formatCurrency,
+} from "@/enum/functions";
 import Button from "@/libs/button";
 import { useRouter } from "next/navigation";
 import { Auction } from "@/enum/defined-type";
@@ -63,7 +67,11 @@ const AunctionCard = ({ auction }: Props) => {
                     Giá đặt trung bình:
                   </div>
                   <div className="text-xs font-bold text-primary-c900">
-                    {formatCurrency(60000)}
+                    {formatCurrency(
+                      auction?.candidates?.length
+                        ? calculateAverageBidderMoney(auction?.candidates)
+                        : 0,
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">

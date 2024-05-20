@@ -1,5 +1,6 @@
 "use client";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+
+import DefaultLayout from "@/components/layouts/default-layout";
 import CreateVariantCategoriesModal from "@/components/products/create-variant-categories";
 import { SCREEN } from "@/enum/setting";
 import Button from "@/libs/button";

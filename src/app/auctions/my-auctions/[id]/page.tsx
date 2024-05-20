@@ -1,5 +1,6 @@
 "use client";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+
+import DefaultLayout from "@/components/layouts/default-layout";
 import MyDetailSellerAuctionScreen from "@/screens/auctions/detail-seller-auction";
 import { useParams } from "next/navigation";
 import React from "react";

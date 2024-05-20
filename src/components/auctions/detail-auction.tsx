@@ -2,6 +2,7 @@ import {
   calculateAverageBidderMoney,
   calculateDaysAfterAccepted,
   calculateRemainingDays,
+  findMaxPercentage,
   findMinMaxBidderMoney,
   formatCurrency,
 } from "@/enum/functions";
@@ -10,18 +11,91 @@ import { Collapse, List, ListItem } from "@mui/material";
 import React from "react";
 import MyDisplayImage from "@/libs/display-image";
 import Button from "@/libs/button";
-import { Auction, Bidder } from "@/enum/defined-type";
-import { AuctionStatus } from "@/enum/constants";
+import { AlertState, Auction, Bidder } from "@/enum/defined-type";
+import { AlertStatus, AuctionStatus } from "@/enum/constants";
+import { useDispatch } from "react-redux";
+import { openAlert } from "@/redux/slices/alertSlice";
+import { openConfirm } from "@/redux/slices/confirmSlice";
+import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
+import { updateAuction } from "@/apis/services/auctions";
+import storage from "@/apis/storage";
 
 type Props = {
   type?: "client" | "seller";
   status: AuctionStatus;
   auction: Auction;
   bidder?: Bidder;
+  handleRefetch: () => void;
 };
 
-const DetailAuction = ({ type = "client", status, auction, bidder }: Props) => {
-  const minMax = findMinMaxBidderMoney(auction?.candidates);
+const DetailAuction = ({
+  type = "client",
+  status,
+  auction,
+  bidder,
+  handleRefetch,
+}: Props) => {
+  const dispatch = useDispatch();
+
+  const minMax = auction?.candidates?.length
+    ? findMinMaxBidderMoney(auction?.candidates)
+    : [0, 0];
+
+  const handleSubmitAuction = async () => {
+    const maxPercentage = findMaxPercentage(auction?.progresses);
+    if (maxPercentage !== 100) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "CHƯA ĐẠT ĐỦ TIẾN ĐỘ",
+        message: "Vui lòng hoàn thành dự án với 100% tiến độ!",
+        type: AlertStatus.WARNING,
+      };
+      dispatch(openAlert(alert));
+      return;
+    }
+
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const variables = {
+        readyToLaunch: true,
+      };
+      const res = await updateAuction(auction.id, variables, token);
+      if (res) {
+        let alert: AlertState = {
+          isOpen: true,
+          title: "THÀNH CÔNG",
+          message: "Đã báo cáo dự án hoàn thành cho admin!",
+          type: AlertStatus.SUCCESS,
+        };
+        dispatch(openAlert(alert));
+        handleRefetch();
+      }
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
+  const handleCancelAuction = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN HỦY",
+      message: "Bạn đã chắc chắn hủy dự án này chưa?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: async () => {},
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
   return (
     <div>
       <div className="rounded-2xl border-[2px] border-grey-c50">
@@ -40,7 +114,9 @@ const DetailAuction = ({ type = "client", status, auction, bidder }: Props) => {
                 </MyLabel>
               )}
               {type === "seller" && status !== AuctionStatus.CANCELED && (
-                <MyLabel type="success">Đạt tiến độ: 100%</MyLabel>
+                <MyLabel type="success">
+                  Đạt tiến độ: {findMaxPercentage(auction?.progresses)}%
+                </MyLabel>
               )}
             </div>
             {type === "seller" ? (
@@ -147,7 +223,9 @@ const DetailAuction = ({ type = "client", status, auction, bidder }: Props) => {
                   </div>
                   <div className="font-medium text-primary-c900">
                     {formatCurrency(
-                      calculateAverageBidderMoney(auction?.candidates),
+                      auction?.candidates?.length
+                        ? calculateAverageBidderMoney(auction?.candidates)
+                        : 0,
                     )}
                   </div>
                 </div>
@@ -194,16 +272,33 @@ const DetailAuction = ({ type = "client", status, auction, bidder }: Props) => {
           </List>
         </Collapse>
       </div>
-      {type === "seller" && status === AuctionStatus.PROGRESS && (
-        <div className="mt-4 flex flex-row justify-end gap-3">
-          <Button className="!w-fit !px-3 !py-1.5" color="grey">
-            <span className="text-xs font-medium">Hủy dự án</span>
-          </Button>
-          <Button className="!w-fit !px-3 !py-1.5" color="primary">
-            <span className="text-xs font-medium">Dự án đã xong?</span>
-          </Button>
-        </div>
-      )}
+      {type === "seller" &&
+        status === AuctionStatus.PROGRESS &&
+        !auction?.readyToLaunch && (
+          <div className="mt-4 flex flex-row justify-end gap-3">
+            <Button
+              className="!w-fit !px-3 !py-1.5"
+              color="grey"
+              onClick={() => handleCancelAuction()}
+            >
+              <span className="text-xs font-medium">Hủy dự án</span>
+            </Button>
+            <Button
+              className="!w-fit !px-3 !py-1.5"
+              color="primary"
+              onClick={() => handleSubmitAuction()}
+            >
+              <span className="text-xs font-medium">Dự án đã xong?</span>
+            </Button>
+          </div>
+        )}
+      {type === "seller" &&
+        status === AuctionStatus.PROGRESS &&
+        auction?.readyToLaunch && (
+          <div className="mt-4 flex flex-row justify-end">
+            <MyLabel type="success">Đã thông báo tới admin!</MyLabel>
+          </div>
+        )}
     </div>
   );
 };

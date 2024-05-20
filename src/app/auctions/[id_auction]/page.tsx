@@ -1,5 +1,5 @@
 "use client";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import DefaultLayout from "@/components/layouts/default-layout";
 import DetailAuctionsScreen from "@/screens/auctions/detail-auction-screen";
 import { useParams } from "next/navigation";
 

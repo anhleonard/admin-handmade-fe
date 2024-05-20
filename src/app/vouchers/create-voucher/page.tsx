@@ -1,5 +1,5 @@
 "use client";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import DefaultLayout from "@/components/layouts/default-layout";
 import CreateVoucherScreen from "@/screens/vouchers/create-voucher-screen";
 
 const MainCreateVoucher = () => {

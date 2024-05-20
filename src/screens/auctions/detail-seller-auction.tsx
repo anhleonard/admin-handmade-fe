@@ -87,34 +87,40 @@ const MyDetailSellerAuctionScreen = ({ auctionId }: Props) => {
               auction={auction}
               status={auction?.status as AuctionStatus}
               bidder={selectedBidder}
+              handleRefetch={handleRefetch}
             />
 
             {/* FORM UPDATED WORK */}
-            {auction?.status === AuctionStatus.PROGRESS && (
-              <UpdateWorkForm auction={auction} handleRefetch={handleRefetch} />
-            )}
+            {auction?.status === AuctionStatus.PROGRESS &&
+              !auction?.readyToLaunch && (
+                <UpdateWorkForm
+                  auction={auction}
+                  handleRefetch={handleRefetch}
+                />
+              )}
 
             {/* LIST COMMENT FOR WORK */}
             {auction?.status !== AuctionStatus.CANCELED && (
               <div className="space-y-8">
-                {auction?.progresses?.length &&
-                  auction?.progresses
-                    ?.sort(
-                      (a, b) =>
-                        new Date(b.createdAt).getTime() -
-                        new Date(a.createdAt).getTime(),
-                    )
-                    .map((progress, index) => {
-                      if (!progress) return null;
-                      return (
-                        <ContentUpdatedWork
-                          key={index}
-                          status={auction?.status as AuctionStatus}
-                          progress={progress}
-                          handleRefetch={handleRefetch}
-                        />
-                      );
-                    })}
+                {auction?.progresses?.length
+                  ? auction?.progresses
+                      ?.sort(
+                        (a, b) =>
+                          new Date(b.createdAt).getTime() -
+                          new Date(a.createdAt).getTime(),
+                      )
+                      .map((progress, index) => {
+                        if (!progress) return null;
+                        return (
+                          <ContentUpdatedWork
+                            key={index}
+                            status={auction?.status as AuctionStatus}
+                            progress={progress}
+                            handleRefetch={handleRefetch}
+                          />
+                        );
+                      })
+                  : null}
               </div>
             )}
 

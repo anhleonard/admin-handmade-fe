@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { getCurrentUser } from "@/enum/functions";
 
 const DropdownUser = () => {
+  const currentUser = getCurrentUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const trigger = useRef<any>(null);
@@ -44,16 +46,15 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {currentUser?.name}
           </span>
-          <span className="block text-xs">UX Designer</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
           <Image
             width={112}
             height={112}
-            src={"/images/user/user-01.png"}
+            src={"/images/common-avatar.jpg"}
             style={{
               width: "auto",
               height: "auto",
@@ -92,7 +93,7 @@ const DropdownUser = () => {
           <li>
             <Link
               href="/profile"
-              className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+              className="hover:text-primary flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
             >
               <svg
                 className="fill-current"
@@ -111,13 +112,13 @@ const DropdownUser = () => {
                   fill=""
                 />
               </svg>
-              My Profile
+              Thông tin cá nhân
             </Link>
           </li>
           <li>
             <Link
               href="#"
-              className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+              className="hover:text-primary flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
             >
               <svg
                 className="fill-current"
@@ -132,13 +133,13 @@ const DropdownUser = () => {
                   fill=""
                 />
               </svg>
-              My Contacts
+              Shop của tôi
             </Link>
           </li>
           <li>
             <Link
               href="/settings"
-              className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+              className="hover:text-primary flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
             >
               <svg
                 className="fill-current"
@@ -161,7 +162,7 @@ const DropdownUser = () => {
             </Link>
           </li>
         </ul>
-        <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+        <button className="hover:text-primary flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out lg:text-base">
           <svg
             className="fill-current"
             width="22"
@@ -179,7 +180,7 @@ const DropdownUser = () => {
               fill=""
             />
           </svg>
-          Log Out
+          Đăng xuất
         </button>
       </div>
       {/* <!-- Dropdown End --> */}

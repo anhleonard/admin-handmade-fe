@@ -1,5 +1,5 @@
 "use client";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import DefaultLayout from "@/components/layouts/default-layout";
 import ListProductsScreen from "@/screens/products/list-products-screen";
 
 const MainListProducts = () => {

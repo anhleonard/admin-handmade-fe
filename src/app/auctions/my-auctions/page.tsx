@@ -1,4 +1,4 @@
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import DefaultLayout from "@/components/layouts/default-layout";
 import MyAuctionsScreen from "@/screens/auctions/seller-list-auctions";
 import React from "react";
 

@@ -1,6 +1,13 @@
 import moment from "moment";
-import { Bidder, Shipping, Variant, VariantItem } from "./defined-type";
+import {
+  Bidder,
+  Progress,
+  Shipping,
+  Variant,
+  VariantItem,
+} from "./defined-type";
 import { Role } from "./constants";
+import storage from "@/apis/storage";
 
 export function formatCurrency(price: number) {
   const formatter = new Intl.NumberFormat("vi", {
@@ -137,4 +144,31 @@ export function calculateDaysAfterAccepted(
   const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
 
   return remainingDays > 0 ? remainingDays : 0;
+}
+
+export function findMaxPercentage(progresses: Progress[]) {
+  if (!progresses?.length) return 0;
+
+  const maxPercentage = progresses
+    .map((progress) => progress.percentage)
+    .filter((percentage) => percentage !== null)
+    .reduce((max, current) => Math.max(max, current), 0);
+
+  return maxPercentage;
+}
+
+export function getCurrentUser() {
+  const localUser = storage.getLocalUser();
+  if (localUser) {
+    try {
+      const user = JSON.parse(localUser);
+      return user;
+    } catch (error) {
+      console.error("Error parsing localUser JSON:", error);
+      return null;
+    }
+  } else {
+    console.error("localUser is empty or undefined");
+    return null;
+  }
 }

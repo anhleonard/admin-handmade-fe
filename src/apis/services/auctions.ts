@@ -39,3 +39,19 @@ export const allSellerAuctions = async (token: string, variables: any) => {
     .post(`${headerUrl}/auctions/seller-auctions`, variables, config)
     .then((res) => res.data);
 };
+
+export const updateAuction = async (
+  id: number,
+  variables: any,
+  token: string,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/auctions/update/${id}`, variables, config)
+    .then((res) => res.data);
+};

@@ -2,7 +2,7 @@ import Link from "next/link";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownMessage from "./DropdownMessage";
 import DropdownNotification from "./DropdownNotification";
-import DropdownUser from "./DropdownUser";
+import DropdownUser from "./dropdown-user";
 import Image from "next/image";
 
 const Header = (props: {
