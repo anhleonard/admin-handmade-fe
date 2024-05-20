@@ -299,7 +299,7 @@ export const sellerAuctionTabs = [
     content: <AllAuctionsTab />,
   },
   {
-    label: "Đang làm",
+    label: "Đang tiến hành",
     value: "2",
     content: <ProcessingAuctionsTab />,
   },

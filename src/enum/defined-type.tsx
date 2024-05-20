@@ -246,6 +246,7 @@ export type Bidder = {
   selfIntroduce: string;
   isSelected: boolean;
   store: Store;
+  acceptedAt: Date;
 };
 
 export type Progress = {
@@ -254,4 +255,5 @@ export type Progress = {
   comment: string;
   createdAt: Date;
   updatedAt: Date;
+  user: User;
 };

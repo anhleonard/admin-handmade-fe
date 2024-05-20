@@ -1,5 +1,6 @@
 import {
   calculateAverageBidderMoney,
+  calculateDaysAfterAccepted,
   calculateRemainingDays,
   findMinMaxBidderMoney,
   formatCurrency,
@@ -9,16 +10,17 @@ import { Collapse, List, ListItem } from "@mui/material";
 import React from "react";
 import MyDisplayImage from "@/libs/display-image";
 import Button from "@/libs/button";
-import { Auction } from "@/enum/defined-type";
+import { Auction, Bidder } from "@/enum/defined-type";
 import { AuctionStatus } from "@/enum/constants";
 
 type Props = {
   type?: "client" | "seller";
   status: AuctionStatus;
   auction: Auction;
+  bidder?: Bidder;
 };
 
-const DetailAuction = ({ type = "client", status, auction }: Props) => {
+const DetailAuction = ({ type = "client", status, auction, bidder }: Props) => {
   const minMax = findMinMaxBidderMoney(auction?.candidates);
   return (
     <div>
@@ -44,7 +46,7 @@ const DetailAuction = ({ type = "client", status, auction }: Props) => {
             {type === "seller" ? (
               <>
                 {status === AuctionStatus.PROGRESS && (
-                  <MyLabel type="progress">Đang làm</MyLabel>
+                  <MyLabel type="progress">Đang tiến hành</MyLabel>
                 )}
                 {status === AuctionStatus.COMPLETED && (
                   <MyLabel type="success">Đã hoàn thành</MyLabel>
@@ -129,7 +131,7 @@ const DetailAuction = ({ type = "client", status, auction }: Props) => {
                 <div className="flex flex-col gap-1">
                   <div className="font-bold text-grey-c900">Giá chốt</div>
                   <div className="font-medium text-primary-c900">
-                    {formatCurrency(150000)}
+                    {bidder?.bidderMoney && formatCurrency(bidder?.bidderMoney)}
                   </div>
                 </div>
               )}
@@ -153,7 +155,9 @@ const DetailAuction = ({ type = "client", status, auction }: Props) => {
               {type === "seller" && (
                 <div className="flex flex-col gap-1">
                   <div className="font-bold text-grey-c900">Làm trong vòng</div>
-                  <div className="text-grey-c900">12 ngày</div>
+                  <div className="font-medium text-primary-c900">
+                    {bidder?.estimatedDay} ngày
+                  </div>
                 </div>
               )}
             </ListItem>
@@ -174,7 +178,15 @@ const DetailAuction = ({ type = "client", status, auction }: Props) => {
                     <div className="font-bold text-grey-c900">
                       Số ngày còn lại
                     </div>
-                    <div className="text-grey-c900">0 ngày</div>
+                    <div className="font-medium text-primary-c900">
+                      {bidder?.estimatedDay &&
+                        bidder?.acceptedAt &&
+                        calculateDaysAfterAccepted(
+                          bidder?.estimatedDay,
+                          bidder?.acceptedAt,
+                        )}{" "}
+                      ngày
+                    </div>
                   </div>
                 )}
               </ListItem>

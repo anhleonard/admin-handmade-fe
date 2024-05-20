@@ -1,16 +1,24 @@
 import { Collapse, List, ListItem } from "@mui/material";
 import React from "react";
 import MyLabel from "@/libs/label";
-import { formatCurrency } from "@/enum/functions";
+import { calculateDaysAfterAccepted, formatCurrency } from "@/enum/functions";
 import Button from "@/libs/button";
 import { useRouter } from "next/navigation";
+import { AuctionStatus } from "@/enum/constants";
+import { Auction } from "@/enum/defined-type";
 
 type SellerAunctionCardProps = {
-  status: "all" | "progress" | "finished" | "canceled";
+  auction: Auction;
+  status: AuctionStatus;
 };
 
-const SellerAunctionCard = ({ status }: SellerAunctionCardProps) => {
+const SellerAunctionCard = ({ auction, status }: SellerAunctionCardProps) => {
   const router = useRouter();
+
+  const bidder = auction?.candidates?.filter(
+    (bidder) => bidder.isSelected === true,
+  )[0];
+
   return (
     <div className="rounded-2xl border-[2px] border-grey-c50">
       <ListItem
@@ -20,16 +28,12 @@ const SellerAunctionCard = ({ status }: SellerAunctionCardProps) => {
         <div className="flex w-full flex-row items-center justify-between px-4 py-4">
           <div className="flex flex-row items-center gap-2">
             <div className="text-base font-semibold text-primary-c900">
-              Finish Json Web Token
+              {auction?.name}
             </div>
           </div>
           <Button
             className="!w-fit !px-3 !py-1.5"
-            onClick={() =>
-              router.push(
-                `${"/auctions/my-auctions/" + status + "/" + "idididid"}`,
-              )
-            }
+            onClick={() => router.push(`/auctions/my-auctions/${auction?.id}`)}
           >
             <span className="text-xs font-medium">Xem chi tiết</span>
           </Button>
@@ -46,39 +50,32 @@ const SellerAunctionCard = ({ status }: SellerAunctionCardProps) => {
                   Mô tả chi tiết
                 </div>
                 <div className="line-clamp-4 text-justify text-sm font-normal text-grey-c900">
-                  Marshfield was a rapid transit station on the Chicago "L" in
-                  the U.S. between 1895 and 1954. Originally part of the
-                  Metropolitan West Side Elevated Railroad, it was the
-                  westernmost station of the Metropolitan's main line. West of
-                  the station, the main line diverged into three branches; this
-                  junction, served by the station, has been described as the
-                  most complex on the entire Chicago "L" system. After 1905, the
-                  Chicago Aurora and Elgin Railroad, an interurban line, also
-                  served the station, but limited its service based on direction
-                  to avoid competing with the "L". The lines that had been
-                  constructed by the Metropolitan, including those serving
-                  Marshfield, were subject to modifications planned since the
-                  1930s that incrementally withdrew service from the station.
+                  {auction?.description}
                 </div>
-                <div className="flex flex-row items-center gap-3 text-sm font-medium text-primary-c900">
+                {/* <div className="flex flex-row items-center gap-3 text-sm font-medium text-primary-c900">
                   <div className="hover:cursor-pointer">Đan len</div>
                   <div className="hover:cursor-pointer">Thú nhồi bông</div>
                   <div className="hover:cursor-pointer">Quà tặng</div>
-                </div>
+                </div> */}
               </div>
               {/* right content */}
               <div className="col-span-1 flex flex-col gap-3">
                 <div className="text-xs font-bold text-grey-c900">
                   Giá chốt:{" "}
                   <span className="text-xs font-bold text-primary-c900">
-                    {formatCurrency(60000)}
+                    {formatCurrency(bidder?.bidderMoney)}
                   </span>
                 </div>
-                {status === "progress" && (
+                {status === AuctionStatus.PROGRESS && (
                   <div className="text-xs font-bold text-grey-c900">
                     Hạn:{" "}
                     <span className="text-xs font-bold text-primary-c900">
-                      còn 6 ngày
+                      còn{" "}
+                      {calculateDaysAfterAccepted(
+                        bidder?.estimatedDay,
+                        bidder?.acceptedAt,
+                      )}{" "}
+                      ngày
                     </span>
                   </div>
                 )}
@@ -86,13 +83,13 @@ const SellerAunctionCard = ({ status }: SellerAunctionCardProps) => {
                   <div className="text-xs font-bold text-grey-c900">
                     Trạng thái:{" "}
                   </div>
-                  {status === "progress" && (
-                    <MyLabel type="progress">Đang làm</MyLabel>
+                  {status === AuctionStatus.PROGRESS && (
+                    <MyLabel type="progress">Đang tiến hành</MyLabel>
                   )}
-                  {status === "finished" && (
+                  {status === AuctionStatus.COMPLETED && (
                     <MyLabel type="success">Đã hoàn thành</MyLabel>
                   )}
-                  {status === "canceled" && (
+                  {status === AuctionStatus.CANCELED && (
                     <MyLabel type="error">Đã hủy</MyLabel>
                   )}
                 </div>

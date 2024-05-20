@@ -28,3 +28,13 @@ export type CreateBidderValues = {
   estimatedDay: string;
   selfIntroduce: string;
 };
+
+export type CreateProgressValues = {
+  auctionId: number;
+  comment: string;
+  percentage?: number;
+};
+
+export type UpdateProgressValues = {
+  comment: string;
+};
