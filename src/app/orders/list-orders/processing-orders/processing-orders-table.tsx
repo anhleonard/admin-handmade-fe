@@ -12,7 +12,11 @@ import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { ordersByStatus, updateReadyForAdmin } from "@/apis/services/orders";
+import {
+  adminOrders,
+  ordersByStatus,
+  updateReadyForAdmin,
+} from "@/apis/services/orders";
 import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { OrderStatusValues } from "@/apis/types";
@@ -36,16 +40,17 @@ const ProcessingOrdersTable = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
-  const getSellerOrdersByStatus = async () => {
+  const getAllOrders = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const variables: OrderStatusValues = {
+      const query = {
         status: EnumOrderStatus.PROCESSING,
+        isReadyDelivery: false,
       };
-      const res = await ordersByStatus(token, variables);
+      const res = await adminOrders(token, query);
       if (res) {
-        setOrders(res?.reverse());
+        setOrders(res?.data?.reverse());
       }
     } catch (error: any) {
       let alert: AlertState = {
@@ -61,7 +66,7 @@ const ProcessingOrdersTable = () => {
   };
 
   useEffect(() => {
-    getSellerOrdersByStatus();
+    getAllOrders();
   }, [refetchQueries]);
 
   const handleOpenDetailModal = (orderId: number) => {
@@ -70,57 +75,6 @@ const ProcessingOrdersTable = () => {
       title: "Chi tiết đơn hàng",
       content: (
         <DetailOrderModal type={EnumOrderStatus.PROCESSING} orderId={orderId} />
-      ),
-      screen: SCREEN.BASE,
-    };
-    dispatch(openModal(modal));
-  };
-
-  const handleAlertForAdmin = (orderId: number) => {
-    const confirm: any = {
-      isOpen: true,
-      title: "XÁC NHẬN SẴN SÀNG GIAO HÀNG",
-      message: "Bạn đã chắc chắn sẵn sàng giao đơn hàng này?",
-      feature: "CONFIRM_CONTACT_US",
-      onConfirm: async () => {
-        try {
-          dispatch(openLoading());
-          const token = storage.getLocalAccessToken();
-          const res = await updateReadyForAdmin(orderId, token);
-          if (res) {
-            dispatch(closeConfirm());
-            let alert: AlertState = {
-              isOpen: true,
-              title: "THÔNG BÁO THÀNH CÔNG",
-              message: "Đã thông báo sẵn sàng giao đơn hàng cho admin!",
-              type: AlertStatus.SUCCESS,
-            };
-            dispatch(openAlert(alert));
-            handleRefetch();
-          }
-        } catch (error: any) {
-          let alert: AlertState = {
-            isOpen: true,
-            title: "LỖI",
-            message: error?.response?.data?.message,
-            type: AlertStatus.ERROR,
-          };
-          dispatch(openAlert(alert));
-        } finally {
-          dispatch(closeLoading());
-        }
-      },
-    };
-
-    dispatch(openConfirm(confirm));
-  };
-
-  const handleOpenCancelModal = (orderId: number) => {
-    const modal = {
-      isOpen: true,
-      title: "Lí do hủy đơn hàng",
-      content: (
-        <CancelOrderModal orderId={orderId} handleRefetch={handleRefetch} />
       ),
       screen: SCREEN.BASE,
     };
@@ -159,6 +113,7 @@ const ProcessingOrdersTable = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã đơn hàng</th>
                 <th className="px-1 py-4">Tên khách hàng</th>
+                <th className="px-1 py-4">Nhà bán</th>
                 <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Số lượng</th>
                 <th className="px-1 py-4">Khách trả</th>
@@ -177,6 +132,7 @@ const ProcessingOrdersTable = () => {
                   >
                     <td className="py-4 pl-3">{order?.code}</td>
                     <td className="px-1 py-4">{order?.client?.name}</td>
+                    <td className="px-1 py-4">{order?.store?.name}</td>
                     <td className="px-1 py-4">
                       <MyLabel type="progress">Đang xử lý</MyLabel>
                     </td>
@@ -200,38 +156,6 @@ const ProcessingOrdersTable = () => {
                             onClick={() => handleOpenDetailModal(order?.id)}
                           >
                             <DetailIcon />
-                          </div>
-                        </Tooltip>
-
-                        {!order?.isReadyDelivery ? (
-                          <Tooltip title="Sẵn sàng giao hàng">
-                            <div
-                              className="hover:cursor-pointer"
-                              onClick={() => handleAlertForAdmin(order?.id)}
-                            >
-                              <NotificationsNoneRoundedIcon
-                                sx={{ fontSize: 24, color: COLORS.purple.c700 }}
-                              />
-                            </div>
-                          </Tooltip>
-                        ) : (
-                          <Tooltip title="Đã thông báo cho admin">
-                            <div className="hover:cursor-pointer">
-                              <CheckCircleOutlineIcon
-                                sx={{ fontSize: 20, color: COLORS.blue.c900 }}
-                              />
-                            </div>
-                          </Tooltip>
-                        )}
-
-                        <Tooltip title="Hủy đơn hàng">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() => handleOpenCancelModal(order?.id)}
-                          >
-                            <DoNotDisturbOnOutlinedIcon
-                              sx={{ fontSize: 20, color: COLORS.support.c500 }}
-                            />
                           </div>
                         </Tooltip>
                       </div>

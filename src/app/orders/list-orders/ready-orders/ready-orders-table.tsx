@@ -1,38 +1,36 @@
-import { DetailIcon, SearchIcon } from "@/enum/icons";
-import MyTextField from "@/libs/text-field";
-import MySelect from "@/libs/select";
-import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import MyDatePicker from "@/libs/date-picker";
-import MyLabel from "@/libs/label";
-import { Tooltip } from "@mui/material";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { openModal } from "@/redux/slices/modalSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import {
-  adminOrders,
-  ordersByStatus,
-  updateOrder,
-} from "@/apis/services/orders";
+import { adminOrders, updateOrder } from "@/apis/services/orders";
 import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
-import { OrderStatusValues } from "@/apis/types";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
-import DetailOrderModal from "../../modals/detail-order-modal";
-import { openModal } from "@/redux/slices/modalSlice";
-import { RootState } from "@/redux/store";
-import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-import { COLORS } from "@/enum/colors";
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { RootState } from "@/redux/store";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
+import DetailOrderModal from "../../modals/detail-order-modal";
+import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
+import MyTextField from "@/libs/text-field";
+import { DetailIcon, SearchIcon } from "@/enum/icons";
+import MyDatePicker from "@/libs/date-picker";
+import MySelect from "@/libs/select";
+import MyLabel from "@/libs/label";
+import { Tooltip } from "@mui/material";
+import { COLORS } from "@/enum/colors";
+import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import { OrderStatusValues } from "@/apis/types";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
   { label: "Tên khách hàng", value: "CLIENT_NAME" },
 ];
 
-const TransportOrdersTable = () => {
+const ReadyOrdersTable = () => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
@@ -42,7 +40,8 @@ const TransportOrdersTable = () => {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
       const query = {
-        status: EnumOrderStatus.DELIVERED,
+        status: EnumOrderStatus.PROCESSING,
+        isReadyDelivery: true,
       };
       const res = await adminOrders(token, query);
       if (res) {
@@ -70,14 +69,18 @@ const TransportOrdersTable = () => {
       isOpen: true,
       title: "Chi tiết đơn hàng",
       content: (
-        <DetailOrderModal type={EnumOrderStatus.DELIVERED} orderId={orderId} />
+        <DetailOrderModal type={EnumOrderStatus.PROCESSING} orderId={orderId} />
       ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
   };
 
-  const handleConfirmShipped = (orderId: number) => {
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
+  };
+
+  const handleConfirmDelivery = (orderId: number) => {
     const confirm: any = {
       isOpen: true,
       title: "XÁC NHẬN VẬN CHUYỂN GIAO HÀNG",
@@ -88,7 +91,7 @@ const TransportOrdersTable = () => {
           dispatch(openLoading());
           const token = storage.getLocalAccessToken();
           const variables: OrderStatusValues = {
-            status: EnumOrderStatus.SHIPPED,
+            status: EnumOrderStatus.DELIVERED,
           };
           const res = await updateOrder(orderId, token, variables);
           if (res) {
@@ -96,7 +99,7 @@ const TransportOrdersTable = () => {
             let alert: AlertState = {
               isOpen: true,
               title: "THÀNH CÔNG",
-              message: "Đã cập nhật giao hàng thành công!",
+              message: "Đã cập nhật vận chuyển thành công!",
               type: AlertStatus.SUCCESS,
             };
             dispatch(openAlert(alert));
@@ -117,10 +120,6 @@ const TransportOrdersTable = () => {
     };
 
     dispatch(openConfirm(confirm));
-  };
-
-  const handleRefetch = () => {
-    dispatch(refetchComponent());
   };
 
   return (
@@ -156,12 +155,13 @@ const TransportOrdersTable = () => {
                 <th className="px-1 py-4">Số lượng</th>
                 <th className="px-1 py-4">Khách trả</th>
                 <th className="px-1 py-4">Ngày đặt hàng</th>
-                <th className="px-1 py-4">Dự kiến giao hàng</th>
+                <th className="px-1 py-4">Hạn xác nhận</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {orders?.map((order, index) => {
+                if (!order?.orderProducts?.length) return null;
                 return (
                   <tr
                     key={index}
@@ -171,7 +171,7 @@ const TransportOrdersTable = () => {
                     <td className="px-1 py-4">{order?.client?.name}</td>
                     <td className="px-1 py-4">{order?.store?.name}</td>
                     <td className="px-1 py-4">
-                      <MyLabel type="delivery">Đang vận chuyển</MyLabel>
+                      <MyLabel type="progress">Đang xử lý</MyLabel>
                     </td>
                     <td className="px-1 py-4">
                       {order?.orderProducts?.length}
@@ -182,9 +182,8 @@ const TransportOrdersTable = () => {
                     <td className="px-1 py-4">
                       {formatCommonTime(order?.orderAt)}
                     </td>
-                    {/* tính thêm 7 ngày từ ngày giao hàng cho shipper */}
                     <td className="px-1 py-4">
-                      {formatCommonTime(order?.deliveredAt, 7)}
+                      {formatCommonTime(order?.orderAt, 7)}
                     </td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
@@ -196,13 +195,13 @@ const TransportOrdersTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        <Tooltip title="Xác nhận giao hàng">
+                        <Tooltip title="Xác nhận vận chuyển">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleConfirmShipped(order?.id)}
+                            onClick={() => handleConfirmDelivery(order?.id)}
                           >
                             <CheckCircleOutlineRoundedIcon
-                              sx={{ fontSize: 20, color: COLORS.blue.c900 }}
+                              sx={{ fontSize: 20, color: COLORS.purple.c900 }}
                             />
                           </div>
                         </Tooltip>
@@ -219,4 +218,4 @@ const TransportOrdersTable = () => {
   );
 };
 
-export default TransportOrdersTable;
+export default ReadyOrdersTable;

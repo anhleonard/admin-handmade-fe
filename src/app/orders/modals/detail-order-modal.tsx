@@ -89,9 +89,9 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
               </span>
             </div>
             <div>
-              Ngày giao hàng:{" "}
+              Đã giao lúc:{" "}
               <span className="font-semibold">
-                {order?.processingAt && formatCommonTime(order?.shippedAt)}
+                {order?.shippedAt && formatCommonTime(order?.shippedAt)}
               </span>
             </div>
             <div className="flex flex-row items-center gap-1">
@@ -156,6 +156,28 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
             </div>
             <div className="flex flex-row items-center gap-1">
               Trạng thái: <MyLabel type="error">Đã hủy</MyLabel>
+            </div>
+          </>
+        );
+      case EnumOrderStatus.DELIVERED:
+        return (
+          <>
+            <div>
+              Ngày đặt hàng:{" "}
+              <span className="font-semibold">
+                {order?.orderAt && formatCommonTime(order?.orderAt)}
+              </span>
+            </div>
+            <div>
+              Xác nhận vận chuyển lúc:{" "}
+              <span className="font-semibold">
+                {order?.deliveredAt && formatCommonTime(order?.deliveredAt)}
+              </span>
+            </div>
+            <div className="flex flex-row items-center gap-1">
+              Trạng thái:{" "}
+              {order?.status &&
+                renderStatusLabel(order?.status as EnumOrderStatus)}
             </div>
           </>
         );
@@ -228,9 +250,6 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
       )}
       {order?.orderProducts && (
         <OrderPackage orderProducts={order?.orderProducts} />
-      )}
-      {type === EnumOrderStatus.WAITING_PAYMENT && (
-        <Button className="mx-auto max-w-[200px]">Xác nhận đơn hàng</Button>
       )}
     </div>
   );

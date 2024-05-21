@@ -1,5 +1,11 @@
 "use client";
-import { AlertStatus, ProductStatus, mainCategories } from "@/enum/constants";
+import {
+  AlertStatus,
+  Page,
+  ProductStatus,
+  mainCategories,
+  rowsPerPage,
+} from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -9,27 +15,24 @@ import {
 } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
-import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
-import {
-  getSellingProducts,
-  updateProductBySeller,
-} from "@/apis/services/product";
+import { adminProducts } from "@/apis/services/product";
 import storage from "@/apis/storage";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Product } from "@/enum/defined-type";
-import { closeAlert, openAlert } from "@/redux/slices/alertSlice";
+import { openAlert } from "@/redux/slices/alertSlice";
 import { RootState } from "@/redux/store";
 import { headerUrl } from "@/apis/services/authentication";
 import { formatCurrency } from "@/enum/functions";
 import DetailProductModal from "../../modals/detail-product-modal";
-import EditProductModal from "../../modals/edit-product-modal";
-import { refetchComponent } from "@/redux/slices/refetchSlice";
-import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import MyStatus from "@/libs/status";
+import { COLORS } from "@/enum/colors";
+import HighlightOffRoundedIcon from "@mui/icons-material/HighlightOffRounded";
+import { MyPagination } from "@/libs/pagination";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -38,8 +41,11 @@ const labelOptions = [
 
 const SellingItemsTable = () => {
   const dispatch = useDispatch();
-  const [sellingProducts, setSellingProducts] = useState<Product[]>();
+  const [products, setProducts] = useState<Product[]>();
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
 
   const handleOpenDetailModal = (productId: number) => {
     const modal = {
@@ -56,23 +62,21 @@ const SellingItemsTable = () => {
     dispatch(openModal(modal));
   };
 
-  const handleOpenEditModal = (productId: number) => {
-    const modal = {
-      isOpen: true,
-      title: "Chỉnh sửa sản phẩm",
-      content: <EditProductModal productId={productId} />,
-      screen: SCREEN.BASE,
-    };
-    dispatch(openModal(modal));
-  };
-
   // get all selling products by seller token
-  const getAllSellingProducts = async () => {
+  const getAllProducts = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const res = await getSellingProducts(token);
-      setSellingProducts(res);
+      const query = {
+        status: ProductStatus.SELLING,
+        limit: rowsPage,
+        page: page,
+      };
+      const res = await adminProducts(token, query);
+      if (res) {
+        setCount(res?.total ?? 0);
+        setProducts(res?.data);
+      }
     } catch (error: any) {
       let alert: AlertState = {
         isOpen: true,
@@ -86,51 +90,17 @@ const SellingItemsTable = () => {
     }
   };
 
-  const handleConfirmOffItem = (id: number) => {
-    const confirm: any = {
-      isOpen: true,
-      title: "TẮT SẢN PHẨM",
-      message: "Bạn có chắc chắn tắt sản phẩm này không?",
-      feature: "CONFIRM_CONTACT_US",
-      onConfirm: async () => {
-        try {
-          dispatch(openLoading());
-          const token = storage.getLocalAccessToken();
-          const variables = {
-            status: ProductStatus?.OFF,
-          };
-          const res = await updateProductBySeller(id, variables, token);
-          if (res) {
-            dispatch(closeConfirm());
-            let alert: AlertState = {
-              isOpen: true,
-              title: "THÀNH CÔNG",
-              message: "Sản phẩm đã được tắt",
-              type: AlertStatus.SUCCESS,
-            };
-            dispatch(openAlert(alert));
-            dispatch(refetchComponent());
-          }
-        } catch (error: any) {
-          let alert: AlertState = {
-            isOpen: true,
-            title: "LỖI",
-            message: error?.response?.data?.message,
-            type: AlertStatus.ERROR,
-          };
-          dispatch(openAlert(alert));
-        } finally {
-          dispatch(closeLoading());
-        }
-      },
-    };
-
-    dispatch(openConfirm(confirm));
-  };
-
   useEffect(() => {
-    getAllSellingProducts();
-  }, [refetchQueries]);
+    getAllProducts();
+  }, [refetchQueries, page, rowsPage]);
+
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -162,16 +132,17 @@ const SellingItemsTable = () => {
             >
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã sản phẩm</th>
-                <th className="px-1 py-4">Sản phẩm</th>
+                <th className="px-1 py-4">Tên sản phẩm</th>
+                <th className="px-1 py-4">Nhà bán</th>
+                <th className="px-1 py-4">Danh mục</th>
+                <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Tồn kho</th>
                 <th className="px-1 py-4">Giá bán</th>
-                <th className="px-1 py-4">Phí Handmade thu</th>
-                <th className="px-1 py-4">Lợi nhuận</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {sellingProducts?.map((product: Product, index: number) => {
+              {products?.map((product: Product, index: number) => {
                 return (
                   <tr
                     key={index}
@@ -198,28 +169,23 @@ const SellingItemsTable = () => {
                         </div>
                       </div>
                     </td>
+                    <td className="px-1 py-4 align-top">
+                      {product?.store?.name}
+                    </td>
+                    <td className="px-1 py-4 align-top">
+                      <div className="flex flex-col gap-1">
+                        {product?.category?.map((cate, index) => {
+                          return <div key={index}>{cate?.title}</div>;
+                        })}
+                      </div>
+                    </td>
+                    <td className="px-1 py-4">
+                      <MyStatus status={product?.status}></MyStatus>
+                    </td>
                     <td className="px-1 py-4">{product?.inventoryNumber}</td>
                     <td className="px-1 py-4">
                       {product?.price ? (
                         formatCurrency(product?.price)
-                      ) : (
-                        <div className="flex flex-row items-center justify-center">
-                          -
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-1 py-4">
-                      {product?.profitMoney ? (
-                        formatCurrency(product?.profitMoney)
-                      ) : (
-                        <div className="flex flex-row items-center justify-center">
-                          -
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-1 py-4">
-                      {product?.profitMoney && product?.price ? (
-                        formatCurrency(product?.price - product?.profitMoney)
                       ) : (
                         <div className="flex flex-row items-center justify-center">
                           -
@@ -236,25 +202,11 @@ const SellingItemsTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        <Tooltip title="Chỉnh sửa">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() => handleOpenEditModal(product?.id)}
-                          >
-                            <EditIcon />
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Xóa">
+                        <Tooltip title="Báo cáo vi phạm">
                           <div className="hover:cursor-pointer">
-                            <DeleteIcon />
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Tắt sản phẩm">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() => handleConfirmOffItem(product?.id)}
-                          >
-                            <OffIcon />
+                            <HighlightOffRoundedIcon
+                              sx={{ color: COLORS.support.c600, fontSize: 21 }}
+                            />
                           </div>
                         </Tooltip>
                       </div>
@@ -266,6 +218,13 @@ const SellingItemsTable = () => {
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };

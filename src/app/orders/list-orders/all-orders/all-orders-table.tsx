@@ -110,7 +110,7 @@ const AllOrdersTable = () => {
           />
         </div>
         <div className="flex flex-row items-center justify-center gap-3">
-          <div>Ngày đặt hàng</div>
+          <div className="flex-1">Ngày đặt hàng</div>
           <MyDatePicker id="" name="" className="flex-1" />
         </div>
       </div>

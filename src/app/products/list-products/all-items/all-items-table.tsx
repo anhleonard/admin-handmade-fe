@@ -36,7 +36,7 @@ import { useEffect, useState } from "react";
 import GiftCollapse from "@/components/gifts/gift-collapse";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { getSellerProducts } from "@/apis/services/product";
+import { adminProducts, getSellerProducts } from "@/apis/services/product";
 import { AlertState, Product } from "@/enum/defined-type";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { RootState } from "@/redux/store";
@@ -53,10 +53,11 @@ const labelOptions = [
 
 const AllItemsTable = () => {
   const dispatch = useDispatch();
+  const [products, setProducts] = useState<Product[]>([]);
+
   const [page, setPage] = useState(Page);
   const [rowsPage, setRowsPage] = useState(rowsPerPage);
   const [count, setCount] = useState(0);
-  const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
   const handleOpenDetailModal = (productId: number, status: ProductStatus) => {
@@ -70,16 +71,19 @@ const AllItemsTable = () => {
   };
 
   // get all seller products by seller token
-  const getAllSellerProducts = async () => {
+  const getAllProducts = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const res = await getSellerProducts(token, {
+      const query = {
         limit: rowsPage,
         page: page,
-      });
-      setCount(res?.total ?? 0);
-      setSellerProducts(res?.data);
+      };
+      const res = await adminProducts(token, query);
+      if (res) {
+        setCount(res?.total ?? 0);
+        setProducts(res?.data);
+      }
     } catch (error: any) {
       let alert: AlertState = {
         isOpen: true,
@@ -94,7 +98,7 @@ const AllItemsTable = () => {
   };
 
   useEffect(() => {
-    getAllSellerProducts();
+    getAllProducts();
   }, [refetchQueries, page, rowsPage]);
 
   const handlePageChange = (page: number) => {
@@ -104,11 +108,6 @@ const AllItemsTable = () => {
     setPage(Page);
     setRowsPage(parseInt(e.target.value));
   };
-
-  console.log({
-    page,
-    rowsPage,
-  });
 
   return (
     <div className="flex flex-col gap-8">
@@ -140,16 +139,17 @@ const AllItemsTable = () => {
             >
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã sản phẩm</th>
-                <th className="px-1 py-4">Sản phẩm</th>
+                <th className="px-1 py-4">Tên sản phẩm</th>
+                <th className="px-1 py-4">Nhà bán</th>
+                <th className="px-1 py-4">Danh mục</th>
                 <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Tồn kho</th>
                 <th className="px-1 py-4">Giá bán</th>
-                <th className="px-1 py-4">Đã bán</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {sellerProducts?.map((product: Product, index: number) => {
+              {products?.map((product: Product, index: number) => {
                 return (
                   <tr
                     className="hover:bg-primary-c100 hover:text-grey-c700"
@@ -167,13 +167,26 @@ const AllItemsTable = () => {
                           <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
                             {product.productName}
                           </div>
-                          <div>
-                            <span className="text-[10px]">Đã bán:</span>{" "}
-                            <span className="text-[10px] font-bold text-primary-c900">
-                              {product?.soldNumber}
-                            </span>
-                          </div>
+                          {(product?.status === ProductStatus.SELLING ||
+                            product?.status === ProductStatus.OFF ||
+                            (product?.status === ProductStatus.VIOLATE &&
+                              product?.isAccepted)) && (
+                            <div>
+                              <span className="text-[10px]">Đã bán:</span>{" "}
+                              <span className="text-[10px] font-bold text-primary-c900">
+                                {product?.soldNumber}
+                              </span>
+                            </div>
+                          )}
                         </div>
+                      </div>
+                    </td>
+                    <td className="px-1 py-4">{product?.store?.name}</td>
+                    <td className="px-1 py-4 align-top">
+                      <div className="flex flex-col gap-1">
+                        {product?.category?.map((cate, index) => {
+                          return <div key={index}>{cate?.title}</div>;
+                        })}
                       </div>
                     </td>
                     <td className="px-1 py-4">
@@ -189,7 +202,6 @@ const AllItemsTable = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-1 py-4">{product?.soldNumber}</td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
                         <Tooltip title="Xem chi tiết">

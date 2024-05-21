@@ -38,3 +38,13 @@ export type CreateProgressValues = {
 export type UpdateProgressValues = {
   comment: string;
 };
+
+export type RejectFormValues = {
+  rejectReason: string;
+  editHint: string;
+};
+
+export type CreateCategoryValues = {
+  title: string;
+  description: string;
+};

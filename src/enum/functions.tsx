@@ -6,7 +6,7 @@ import {
   Variant,
   VariantItem,
 } from "./defined-type";
-import { Role } from "./constants";
+import { ProductStatus, Role } from "./constants";
 import storage from "@/apis/storage";
 
 export function formatCurrency(price: number) {
@@ -170,5 +170,24 @@ export function getCurrentUser() {
   } else {
     console.error("localUser is empty or undefined");
     return null;
+  }
+}
+
+export function setLabelByStatus(status: ProductStatus) {
+  switch (status) {
+    case ProductStatus.NO_ITEM:
+      return "Hết hàng";
+
+    case ProductStatus.VIOLATE:
+      return "Vi phạm";
+
+    case ProductStatus.PENDING:
+      return "Chờ duyệt";
+
+    case ProductStatus.SELLING:
+      return "Đang bán";
+
+    case ProductStatus.OFF:
+      return "Đã tắt";
   }
 }

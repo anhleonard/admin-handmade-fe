@@ -182,7 +182,6 @@ const DetailProductModal = ({ productId, type }: Props) => {
             <MyDisabledMultipleChoices
               variants={product?.variants}
               isError={type === ProductStatus.VIOLATE}
-              helperText="Vui lòng điều chỉnh giá của bạn"
             />
           )}
           {type === ProductStatus.VIOLATE && (

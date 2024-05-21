@@ -118,3 +118,33 @@ export const updateProductBySeller = async (
     .put(`${headerUrl}/products/update/${id}`, variables, config)
     .then((res) => res.data);
 };
+
+// -------------- ADMIN --------------
+export const adminProducts = async (token: string, query?: any) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const params = new URLSearchParams(query).toString();
+  const url = `${headerUrl}/products/admin-filter-products?${params}`;
+
+  return await axios.get(url, config).then((res) => res.data);
+};
+
+export const adminApproveProduct = async (
+  id: number,
+  variables: any,
+  token: string,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const url = `${headerUrl}/products/update-approve/${id}`;
+
+  return await axios.put(url, variables, config).then((res) => res.data);
+};

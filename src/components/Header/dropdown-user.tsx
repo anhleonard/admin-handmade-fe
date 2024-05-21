@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/enum/functions";
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 
 const DropdownUser = () => {
   const router = useRouter();
@@ -44,12 +44,12 @@ const DropdownUser = () => {
       <Link
         ref={trigger}
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-4"
+        className="flex items-center gap-2"
         href="#"
       >
         <span className="hidden text-right lg:block">
-          <span className="block text-sm font-medium text-black dark:text-white">
-            {currentUser?.name}
+          <span className="block text-sm font-semibold text-black dark:text-white">
+            ADMIN
           </span>
         </span>
 
@@ -66,7 +66,7 @@ const DropdownUser = () => {
           />
         </span>
 
-        <KeyboardArrowDownRoundedIcon/>
+        <KeyboardArrowDownRoundedIcon />
       </Link>
 
       {/* <!-- Dropdown Start --> */}

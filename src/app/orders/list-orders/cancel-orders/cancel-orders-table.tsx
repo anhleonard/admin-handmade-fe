@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { ordersByStatus } from "@/apis/services/orders";
+import { adminOrders, ordersByStatus } from "@/apis/services/orders";
 import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { OrderStatusValues } from "@/apis/types";
@@ -40,16 +40,16 @@ const CancelOrdersTable = () => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
 
-  const getSellerOrdersByStatus = async () => {
+  const getAllOrders = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const variables: OrderStatusValues = {
+      const query = {
         status: EnumOrderStatus.CENCELLED,
       };
-      const res = await ordersByStatus(token, variables);
+      const res = await adminOrders(token, query);
       if (res) {
-        setOrders(res?.reverse());
+        setOrders(res?.data?.reverse());
       }
     } catch (error: any) {
       let alert: AlertState = {
@@ -65,7 +65,7 @@ const CancelOrdersTable = () => {
   };
 
   useEffect(() => {
-    getSellerOrdersByStatus();
+    getAllOrders();
   }, []);
 
   const handleOpenDetailModal = (orderId: number) => {
@@ -118,6 +118,7 @@ const CancelOrdersTable = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã đơn hàng</th>
                 <th className="px-1 py-4">Tên khách hàng</th>
+                <th className="px-1 py-4">Nhà bán</th>
                 <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Số lượng</th>
                 <th className="px-1 py-4">Khách trả</th>
@@ -136,6 +137,7 @@ const CancelOrdersTable = () => {
                   >
                     <td className="py-4 pl-3">{order?.code}</td>
                     <td className="px-1 py-4">{order?.client?.name}</td>
+                    <td className="px-1 py-4">{order?.store?.name}</td>
                     <td className="px-1 py-4">
                       <MyLabel type="error">Đã hủy</MyLabel>
                     </td>

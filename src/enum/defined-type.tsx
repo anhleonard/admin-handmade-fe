@@ -130,12 +130,14 @@ export type Product = {
   profitMoney: number;
   rejectReason: string;
   editHint: string;
+  store: Store;
 };
 
 export type Category = {
   id: number;
   title: string;
   description: string;
+  products: Product[];
 };
 
 export type Store = {

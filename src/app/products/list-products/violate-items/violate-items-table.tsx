@@ -1,5 +1,11 @@
 "use client";
-import { AlertStatus, ProductStatus, mainCategories } from "@/enum/constants";
+import {
+  AlertStatus,
+  Page,
+  ProductStatus,
+  mainCategories,
+  rowsPerPage,
+} from "@/enum/constants";
 import {
   DeleteIcon,
   DetailIcon,
@@ -27,10 +33,12 @@ import { useEffect, useState } from "react";
 import { AlertState, Product } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { getViolateProducts } from "@/apis/services/product";
+import { adminProducts, getViolateProducts } from "@/apis/services/product";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { headerUrl } from "@/apis/services/authentication";
 import { formatDate } from "@/enum/functions";
+import MyStatus from "@/libs/status";
+import { MyPagination } from "@/libs/pagination";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -39,7 +47,11 @@ const labelOptions = [
 
 const ViolateItemsTable = () => {
   const dispatch = useDispatch();
-  const [violateProducts, setViolateProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
 
   const handleOpenDetailModal = (productId: number) => {
     const modal = {
@@ -51,16 +63,6 @@ const ViolateItemsTable = () => {
           productId={productId}
         />
       ),
-      screen: SCREEN.BASE,
-    };
-    dispatch(openModal(modal));
-  };
-
-  const handleOpenEditModal = () => {
-    const modal = {
-      isOpen: true,
-      title: "Chỉnh sửa sản phẩm & lỗi",
-      content: <EditViolateProductModal />,
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -79,12 +81,18 @@ const ViolateItemsTable = () => {
   };
 
   // get all violate products by seller token
-  const getAllViolateProducts = async () => {
+  const getAllProducts = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const res = await getViolateProducts(token);
-      setViolateProducts(res);
+      const query = {
+        status: ProductStatus.VIOLATE,
+      };
+      const res = await adminProducts(token, query);
+      if (res) {
+        setCount(res?.total ?? 0);
+        setProducts(res?.data);
+      }
     } catch (error: any) {
       let alert: AlertState = {
         isOpen: true,
@@ -99,8 +107,16 @@ const ViolateItemsTable = () => {
   };
 
   useEffect(() => {
-    getAllViolateProducts();
-  }, []);
+    getAllProducts();
+  }, [page, rowsPage]);
+
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -133,14 +149,15 @@ const ViolateItemsTable = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã sản phẩm</th>
                 <th className="px-1 py-4">Sản phẩm</th>
-                <th className="px-1 py-4">Ngày phát hiện vi phạm</th>
+                <th className="px-1 py-4">Trạng thái</th>
+                <th className="px-1 py-4">Ngày vi phạm</th>
                 <th className="px-1 py-4">Lý do</th>
-                <th className="px-1 py-4">Gợi ý chỉnh sửa</th>
+                {/* <th className="px-1 py-4">Gợi ý chỉnh sửa</th> */}
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {violateProducts?.map((product: Product, index: number) => {
+              {products?.map((product: Product, index: number) => {
                 return (
                   <tr className="hover:bg-primary-c100 hover:text-grey-c700">
                     <td className="py-4 pl-3">{product?.productCode}</td>
@@ -152,9 +169,7 @@ const ViolateItemsTable = () => {
                           className="h-15 w-15 rounded-lg object-cover"
                         />
                         <div className="flex flex-col justify-start">
-                          <div className=" overflow-ellipsis break-words ">
-                            {product?.productName}
-                          </div>
+                          <div className="">{product?.productName}</div>
                           <div>
                             <span className="text-[10px]">Đã bán:</span>{" "}
                             <span className="text-[10px] font-bold text-primary-c900">
@@ -165,14 +180,15 @@ const ViolateItemsTable = () => {
                       </div>
                     </td>
                     <td className="px-1 py-4 align-top">
-                      {formatDate(product?.updatedAt)}
+                      <MyStatus status={product?.status}></MyStatus>
                     </td>
                     <td className="px-1 py-4 align-top">
+                      {formatDate(product?.updatedAt)}
+                    </td>
+                    <td className="max-w-[300px] px-1 py-4 align-top">
                       {product?.rejectReason}
                     </td>
-                    <td className="max-w-[200px] px-1 py-4 align-top">
-                      {product?.editHint}
-                    </td>
+                    {/* <td className="px-1 py-4 align-top">{product?.editHint}</td> */}
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
                         <Tooltip title="Xem chi tiết lỗi">
@@ -183,14 +199,6 @@ const ViolateItemsTable = () => {
                             <ErrorOutlineIcon
                               sx={{ color: COLORS.primary.c700, fontSize: 22 }}
                             />
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Chỉnh sửa">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() => handleOpenEditModal()}
-                          >
-                            <EditIcon />
                           </div>
                         </Tooltip>
                         <Tooltip title="Xóa">
@@ -210,6 +218,13 @@ const ViolateItemsTable = () => {
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };

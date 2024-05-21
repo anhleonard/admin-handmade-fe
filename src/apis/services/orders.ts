@@ -31,22 +31,6 @@ export const singleOrder = async (orderId: number, token: string) => {
     .then((res) => res.data);
 };
 
-export const updateOrder = async (
-  orderId: number,
-  token: string,
-  variables: OrderStatusValues,
-) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  return await axios
-    .put(`${headerUrl}/orders/update/${orderId}`, variables, config)
-    .then((res) => res.data);
-};
-
 export const updateReadyForAdmin = async (orderId: number, token: string) => {
   const config = {
     headers: {
@@ -72,5 +56,35 @@ export const cancelOrder = async (
 
   return await axios
     .put(`${headerUrl}/orders/cancel/${orderId}`, variables, config)
+    .then((res) => res.data);
+};
+
+// ADMIN
+export const adminOrders = async (token: string, query?: any) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const params = new URLSearchParams(query).toString();
+  const url = `${headerUrl}/orders/admin-filter-orders?${params}`;
+
+  return await axios.get(url, config).then((res) => res.data);
+};
+
+export const updateOrder = async (
+  orderId: number,
+  token: string,
+  variables: OrderStatusValues,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/orders/update/${orderId}`, variables, config)
     .then((res) => res.data);
 };

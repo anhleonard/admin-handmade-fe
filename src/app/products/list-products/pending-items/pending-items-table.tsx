@@ -1,15 +1,14 @@
 "use client";
-import { AlertStatus, ProductStatus, mainCategories } from "@/enum/constants";
 import {
-  DeleteIcon,
-  DetailIcon,
-  EditIcon,
-  OffIcon,
-  SearchIcon,
-} from "@/enum/icons";
+  AlertStatus,
+  Page,
+  ProductStatus,
+  mainCategories,
+  rowsPerPage,
+} from "@/enum/constants";
+import { DetailIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
-import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
@@ -17,7 +16,7 @@ import { Tooltip } from "@mui/material";
 import DetailProductModal from "../../modals/detail-product-modal";
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import { deleteProduct, getPendingProducts } from "@/apis/services/product";
+import { adminApproveProduct, adminProducts } from "@/apis/services/product";
 import storage from "@/apis/storage";
 import { AlertState, Category, Product } from "@/enum/defined-type";
 import { openAlert } from "@/redux/slices/alertSlice";
@@ -26,6 +25,12 @@ import { formatCurrency, formatDate } from "@/enum/functions";
 import { headerUrl } from "@/apis/services/authentication";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import { RootState } from "@/redux/store";
+import { COLORS } from "@/enum/colors";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import HighlightOffRoundedIcon from "@mui/icons-material/HighlightOffRounded";
+import RejectProductModal from "@/components/products/reject-product-modal";
+import MyStatus from "@/libs/status";
+import { MyPagination } from "@/libs/pagination";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -34,8 +39,11 @@ const labelOptions = [
 
 const PendingItemsTable = () => {
   const dispatch = useDispatch();
-  const [pendingProducts, setPendingProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
 
   const handleOpenDetailModal = (productId: number) => {
     const modal = {
@@ -52,22 +60,41 @@ const PendingItemsTable = () => {
     dispatch(openModal(modal));
   };
 
-  const handleConfirmDeleteItem = (id: number) => {
+  const handleOpenRejectModal = (productId: number) => {
+    const modal = {
+      isOpen: true,
+      title: "Nêu lý do từ chối",
+      content: (
+        <RejectProductModal
+          productId={productId}
+          handleRefetch={handleRefetch}
+        />
+      ),
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleApproveProduct = (id: number) => {
     const confirm: any = {
       isOpen: true,
-      title: "HỦY CHỜ DUYỆT SẢN PHẨM",
-      message: "Bạn có chắc chắn hủy chờ duyệt cho sản phẩm này không?",
+      title: "DUYỆT SẢN PHẨM",
+      message: "Bạn có chắc chắn duyệt sản phẩm này không?",
       feature: "CONFIRM_CONTACT_US",
       onConfirm: async () => {
         try {
           dispatch(openLoading());
-          const res = await handleDeleteProduct(id); //call api to delete product
+          const token = storage.getLocalAccessToken();
+          const variables = {
+            isAccepted: true,
+          };
+          const res = await adminApproveProduct(id, variables, token);
           if (res) {
             dispatch(closeConfirm());
             let alert: AlertState = {
               isOpen: true,
-              title: "XÓA THÀNH CÔNG",
-              message: "Đã xóa sản phẩm khỏi danh sách chờ duyệt thành công",
+              title: "THÀNH CÔNG",
+              message: "Sản phẩm đã được duyệt thành công!",
               type: AlertStatus.SUCCESS,
             };
             dispatch(openAlert(alert));
@@ -90,18 +117,19 @@ const PendingItemsTable = () => {
     dispatch(openConfirm(confirm));
   };
 
-  const handleDeleteProduct = async (id: number) => {
-    const token = storage.getLocalAccessToken();
-    return await deleteProduct(id, token);
-  };
-
   // get all pending products by seller token
-  const getAllPendingProducts = async () => {
+  const getAllProducts = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const res = await getPendingProducts(token);
-      setPendingProducts(res);
+      const query = {
+        status: ProductStatus.PENDING,
+      };
+      const res = await adminProducts(token, query);
+      if (res) {
+        setCount(res?.total ?? 0);
+        setProducts(res?.data);
+      }
     } catch (error: any) {
       let alert: AlertState = {
         isOpen: true,
@@ -116,8 +144,20 @@ const PendingItemsTable = () => {
   };
 
   useEffect(() => {
-    getAllPendingProducts();
-  }, [refetchQueries]);
+    getAllProducts();
+  }, [refetchQueries, page, rowsPage]);
+
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
+  };
+
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -150,6 +190,8 @@ const PendingItemsTable = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã sản phẩm</th>
                 <th className="px-1 py-4">Sản phẩm</th>
+                <th className="px-1 py-4">Nhà bán</th>
+                <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Danh mục</th>
                 <th className="px-1 py-4">Tồn kho</th>
                 <th className="px-1 py-4">Giá bán</th>
@@ -159,7 +201,7 @@ const PendingItemsTable = () => {
               </tr>
             </thead>
             <tbody>
-              {pendingProducts?.map((product: Product, index: number) => {
+              {products?.map((product: Product, index: number) => {
                 return (
                   <tr
                     className="hover:bg-primary-c100 hover:text-grey-c700"
@@ -174,13 +216,19 @@ const PendingItemsTable = () => {
                           className="h-15 w-15 rounded-lg object-cover"
                         />
                         <div className="flex flex-col justify-start">
-                          <div className="w-[160px] overflow-ellipsis break-words md:w-[200px] ">
+                          <div className="max-w-[100px] overflow-ellipsis break-words">
                             {product.productName}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-1 py-4">
+                    <td className="px-1 py-4 align-top">
+                      {product.store.name}
+                    </td>
+                    <td className="px-1 py-4 align-top">
+                      <MyStatus status={product?.status}></MyStatus>
+                    </td>
+                    <td className="px-1 py-4 align-top">
                       <div className="flex flex-col items-start justify-start gap-1">
                         {product.category?.map(
                           (cate: Category, index: number) => {
@@ -226,12 +274,24 @@ const PendingItemsTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        <Tooltip title="Xóa">
+                        <Tooltip title="Phê duyệt">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleConfirmDeleteItem(product?.id)}
+                            onClick={() => handleApproveProduct(product?.id)}
                           >
-                            <DeleteIcon />
+                            <CheckCircleOutlineRoundedIcon
+                              sx={{ color: COLORS.purple.c800, fontSize: 20 }}
+                            />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Từ chối">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleOpenRejectModal(product?.id)}
+                          >
+                            <HighlightOffRoundedIcon
+                              sx={{ color: COLORS.support.c600, fontSize: 21 }}
+                            />
                           </div>
                         </Tooltip>
                       </div>
@@ -243,6 +303,13 @@ const PendingItemsTable = () => {
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };

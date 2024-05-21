@@ -7,12 +7,10 @@ import {
 } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
-import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import { Tooltip } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import { COLORS } from "@/enum/colors";
 import DetailOrderModal from "../../modals/detail-order-modal";
@@ -22,15 +20,13 @@ import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { ordersByStatus, updateOrder } from "@/apis/services/orders";
+import { adminOrders } from "@/apis/services/orders";
 import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
-import { OrderStatusValues } from "@/apis/types";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
-import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { openConfirm } from "@/redux/slices/confirmSlice";
 import { RootState } from "@/redux/store";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
-import CancelOrderModal from "@/components/orders/cancel-order-modal";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -42,16 +38,16 @@ const WaitingOrdersTable = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
-  const getSellerOrdersByStatus = async () => {
+  const getAllOrders = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const variables: OrderStatusValues = {
+      const query = {
         status: EnumOrderStatus.WAITING_PAYMENT,
       };
-      const res = await ordersByStatus(token, variables);
+      const res = await adminOrders(token, query);
       if (res) {
-        setOrders(res?.reverse());
+        setOrders(res?.data?.reverse());
       }
     } catch (error: any) {
       let alert: AlertState = {
@@ -67,7 +63,7 @@ const WaitingOrdersTable = () => {
   };
 
   useEffect(() => {
-    getSellerOrdersByStatus();
+    getAllOrders();
   }, [refetchQueries]);
 
   const handleOpenDetailModal = (orderId: number) => {
@@ -85,62 +81,20 @@ const WaitingOrdersTable = () => {
     dispatch(openModal(modal));
   };
 
-  const handleConfirmOrder = (orderId: number) => {
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
+  };
+
+  const handleCancelOrderByAdmin = (orderId: number) => {
     const confirm: any = {
       isOpen: true,
-      title: "XÁC NHẬN ĐƠN HÀNG",
-      message: "Bạn có chắc chắn xác nhận đơn hàng này không?",
+      title: "HỦY ĐƠN HÀNG",
+      message: "Bạn có chắc chắn hủy đơn hàng này không?",
       feature: "CONFIRM_CONTACT_US",
-      onConfirm: async () => {
-        try {
-          dispatch(openLoading());
-          const token = storage.getLocalAccessToken();
-          const variables = {
-            status: EnumOrderStatus.PROCESSING,
-          };
-          const res = await updateOrder(orderId, token, variables);
-          if (res) {
-            dispatch(closeConfirm());
-            let alert: AlertState = {
-              isOpen: true,
-              title: "DUYỆT THÀNH CÔNG",
-              message: "Đã duyệt đơn hàng thành công!",
-              type: AlertStatus.SUCCESS,
-            };
-            dispatch(openAlert(alert));
-            handleRefetch();
-          }
-        } catch (error: any) {
-          let alert: AlertState = {
-            isOpen: true,
-            title: "LỖI",
-            message: error?.response?.data?.message,
-            type: AlertStatus.ERROR,
-          };
-          dispatch(openAlert(alert));
-        } finally {
-          dispatch(closeLoading());
-        }
-      },
+      onConfirm: () => {},
     };
 
     dispatch(openConfirm(confirm));
-  };
-
-  const handleOpenCancelModal = (orderId: number) => {
-    const modal = {
-      isOpen: true,
-      title: "Lí do hủy đơn hàng",
-      content: (
-        <CancelOrderModal orderId={orderId} handleRefetch={handleRefetch} />
-      ),
-      screen: SCREEN.BASE,
-    };
-    dispatch(openModal(modal));
-  };
-
-  const handleRefetch = () => {
-    dispatch(refetchComponent());
   };
 
   return (
@@ -158,7 +112,7 @@ const WaitingOrdersTable = () => {
         </div>
         <div className="flex flex-row items-center justify-center gap-3">
           <div>Ngày đặt hàng</div>
-          <MyDatePicker id="" />
+          <MyDatePicker id="" className="flex-1" />
         </div>
       </div>
       {/* table */}
@@ -171,6 +125,7 @@ const WaitingOrdersTable = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Mã đơn hàng</th>
                 <th className="px-1 py-4">Tên khách hàng</th>
+                <th className="px-1 py-4">Nhà bán</th>
                 <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Số lượng</th>
                 <th className="px-1 py-4">Khách trả</th>
@@ -189,6 +144,7 @@ const WaitingOrdersTable = () => {
                   >
                     <td className="py-4 pl-3">{order?.code}</td>
                     <td className="px-1 py-4">{order?.client?.name}</td>
+                    <td className="px-1 py-4">{order?.store?.name}</td>
                     <td className="px-1 py-4">
                       <MyLabel type="warning">Chờ xác nhận</MyLabel>
                     </td>
@@ -214,20 +170,10 @@ const WaitingOrdersTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        <Tooltip title="Xác nhận">
+                        <Tooltip title="Hủy">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleConfirmOrder(order?.id)}
-                          >
-                            <CheckCircleOutlineIcon
-                              sx={{ fontSize: 20, color: COLORS.blue.c900 }}
-                            />
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Từ chối">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() => handleOpenCancelModal(order?.id)}
+                            onClick={() => handleCancelOrderByAdmin(order?.id)}
                           >
                             <DoNotDisturbOnOutlinedIcon
                               sx={{ fontSize: 20, color: COLORS.support.c500 }}

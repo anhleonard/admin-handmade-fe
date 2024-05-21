@@ -27,6 +27,8 @@ import ProcessingAuctionsTab from "@/app/auctions/my-auctions/processing-auction
 import FinishedAuctionsTab from "@/app/auctions/my-auctions/finished-auctions/finished-auctions-table";
 import CanceledAuctionsTab from "@/app/auctions/my-auctions/canceled-auctions/canceled-auctions-table";
 import { FilterTime } from "./defined-type";
+import AllStoresTable from "@/app/(stores)/all-stores/page";
+import ReadyOrdersTable from "@/app/orders/list-orders/ready-orders/ready-orders-table";
 
 export const Page = 1;
 export const Limit = 5;
@@ -125,43 +127,62 @@ export const productTabs = [
     content: <SellingItemsTable />,
   },
   {
-    label: "Hết hàng",
-    value: "3",
-    content: <NoItemsTable />,
-  },
-  {
     label: "Chờ duyệt",
-    value: "4",
+    value: "3",
     content: <PendingItemsTable />,
   },
   {
     label: "Vi phạm",
-    value: "5",
+    value: "4",
     content: <ViolateItemsTable />,
   },
+];
+
+// store tabs
+export const storeTabs = [
   {
-    label: "Tắt bởi Nhà bán",
-    value: "6",
-    content: <OffItemsTable />,
+    label: "Tất cả",
+    value: "1",
+    content: <AllStoresTable />,
+  },
+  {
+    label: "Đang hoạt động",
+    value: "2",
+    content: <SellingItemsTable />,
+  },
+  {
+    label: "Chờ duyệt",
+    value: "3",
+    content: <PendingItemsTable />,
+  },
+  {
+    label: "Bị cấm",
+    value: "4",
+    content: <ViolateItemsTable />,
   },
 ];
 
 // order tabs
 export const orderTabs = [
-  {
-    label: "Tất cả",
-    value: "1",
-    content: <AllOrdersTable />,
-  },
+  // {
+  //   label: "Tất cả",
+  //   value: "1",
+  //   content: <AllOrdersTable />,
+  // },
   {
     label: "Chờ xác nhận",
-    value: "2",
+    value: "1",
     content: <WaitingOrdersTable />,
   },
   {
     label: "Đang xử lý",
-    value: "3",
+    value: "2",
     content: <ProcessingOrdersTable />,
+  },
+  {
+    label: "Sẵn sàng giao",
+    value: "3",
+    content: <ReadyOrdersTable />,
   },
   {
     label: "Đang vận chuyển",
