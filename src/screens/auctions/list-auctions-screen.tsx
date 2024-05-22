@@ -77,7 +77,7 @@ const ListAuctionsScreen = () => {
     <div className="w-full rounded-lg bg-white px-8 py-4">
       <div className="mb-5 flex flex-col gap-6">
         <div className="text-lg font-bold text-grey-c900">
-          Thị trường đấu giá
+          Thị trường handmade
         </div>
         <div className="grid grid-cols-2 gap-6 md:grid-cols-5">
           <div className="md:col-span-4">

@@ -29,6 +29,10 @@ import CanceledAuctionsTab from "@/app/auctions/my-auctions/canceled-auctions/ca
 import { FilterTime } from "./defined-type";
 import AllStoresTable from "@/app/(stores)/all-stores/page";
 import ReadyOrdersTable from "@/app/orders/list-orders/ready-orders/ready-orders-table";
+import WaitingAuctionsTable from "@/app/auctions/my-auctions/waiting-auctions/waiting-auctions-table";
+import DeliveryAuctionsTable from "@/app/auctions/my-auctions/delivery-auctions/delivery-auctions-table";
+import AuctioningAuctionsTable from "@/app/auctions/my-auctions/auctioning-auctions/auctioning-auctions-table";
+import ReadyAuctionsTab from "@/app/auctions/my-auctions/ready-auctions/ready-auctions-table";
 
 export const Page = 1;
 export const Limit = 5;
@@ -314,24 +318,44 @@ export const reviewTabs = [
 
 // my auctions tabs
 export const sellerAuctionTabs = [
+  // {
+  //   label: "Tất cả",
+  //   value: "1",
+  //   content: <AllAuctionsTab />,
+  // },
   {
-    label: "Tất cả",
+    label: "Chờ duyệt",
     value: "1",
-    content: <AllAuctionsTab />,
+    content: <WaitingAuctionsTable />,
+  },
+  {
+    label: "Đang đấu giá",
+    value: "2",
+    content: <AuctioningAuctionsTable />,
   },
   {
     label: "Đang tiến hành",
-    value: "2",
+    value: "3",
     content: <ProcessingAuctionsTab />,
   },
   {
+    label: "Sẵn sàng vận chuyển",
+    value: "4",
+    content: <ReadyAuctionsTab />,
+  },
+  {
+    label: "Đang vận chuyển",
+    value: "5",
+    content: <DeliveryAuctionsTable />,
+  },
+  {
     label: "Đã hoàn thành",
-    value: "3",
+    value: "6",
     content: <FinishedAuctionsTab />,
   },
   {
     label: "Đã hủy",
-    value: "4",
+    value: "7",
     content: <CanceledAuctionsTab />,
   },
 ];

@@ -1,20 +1,17 @@
-import {
-  adminFilterAuctions,
-  allSellerAuctions,
-} from "@/apis/services/auctions";
+import { adminFilterAuctions } from "@/apis/services/auctions";
 import storage from "@/apis/storage";
 import AdminDetailAuction from "@/components/auctions/admin-detail-auction";
-import SellerAunctionCard from "@/components/auctions/seller-auctions/seller-auctions-card";
 import NoItemCard from "@/components/no-item/no-item-card";
 import { AlertStatus, AuctionStatus } from "@/enum/constants";
-import { AlertState, Auction, Bidder } from "@/enum/defined-type";
+import { AlertState, Auction } from "@/enum/defined-type";
 import {
-  calculateDaysAfterAccepted,
-  findMaxPercentage,
+  calculateAverageBidderMoney,
+  formatCommonTime,
   formatCurrency,
 } from "@/enum/functions";
-import { DetailIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
+import MyLabel from "@/libs/label";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
@@ -23,7 +20,7 @@ import { Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
-const FinishedAuctionsTab = () => {
+const AuctioningAuctionsTable = () => {
   const dispatch = useDispatch();
   const [auctions, setAuctions] = useState<Auction[]>([]);
 
@@ -32,7 +29,7 @@ const FinishedAuctionsTab = () => {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
       const query = {
-        status: AuctionStatus.COMPLETED,
+        status: AuctionStatus.AUCTIONING,
       };
       const res = await adminFilterAuctions(token, query);
       if (res) {
@@ -55,11 +52,11 @@ const FinishedAuctionsTab = () => {
     getAllAuctions();
   }, []);
 
-  const handleOpenDetailModal = (auctionId: number, bidder: Bidder) => {
+  const handleOpenDetailModal = (auctionId: number) => {
     const modal = {
       isOpen: true,
       title: "Chi tiết dự án",
-      content: <AdminDetailAuction auctionId={auctionId} bidder={bidder} />,
+      content: <AdminDetailAuction auctionId={auctionId} />,
       screen: SCREEN.LG,
     };
     dispatch(openModal(modal));
@@ -90,20 +87,15 @@ const FinishedAuctionsTab = () => {
                 <th className="py-4 pl-3">Tên dự án</th>
                 <th className="py-4 pl-3">Khách hàng</th>
                 <th className="px-1 py-4">Số lượng yêu cầu</th>
-                <th className="px-1 py-4">Handmader</th>
-                <th className="px-1 py-4">Giá chốt</th>
-                <th className="px-1 py-4">Làm trong</th>
-                <th className="px-1 py-4">Còn lại</th>
-                <th className="px-1 py-4">Tiến độ</th>
+                <th className="px-1 py-4">Ngân sách</th>
+                <th className="px-1 py-4">Đặt cọc</th>
+                <th className="px-1 py-4">Ngày tạo</th>
+                <th className="px-1 py-4">Ngày đóng</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {auctions?.map((auction, index) => {
-                const bidder = auction?.candidates?.filter(
-                  (bidder) => bidder.isSelected === true,
-                )[0];
-
                 return (
                   <tr
                     key={index}
@@ -114,28 +106,24 @@ const FinishedAuctionsTab = () => {
                     </td>
                     <td className="px-1 py-4">{auction?.owner?.name}</td>
                     <td className="px-1 py-4">{auction?.requiredNumber}</td>
-                    <td className="px-1 py-4">{bidder?.store?.name}</td>
                     <td className="px-1 py-4">
-                      {formatCurrency(bidder?.bidderMoney)}
-                    </td>
-                    <td className="px-1 py-4">{bidder?.estimatedDay}</td>
-                    <td className="px-1 py-4">
-                      {calculateDaysAfterAccepted(
-                        bidder?.estimatedDay,
-                        bidder?.acceptedAt,
-                      )}
+                      {formatCurrency(auction?.maxAmount)}
                     </td>
                     <td className="px-1 py-4">
-                      {findMaxPercentage(auction?.progresses)}%
+                      {formatCurrency(auction?.deposit)}
+                    </td>
+                    <td className="px-1 py-4">
+                      {formatCommonTime(auction?.createdAt)}
+                    </td>
+                    <td className="px-1 py-4">
+                      {formatCommonTime(auction?.createdAt, 7)}
                     </td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
                         <Tooltip title="Xem chi tiết">
                           <div
                             className="pt-1 hover:cursor-pointer"
-                            onClick={() =>
-                              handleOpenDetailModal(auction?.id, bidder)
-                            }
+                            onClick={() => handleOpenDetailModal(auction?.id)}
                           >
                             <DetailIcon />
                           </div>
@@ -156,4 +144,4 @@ const FinishedAuctionsTab = () => {
   );
 };
 
-export default FinishedAuctionsTab;
+export default AuctioningAuctionsTable;

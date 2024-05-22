@@ -231,14 +231,17 @@ export type Auction = {
   requiredNumber: number;
   maxAmount: number;
   createdAt: Date;
+  updatedAt: Date;
   closedDate: Date;
   maxDays: number;
   deposit: number;
   readyToLaunch: boolean;
   status: string;
+  owner: User;
   shipping: Shipping;
   candidates: Bidder[];
   progresses: Progress[];
+  canceledBy: User;
 };
 
 export type Bidder = {

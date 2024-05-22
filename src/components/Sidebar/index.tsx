@@ -594,7 +594,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         }}
                       >
                         <PriceCheckIcon />
-                        <div className="text-sm">Đấu giá</div>
+                        <div className="text-sm">Dự án handmade</div>
                         <svg
                           className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
                             open && "rotate-180"
@@ -643,7 +643,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 "text-white"
                               } `}
                             >
-                              <div className="text-sm">Dự án của tôi</div>
+                              <div className="text-sm">Danh sách dự án</div>
                             </Link>
                           </li>
                         </ul>

@@ -15,7 +15,9 @@ const MyAuctionsScreen = () => {
   return (
     <div className="w-full rounded-lg bg-white px-8 py-4">
       <div className="mb-5 flex flex-col gap-3">
-        <div className="text-lg font-bold text-grey-c900">Dự án của tôi</div>
+        <div className="text-lg font-bold text-grey-c900">
+          Danh sách dự án handmade
+        </div>
         <div>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <TabContext value={value}>

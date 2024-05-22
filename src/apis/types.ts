@@ -48,3 +48,8 @@ export type CreateCategoryValues = {
   title: string;
   description: string;
 };
+
+export type RejectAuctionValues = {
+  isAccepted: boolean;
+  additionalComment: string;
+};

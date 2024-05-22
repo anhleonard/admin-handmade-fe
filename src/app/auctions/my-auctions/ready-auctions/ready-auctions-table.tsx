@@ -1,11 +1,11 @@
 import {
   adminFilterAuctions,
-  allSellerAuctions,
+  updateAuctionStatus,
 } from "@/apis/services/auctions";
 import storage from "@/apis/storage";
 import AdminDetailAuction from "@/components/auctions/admin-detail-auction";
-import SellerAunctionCard from "@/components/auctions/seller-auctions/seller-auctions-card";
 import NoItemCard from "@/components/no-item/no-item-card";
+import { COLORS } from "@/enum/colors";
 import { AlertStatus, AuctionStatus } from "@/enum/constants";
 import { AlertState, Auction, Bidder } from "@/enum/defined-type";
 import {
@@ -13,26 +13,33 @@ import {
   findMaxPercentage,
   formatCurrency,
 } from "@/enum/functions";
-import { DetailIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
+import MyLabel from "@/libs/label";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import { RootState } from "@/redux/store";
 
-const FinishedAuctionsTab = () => {
+const ReadyAuctionsTab = () => {
   const dispatch = useDispatch();
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
 
   const getAllAuctions = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
       const query = {
-        status: AuctionStatus.COMPLETED,
+        status: AuctionStatus.PROGRESS,
+        readyToLaunch: true,
       };
       const res = await adminFilterAuctions(token, query);
       if (res) {
@@ -53,7 +60,7 @@ const FinishedAuctionsTab = () => {
 
   useEffect(() => {
     getAllAuctions();
-  }, []);
+  }, [refetchQueries]);
 
   const handleOpenDetailModal = (auctionId: number, bidder: Bidder) => {
     const modal = {
@@ -63,6 +70,52 @@ const FinishedAuctionsTab = () => {
       screen: SCREEN.LG,
     };
     dispatch(openModal(modal));
+  };
+
+  const handleUpdateAuction = (auctionId: number) => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN ĐANG VẬN CHUYỂN",
+      message: "Bạn có xác nhận đang vận chuyển đơn hàng này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: async () => {
+        try {
+          dispatch(openLoading());
+          const variables = {
+            status: AuctionStatus.DELIVERY,
+          };
+          const token = storage.getLocalAccessToken();
+          const res = await updateAuctionStatus(auctionId, variables, token);
+          if (res) {
+            dispatch(closeConfirm());
+            let alert: AlertState = {
+              isOpen: true,
+              title: "THÀNH CÔNG",
+              message: "Đã cập nhật vận chuyển thành công!",
+              type: AlertStatus.SUCCESS,
+            };
+            dispatch(openAlert(alert));
+            handleRefetch();
+          }
+        } catch (error: any) {
+          let alert: AlertState = {
+            isOpen: true,
+            title: "LỖI",
+            message: error?.response?.data?.message,
+            type: AlertStatus.ERROR,
+          };
+          dispatch(openAlert(alert));
+        } finally {
+          dispatch(closeLoading());
+        }
+      },
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
   };
 
   return (
@@ -140,6 +193,16 @@ const FinishedAuctionsTab = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
+                        <Tooltip title="Xác nhận đang vận chuyển">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleUpdateAuction(auction?.id)}
+                          >
+                            <CheckCircleOutlineRoundedIcon
+                              sx={{ color: COLORS.purple.c800, fontSize: 20 }}
+                            />
+                          </div>
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>
@@ -156,4 +219,4 @@ const FinishedAuctionsTab = () => {
   );
 };
 
-export default FinishedAuctionsTab;
+export default ReadyAuctionsTab;
