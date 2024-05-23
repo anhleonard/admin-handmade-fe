@@ -33,6 +33,9 @@ import WaitingAuctionsTable from "@/app/auctions/my-auctions/waiting-auctions/wa
 import DeliveryAuctionsTable from "@/app/auctions/my-auctions/delivery-auctions/delivery-auctions-table";
 import AuctioningAuctionsTable from "@/app/auctions/my-auctions/auctioning-auctions/auctioning-auctions-table";
 import ReadyAuctionsTab from "@/app/auctions/my-auctions/ready-auctions/ready-auctions-table";
+import ActiveStoresTable from "@/app/(stores)/active-stores/page";
+import PendingStoresTable from "@/app/(stores)/pending-stores/page";
+import ViolateStoresTable from "@/app/(stores)/violate-stores/page";
 
 export const Page = 1;
 export const Limit = 5;
@@ -152,17 +155,17 @@ export const storeTabs = [
   {
     label: "Đang hoạt động",
     value: "2",
-    content: <SellingItemsTable />,
+    content: <ActiveStoresTable />,
   },
   {
     label: "Chờ duyệt",
     value: "3",
-    content: <PendingItemsTable />,
+    content: <PendingStoresTable />,
   },
   {
     label: "Bị cấm",
     value: "4",
-    content: <ViolateItemsTable />,
+    content: <ViolateStoresTable />,
   },
 ];
 
@@ -404,4 +407,10 @@ export enum AuctionStatus {
   DELIVERY = "DELIVERY",
   COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
+}
+
+export enum StoreStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BANNED = "BANNED",
 }

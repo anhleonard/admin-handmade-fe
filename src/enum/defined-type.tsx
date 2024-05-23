@@ -151,6 +151,7 @@ export type Store = {
   avgStoreRating: number;
   followerAmount: number;
   owner: User;
+  createdAt: Date;
 };
 
 export type OrderProduct = {

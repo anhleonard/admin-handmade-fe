@@ -3,7 +3,7 @@ import { FontFamily, FontSize } from "@/enum/setting";
 import MyTextField from "@/libs/text-field";
 import React from "react";
 
-const AllStoresTable = () => {
+const ViolateStoresTable = () => {
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -30,8 +30,7 @@ const AllStoresTable = () => {
                 <th className="px-1 py-4">Chủ shop</th>
                 <th className="px-1 py-4">Hàng chủ lực</th>
                 <th className="px-1 py-4">Trạng thái</th>
-                <th className="px-1 py-4">Số đơn hàng</th>
-                <th className="px-1 py-4">Doanh thu</th>
+                <th className="px-1 py-4">Lý do cấm</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
@@ -44,4 +43,4 @@ const AllStoresTable = () => {
   );
 };
 
-export default AllStoresTable;
+export default ViolateStoresTable;
