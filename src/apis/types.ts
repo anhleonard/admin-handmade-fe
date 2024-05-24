@@ -1,4 +1,4 @@
-import { EnumOrderStatus } from "@/enum/constants";
+import { EnumOrderStatus, StoreStatus } from "@/enum/constants";
 
 export type LoginFormValues = {
   email: string;
@@ -52,4 +52,10 @@ export type CreateCategoryValues = {
 export type RejectAuctionValues = {
   isAccepted: boolean;
   additionalComment: string;
+};
+
+export type StoreStatusValues = {
+  status: StoreStatus;
+  bannedReason?: string;
+  notApproveReason?: string;
 };

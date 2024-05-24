@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Url } from "url";
-import { AlertStatus, ProductStatus, Role } from "./constants";
+import { AlertStatus, ProductStatus, Role, StoreStatus } from "./constants";
 import { Item } from "@/libs/select";
 
 export type ColTabItem = {
@@ -152,6 +152,11 @@ export type Store = {
   followerAmount: number;
   owner: User;
   createdAt: Date;
+  products: Product[];
+  orders: Order[];
+  bannedReason: string;
+  notApproveReason: string;
+  status: StoreStatus;
 };
 
 export type OrderProduct = {
@@ -213,6 +218,8 @@ export type User = {
   phoneNumber: string;
   dateOfBirth: Date;
   role: Role;
+  frontCard: string;
+  backCard: string;
 };
 
 export type FilterTime = {

@@ -3,13 +3,14 @@ import React from "react";
 
 type Props = {
   title: string;
-  desc: string;
+  desc: string | number;
+  hasBorder?: boolean;
 };
 
-const DetailStoreItem = ({ title, desc }: Props) => {
+const DetailStoreItem = ({ title, desc, hasBorder = true }: Props) => {
   return (
     <ListItem
-      className="block w-full border-b-[2px] border-grey-c50 px-4 py-2"
+      className={`block w-full ${hasBorder ? "border-b-[2px] border-grey-c50" : ""} px-4 py-2`}
       disablePadding
     >
       <div className="flex flex-col gap-1">

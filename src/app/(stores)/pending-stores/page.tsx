@@ -1,4 +1,4 @@
-import { adminFilterStores } from "@/apis/services/stores";
+import { adminFilterStores, updateStoreStatus } from "@/apis/services/stores";
 import storage from "@/apis/storage";
 import { AlertStatus, StoreStatus } from "@/enum/constants";
 import { AlertState, Store } from "@/enum/defined-type";
@@ -19,6 +19,8 @@ import { COLORS } from "@/enum/colors";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import { openModal } from "@/redux/slices/modalSlice";
 import DetailStore from "@/components/stores/detail-store";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import RejectStoreModal from "@/components/stores/reject-store-modal";
 
 const PendingStoresTable = () => {
   const dispatch = useDispatch();
@@ -62,6 +64,60 @@ const PendingStoresTable = () => {
       isOpen: true,
       title: "Chi tiết cửa hàng",
       content: <DetailStore storeId={storeId} />,
+      screen: SCREEN.LG,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleApproveStore = (storeId: number) => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN DUYỆT CỬA HÀNG",
+      message: "Bạn có xác nhận duyệt cửa hàng này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: async () => {
+        try {
+          dispatch(openLoading());
+          const variables = {
+            status: StoreStatus.ACTIVE,
+          };
+          const token = storage.getLocalAccessToken();
+          const res = await updateStoreStatus(storeId, variables, token);
+          if (res) {
+            dispatch(closeConfirm());
+            let alert: AlertState = {
+              isOpen: true,
+              title: "THÀNH CÔNG",
+              message: "Đã duyệt cửa hàng thành công!",
+              type: AlertStatus.SUCCESS,
+            };
+            dispatch(openAlert(alert));
+            handleRefetch();
+          }
+        } catch (error: any) {
+          let alert: AlertState = {
+            isOpen: true,
+            title: "LỖI",
+            message: error?.response?.data?.message,
+            type: AlertStatus.ERROR,
+          };
+          dispatch(openAlert(alert));
+        } finally {
+          dispatch(closeLoading());
+        }
+      },
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleOpenRejectModal = (storeId: number) => {
+    const modal = {
+      isOpen: true,
+      title: "Nêu lý do từ chối",
+      content: (
+        <RejectStoreModal storeId={storeId} handleRefetch={handleRefetch} />
+      ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -100,6 +156,8 @@ const PendingStoresTable = () => {
 
             <tbody>
               {stores?.map((store, index) => {
+                if (store?.notApproveReason !== null) return null;
+
                 return (
                   <tr
                     key={index}
@@ -111,7 +169,7 @@ const PendingStoresTable = () => {
                     <td className="px-1 py-4">{store?.owner?.name}</td>
                     <td className="px-1 py-4">{store?.mainBusiness}</td>
                     <td className="px-1 py-4">
-                      <MyLabel type="success">Đang hoạt động</MyLabel>
+                      <MyLabel type="warning">Chờ duyệt</MyLabel>
                     </td>
                     <td className="px-1 py-4">
                       {formatCommonTime(store?.createdAt)}
@@ -129,7 +187,7 @@ const PendingStoresTable = () => {
                         <Tooltip title="Duyệt">
                           <div
                             className="hover:cursor-pointer"
-                            // onClick={() => handleOpenEditHappeningVoucherModal()}
+                            onClick={() => handleApproveStore(store?.id)}
                           >
                             <CheckCircleOutlineIcon
                               style={{
@@ -142,7 +200,7 @@ const PendingStoresTable = () => {
                         <Tooltip title="Từ chối duyệt">
                           <div
                             className="hover:cursor-pointer"
-                            // onClick={() => handleConfirmCancelVoucher()}
+                            onClick={() => handleOpenRejectModal(store?.id)}
                           >
                             <HighlightOffIcon
                               style={{

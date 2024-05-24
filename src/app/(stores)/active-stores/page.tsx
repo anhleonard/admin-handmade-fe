@@ -1,9 +1,9 @@
 import { adminFilterStores } from "@/apis/services/stores";
 import storage from "@/apis/storage";
-import { AlertStatus, StoreStatus } from "@/enum/constants";
-import { AlertState, Store } from "@/enum/defined-type";
+import { AlertStatus, EnumOrderStatus, StoreStatus } from "@/enum/constants";
+import { AlertState, Order, Store } from "@/enum/defined-type";
 import { DetailIcon, SearchIcon } from "@/enum/icons";
-import { FontFamily, FontSize } from "@/enum/setting";
+import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyLabel from "@/libs/label";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
@@ -12,9 +12,13 @@ import { RootState } from "@/redux/store";
 import { Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { COLORS } from "@/enum/colors";
+import { formatCurrency } from "@/enum/functions";
+import DetailStore from "@/components/stores/detail-store";
+import { openModal } from "@/redux/slices/modalSlice";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import BannedStoreModal from "@/components/stores/banned-store-modal";
 
 const ActiveStoresTable = () => {
   const dispatch = useDispatch();
@@ -49,6 +53,32 @@ const ActiveStoresTable = () => {
     getAllStores();
   }, [refetchQueries]);
 
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
+  };
+
+  const handleOpenDetailModal = (storeId: number) => {
+    const modal = {
+      isOpen: true,
+      title: "Chi tiết cửa hàng",
+      content: <DetailStore storeId={storeId} />,
+      screen: SCREEN.LG,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleOpenBannedModal = (storeId: number) => {
+    const modal = {
+      isOpen: true,
+      title: "Nêu lý do cấm cửa hàng",
+      content: (
+        <BannedStoreModal storeId={storeId} handleRefetch={handleRefetch} />
+      ),
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -75,7 +105,11 @@ const ActiveStoresTable = () => {
                 <th className="px-1 py-4">Chủ shop</th>
                 <th className="px-1 py-4">Hàng chủ lực</th>
                 <th className="px-1 py-4">Trạng thái</th>
-                <th className="px-1 py-4">Số đơn hàng</th>
+                <th className="px-1 py-4">
+                  <Tooltip title="Số đơn hàng thành công">
+                    <div>Đơn hàng</div>
+                  </Tooltip>
+                </th>
                 <th className="px-1 py-4">Doanh thu</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
@@ -83,6 +117,25 @@ const ActiveStoresTable = () => {
 
             <tbody>
               {stores?.map((store, index) => {
+                const allOrders: Order[] = store?.orders;
+                let filteredOrders: Order[] = [];
+                let totalRevenue = 0;
+
+                if (allOrders?.length) {
+                  // lọc all orders đã đc shipped
+                  filteredOrders = allOrders.filter(
+                    (item) => item.status === EnumOrderStatus.SHIPPED,
+                  );
+
+                  // tính tổng tiền order được shipped
+                  let totalPrice = filteredOrders.reduce(
+                    (sum, order) => sum + order.totalPayment,
+                    0,
+                  );
+
+                  totalRevenue = totalPrice * 0.8; // tính tổng doanh thu vì handmade thu 20%
+                }
+
                 return (
                   <tr
                     key={index}
@@ -96,36 +149,24 @@ const ActiveStoresTable = () => {
                     <td className="px-1 py-4">
                       <MyLabel type="success">Đang hoạt động</MyLabel>
                     </td>
+                    <td className="px-1 py-4">{filteredOrders?.length}</td>
                     <td className="px-1 py-4">
-                      {/* {formatCommonTime(store?.createdAt)} */}
+                      {formatCurrency(totalRevenue)}
                     </td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
                         <Tooltip title="Xem chi tiết">
                           <div
                             className="pt-1 hover:cursor-pointer"
-                            // onClick={() => handleOpenDetailModal()}
+                            onClick={() => handleOpenDetailModal(store?.id)}
                           >
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        <Tooltip title="Duyệt">
+                        <Tooltip title="Cấm hoạt động">
                           <div
                             className="hover:cursor-pointer"
-                            // onClick={() => handleOpenEditHappeningVoucherModal()}
-                          >
-                            <CheckCircleOutlineIcon
-                              style={{
-                                color: COLORS.purple.c800,
-                                fontSize: 20,
-                              }}
-                            />
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Từ chối duyệt">
-                          <div
-                            className="hover:cursor-pointer"
-                            // onClick={() => handleConfirmCancelVoucher()}
+                            onClick={() => handleOpenBannedModal(store?.id)}
                           >
                             <HighlightOffIcon
                               style={{
