@@ -75,7 +75,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <Link href="/">
           <div className="flex flex-row items-center gap-2">
             <StorefrontIcon style={{ fontSize: 30, color: COLORS.white }} />
-            <div className="text-xl font-bold text-white">SELLER CENTER</div>
+            <div className="text-xl font-bold text-white">ADMIN CENTER</div>
           </div>
         </Link>
 

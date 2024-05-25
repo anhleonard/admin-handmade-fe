@@ -97,7 +97,6 @@ const BuildClassificationsModal = ({ onSubmitCallback }: Props) => {
 
   const onSubmit = async (values: any) => {
     const formData = new FormData();
-    console.log(extractVariantItemIds(selectedItems));
 
     if (fileImage) {
       formData.append("image", fileImage);

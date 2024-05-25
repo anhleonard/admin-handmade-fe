@@ -16,3 +16,19 @@ export const createCategory = async (variables: any, token: string) => {
     .post(`${headerUrl}/categories/create`, variables, config)
     .then((res) => res.data);
 };
+
+export const updateCategory = async (
+  cateId: number,
+  variables: any,
+  token: string,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  return await axios
+    .put(`${headerUrl}/categories/update/${cateId}`, variables, config)
+    .then((res) => res.data);
+};

@@ -1,4 +1,5 @@
-import { createCategory } from "@/apis/services/categories";
+import { headerUrl } from "@/apis/services/authentication";
+import { createCategory, updateCategory } from "@/apis/services/categories";
 import {
   adminApproveProduct,
   uploadSingleImage,
@@ -6,7 +7,7 @@ import {
 import storage from "@/apis/storage";
 import { CreateCategoryValues, RejectFormValues } from "@/apis/types";
 import { AlertStatus } from "@/enum/constants";
-import { AlertState, Product } from "@/enum/defined-type";
+import { AlertState, Category, Product } from "@/enum/defined-type";
 import Button from "@/libs/button";
 import MainInputImage from "@/libs/main-input-image";
 import MyTextArea from "@/libs/text-area";
@@ -18,49 +19,59 @@ import { Form, Formik } from "formik";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 type Props = {
+  category: Category;
   handleRefetch: () => void;
 };
 
-const CreateCategoryModal = ({ handleRefetch }: Props) => {
+const EditCategoryModal = ({ category, handleRefetch }: Props) => {
   const dispatch = useDispatch();
-  const [previewImage, setPreviewImage] = useState("");
+  const [previewImage, setPreviewImage] = useState(
+    `${headerUrl}/products/${category?.image}` ?? "",
+  );
   const [fileImage, setFileImage] = useState<File | null>();
 
-  const initialValues: CreateCategoryValues = { title: "", description: "" };
+  const initialValues: CreateCategoryValues = {
+    title: category?.title ?? "",
+    description: category?.description ?? "",
+  };
 
   const onSubmit = async (values: CreateCategoryValues) => {
-    const formData = new FormData();
+    let imageFile: string = "";
 
-    if (fileImage) {
-      formData.append("image", fileImage);
+    if (previewImage === `${headerUrl}/products/${category?.image}`) {
+      imageFile = category?.image;
     } else {
-      let alert: AlertState = {
-        isOpen: true,
-        title: "LỖI",
-        message: "Không thể upload ảnh!",
-        type: AlertStatus.ERROR,
-      };
-      dispatch(openAlert(alert));
-      return;
+      const formData = new FormData();
+      if (fileImage) {
+        formData.append("image", fileImage);
+        imageFile = await uploadSingleImage(formData);
+      } else {
+        let alert: AlertState = {
+          isOpen: true,
+          title: "LỖI",
+          message: "Không thể upload ảnh!",
+          type: AlertStatus.ERROR,
+        };
+        dispatch(openAlert(alert));
+        return;
+      }
     }
 
     try {
       dispatch(openLoading());
-      const file = await uploadSingleImage(formData);
-
       const variables = {
         title: values.title,
         description: values.description,
-        image: file,
+        image: imageFile,
       };
       const token = storage.getLocalAccessToken();
-      const res = await createCategory(variables, token);
+      const res = await updateCategory(category?.id, variables, token);
       if (res) {
         dispatch(closeModal());
         let alert: AlertState = {
           isOpen: true,
-          title: "TẠO THÀNH CÔNG",
-          message: "Đã tạo danh mục thành công",
+          title: "CẬP NHẬT THÀNH CÔNG",
+          message: "Đã cập nhật danh mục thành công",
           type: AlertStatus.SUCCESS,
         };
         dispatch(openAlert(alert));
@@ -78,6 +89,7 @@ const CreateCategoryModal = ({ handleRefetch }: Props) => {
       dispatch(closeLoading());
     }
   };
+
   return (
     <Formik initialValues={initialValues} onSubmit={onSubmit}>
       {(formik) => (
@@ -132,4 +144,4 @@ const CreateCategoryModal = ({ handleRefetch }: Props) => {
   );
 };
 
-export default CreateCategoryModal;
+export default EditCategoryModal;

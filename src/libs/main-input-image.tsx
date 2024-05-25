@@ -30,7 +30,7 @@ export default function MainInputImage({
       {previewImage && (
         <div className="relative">
           <Image
-            alt="Announcement"
+            alt="upload-image"
             unoptimized
             loader={() => previewImage}
             src={previewImage}

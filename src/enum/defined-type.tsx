@@ -137,6 +137,7 @@ export type Category = {
   id: number;
   title: string;
   description: string;
+  image: string;
   products: Product[];
 };
 

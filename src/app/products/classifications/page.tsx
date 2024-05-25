@@ -1,13 +1,15 @@
 "use client";
 
+import { headerUrl } from "@/apis/services/authentication";
 import { getCategories } from "@/apis/services/categories";
 import CategoryProductsList from "@/components/categories/category-products";
 import CreateCategoryModal from "@/components/categories/create-category-modal";
+import EditCategoryModal from "@/components/categories/edit-category-modal";
 import DefaultLayout from "@/components/layouts/default-layout";
 import CreateVariantCategoriesModal from "@/components/products/create-variant-categories";
 import { AlertStatus } from "@/enum/constants";
 import { AlertState, Category } from "@/enum/defined-type";
-import { DetailIcon } from "@/enum/icons";
+import { DetailIcon, EditIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import Button from "@/libs/button";
 import { openAlert } from "@/redux/slices/alertSlice";
@@ -70,6 +72,18 @@ const ClassificationPage = () => {
     dispatch(refetchComponent());
   };
 
+  const handleOpenEditModal = async (category: Category) => {
+    const modal = {
+      isOpen: true,
+      title: `Chỉnh sửa danh mục`,
+      content: (
+        <EditCategoryModal category={category} handleRefetch={handleRefetch} />
+      ),
+      screen: SCREEN.LG,
+    };
+    dispatch(openModal(modal));
+  };
+
   return (
     <DefaultLayout>
       <div className="w-full space-y-4 rounded-lg bg-white px-8 py-4">
@@ -96,6 +110,7 @@ const ClassificationPage = () => {
                 <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                   <th className="py-4 pl-3">ID</th>
                   <th className="px-1 py-4">Tên danh mục</th>
+                  <th className="px-1 py-4">Hình ảnh</th>
                   <th className="px-1 py-4">Mô tả</th>
                   <th className="px-1 py-4">Số lượng sản phẩm</th>
                   <th className="px-1 py-4 text-center">Thao tác</th>
@@ -111,6 +126,13 @@ const ClassificationPage = () => {
                       <td className="py-4 pl-3 align-top">{category?.id}</td>
                       <td className="px-1 py-4 align-top font-medium">
                         {category?.title}
+                      </td>
+                      <td className="px-1 py-4 align-top font-medium">
+                        <img
+                          src={`${headerUrl}/products/${category?.image}`}
+                          alt="product-image"
+                          className="h-18 w-18 rounded-lg object-cover"
+                        />
                       </td>
                       <td className="max-w-[400px] px-1 py-4 align-top">
                         {category?.description}
@@ -128,14 +150,12 @@ const ClassificationPage = () => {
                               <DetailIcon />
                             </div>
                           </Tooltip>
-                          <Tooltip title="Báo cáo vi phạm">
-                            <div className="hover:cursor-pointer">
-                              {/* <HighlightOffRoundedIcon
-                                sx={{
-                                  color: COLORS.support.c600,
-                                  fontSize: 21,
-                                }}
-                              /> */}
+                          <Tooltip title="Chỉnh sửa">
+                            <div
+                              className="hover:cursor-pointer"
+                              onClick={() => handleOpenEditModal(category)}
+                            >
+                              <EditIcon />
                             </div>
                           </Tooltip>
                         </div>
