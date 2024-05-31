@@ -251,6 +251,18 @@ export type Auction = {
   candidates: Bidder[];
   progresses: Progress[];
   canceledBy: User;
+  isPaymentDeposit: boolean;
+  isPaymentFull: boolean;
+  paids: PaidAuction[];
+};
+
+export type PaidAuction = {
+  id: number;
+  isRefund: boolean;
+  type: string;
+  apptransid: string;
+  zp_trans_id: string;
+  auction: Auction;
 };
 
 export type Bidder = {

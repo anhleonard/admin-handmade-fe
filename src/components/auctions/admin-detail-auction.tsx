@@ -19,6 +19,7 @@ import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import { singleAuction, updateAuction } from "@/apis/services/auctions";
 import ListSellerPrice from "@/screens/auctions/list-seller-price";
+import { headerUrl } from "@/apis/services/authentication";
 
 type Props = {
   type?: "client" | "seller";
@@ -131,18 +132,17 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
               <div className="flex flex-col gap-2">
                 <div className="font-bold text-grey-c900">Hình ảnh ví dụ</div>
                 <div className="flex flex-row gap-5">
-                  <MyDisplayImage
-                    src="https://salt.tikicdn.com/cache/750x750/ts/product/40/d1/23/c7a77754eaeb40915246b49476ad68ff.jpg.webp"
-                    alt=""
-                  />
-                  <MyDisplayImage
-                    src="https://salt.tikicdn.com/cache/750x750/ts/product/40/d1/23/c7a77754eaeb40915246b49476ad68ff.jpg.webp"
-                    alt=""
-                  />
-                  <MyDisplayImage
-                    src="https://salt.tikicdn.com/cache/750x750/ts/product/40/d1/23/c7a77754eaeb40915246b49476ad68ff.jpg.webp"
-                    alt=""
-                  />
+                  {auction?.images?.length
+                    ? auction?.images?.map((image, index) => {
+                        return (
+                          <MyDisplayImage
+                            key={index}
+                            src={`${headerUrl}/products/${image}`}
+                            alt="example-image"
+                          />
+                        );
+                      })
+                    : null}
                 </div>
               </div>
             </ListItem>
@@ -169,6 +169,21 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                   <div className="font-bold text-grey-c900">Ngân sách</div>
                   <div className="font-medium text-primary-c900">
                     {auction?.maxAmount && formatCurrency(auction?.maxAmount)}
+                  </div>
+                </div>
+              </ListItem>
+            )}
+
+            {(!auction?.status ||
+              auction?.status === AuctionStatus.CANCELED) && (
+              <ListItem
+                className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
+                disablePadding
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="font-bold text-grey-c900">Số lượng</div>
+                  <div className="font-medium text-primary-c900">
+                    {auction?.requiredNumber}
                   </div>
                 </div>
               </ListItem>
@@ -229,6 +244,7 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                 </div>
               </ListItem>
             )}
+
             {(!auction?.status ||
               auction?.status === AuctionStatus.AUCTIONING) && (
               <ListItem
@@ -243,6 +259,25 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                 </div>
               </ListItem>
             )}
+
+            {(auction?.status === AuctionStatus.AUCTIONING ||
+              !auction?.status) && (
+              <ListItem
+                className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
+                disablePadding
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="font-bold text-grey-c900">
+                    Ngày đóng đặt giá
+                  </div>
+                  <div className="font-medium text-primary-c900">
+                    {auction?.closedDate &&
+                      formatCommonTime(auction?.closedDate)}
+                  </div>
+                </div>
+              </ListItem>
+            )}
+
             {auction?.status === AuctionStatus.AUCTIONING && (
               <ListItem
                 className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
@@ -431,7 +466,10 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
             )}
             {auction?.status !== AuctionStatus.CANCELED &&
               auction?.status === AuctionStatus.AUCTIONING && (
-                <ListItem className="block w-full px-4 py-4" disablePadding>
+                <ListItem
+                  className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
+                  disablePadding
+                >
                   <div className="flex flex-col gap-1">
                     <div className="font-bold text-grey-c900">
                       Giá đặt thấp nhất/ cao nhất
@@ -442,6 +480,57 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                   </div>
                 </ListItem>
               )}
+
+            {auction?.status !== AuctionStatus.CANCELED ? (
+              <ListItem className="border-b-[2px] border-grey-c50">
+                <div className="flex flex-col gap-1 ">
+                  <div className="font-bold text-grey-c900">
+                    Trạng thái thanh toán tiền cọc
+                  </div>
+                  <div className="font-medium text-primary-c900">
+                    {auction?.isPaymentDeposit ? (
+                      <MyLabel type="success">Đã thanh toán</MyLabel>
+                    ) : (
+                      <MyLabel type="error">Chưa thanh toán</MyLabel>
+                    )}
+                  </div>
+                </div>
+              </ListItem>
+            ) : null}
+
+            {auction?.status === AuctionStatus.PROGRESS ||
+            auction?.status === AuctionStatus.DELIVERY ||
+            auction?.status === AuctionStatus.COMPLETED ? (
+              <ListItem className="border-b-[2px] border-grey-c50">
+                <div className="flex flex-col gap-1">
+                  <div className="font-bold text-grey-c900">
+                    Tổng thanh toán
+                  </div>
+                  <div className="font-medium text-primary-c900">
+                    {bidder?.bidderMoney && formatCurrency(bidder?.bidderMoney)}
+                  </div>
+                </div>
+              </ListItem>
+            ) : null}
+
+            {auction?.status === AuctionStatus.PROGRESS ||
+            auction?.status === AuctionStatus.DELIVERY ||
+            auction?.status === AuctionStatus.COMPLETED ? (
+              <ListItem>
+                <div className="flex flex-col gap-1">
+                  <div className="font-bold text-grey-c900">
+                    Trạng thái thanh toán toàn bộ dự án
+                  </div>
+                  <div className="font-medium text-primary-c900">
+                    {auction?.isPaymentFull ? (
+                      <MyLabel type="success">Đã thanh toán</MyLabel>
+                    ) : (
+                      <MyLabel type="error">Chưa thanh toán</MyLabel>
+                    )}
+                  </div>
+                </div>
+              </ListItem>
+            ) : null}
           </List>
         </Collapse>
       </div>
