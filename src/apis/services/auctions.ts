@@ -32,6 +32,7 @@ export const allSellerAuctions = async (token: string, variables: any) => {
     .then((res) => res.data);
 };
 
+// ------------ ADMIN ------------
 export const updateAuction = async (
   id: number,
   variables: any,
@@ -47,8 +48,6 @@ export const updateAuction = async (
     .put(`${headerUrl}/auctions/update/${id}`, variables, config)
     .then((res) => res.data);
 };
-
-// ------------ ADMIN ------------
 
 export const adminFilterAuctions = async (token: string, query: any) => {
   const config = {

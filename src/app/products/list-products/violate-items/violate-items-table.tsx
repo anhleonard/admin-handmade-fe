@@ -16,10 +16,10 @@ import {
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
 import MyTextField from "@/libs/text-field";
-import MySelect from "@/libs/select";
+import MySelect, { Item } from "@/libs/select";
 import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip, Typography } from "@mui/material";
 import MyTextAction from "@/libs/text-action";
@@ -39,6 +39,8 @@ import { headerUrl } from "@/apis/services/authentication";
 import { formatDate } from "@/enum/functions";
 import MyStatus from "@/libs/status";
 import { MyPagination } from "@/libs/pagination";
+import { RootState } from "@/redux/store";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -52,6 +54,9 @@ const ViolateItemsTable = () => {
   const [page, setPage] = useState(Page);
   const [rowsPage, setRowsPage] = useState(rowsPerPage);
   const [count, setCount] = useState(0);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [selectedOption, setSelectedOption] = useState<Item>(labelOptions[0]);
+  const [searchText, setSearchText] = useState<string>("");
 
   const handleOpenDetailModal = (productId: number) => {
     const modal = {
@@ -87,6 +92,16 @@ const ViolateItemsTable = () => {
       const token = storage.getLocalAccessToken();
       const query = {
         status: ProductStatus.VIOLATE,
+        limit: rowsPage,
+        page: page,
+        ...(selectedOption === labelOptions[0] &&
+          searchText !== "" && {
+            productName: searchText,
+          }),
+        ...(selectedOption === labelOptions[1] &&
+          searchText !== "" && {
+            productCode: searchText,
+          }),
       };
       const res = await adminProducts(token, query);
       if (res) {
@@ -108,14 +123,19 @@ const ViolateItemsTable = () => {
 
   useEffect(() => {
     getAllProducts();
-  }, [page, rowsPage]);
+  }, [refetchQueries, page, rowsPage]);
 
   const handlePageChange = (page: number) => {
     setPage(page);
   };
+
   const handleRowPerPageChange = (e: any) => {
     setPage(Page);
     setRowsPage(parseInt(e.target.value));
+  };
+
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
   };
 
   return (
@@ -123,22 +143,30 @@ const ViolateItemsTable = () => {
       {/* filter */}
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
-          <MySelect options={labelOptions} selected={labelOptions[0].value} />
-          <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
-          />
-        </div>
-        <div className="flex flex-row items-center gap-3">
-          <div>Danh mục</div>
           <MySelect
-            options={mainCategories}
-            selected={mainCategories[0].value}
+            options={labelOptions}
+            selected={selectedOption.value}
+            onSelectItem={(item: Item) => setSelectedOption(item)}
           />
+          <form
+            className="flex-1 text-slate-900 dark:text-slate-100"
+            onSubmit={(e) => {
+              setPage(1);
+              handleRefetch();
+              e.preventDefault();
+            }}
+          >
+            <MyTextField
+              id="searchItem"
+              endIcon={<SearchIcon />}
+              placeholder="Nhập nội dung tìm kiếm"
+              className="w-[300px]"
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </form>
         </div>
       </div>
+
       {/* table */}
       <div className="max-w-[100%] overflow-hidden rounded-[10px]">
         <div className="overflow-x-auto">

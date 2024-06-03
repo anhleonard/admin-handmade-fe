@@ -1,10 +1,10 @@
 import axios from "axios";
 import { headerUrl } from "./authentication";
-import { CancelOrderValues, OrderStatusValues } from "../types";
+import { CancelOrderValues, UpdateOrderValues } from "../types";
 
 export const ordersByStatus = async (
   token: string,
-  variables?: OrderStatusValues,
+  variables?: UpdateOrderValues,
 ) => {
   const config = {
     headers: {
@@ -76,7 +76,7 @@ export const adminOrders = async (token: string, query?: any) => {
 export const updateOrder = async (
   orderId: number,
   token: string,
-  variables: OrderStatusValues,
+  variables: UpdateOrderValues,
 ) => {
   const config = {
     headers: {

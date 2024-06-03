@@ -151,6 +151,7 @@ export type Store = {
   productAmount: number;
   avgStoreRating: number;
   followerAmount: number;
+  score: number; //điểm uy tín
   owner: User;
   createdAt: Date;
   products: Product[];
@@ -208,6 +209,7 @@ export type Order = {
   client: User;
   updatedBy: User;
   isReadyDelivery: boolean;
+  isMinusPoint: boolean;
 };
 
 export type User = {
@@ -254,6 +256,7 @@ export type Auction = {
   isPaymentDeposit: boolean;
   isPaymentFull: boolean;
   paids: PaidAuction[];
+  isMinusPoint: boolean;
 };
 
 export type PaidAuction = {

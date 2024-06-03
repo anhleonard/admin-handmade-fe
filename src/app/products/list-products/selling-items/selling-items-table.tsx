@@ -3,18 +3,11 @@ import {
   AlertStatus,
   Page,
   ProductStatus,
-  mainCategories,
   rowsPerPage,
 } from "@/enum/constants";
-import {
-  DeleteIcon,
-  DetailIcon,
-  EditIcon,
-  OffIcon,
-  SearchIcon,
-} from "@/enum/icons";
+import { DetailIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
-import MySelect from "@/libs/select";
+import MySelect, { Item } from "@/libs/select";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
@@ -33,6 +26,7 @@ import MyStatus from "@/libs/status";
 import { COLORS } from "@/enum/colors";
 import HighlightOffRoundedIcon from "@mui/icons-material/HighlightOffRounded";
 import { MyPagination } from "@/libs/pagination";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -42,10 +36,12 @@ const labelOptions = [
 const SellingItemsTable = () => {
   const dispatch = useDispatch();
   const [products, setProducts] = useState<Product[]>();
-  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
   const [page, setPage] = useState(Page);
   const [rowsPage, setRowsPage] = useState(rowsPerPage);
   const [count, setCount] = useState(0);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [selectedOption, setSelectedOption] = useState<Item>(labelOptions[0]);
+  const [searchText, setSearchText] = useState<string>("");
 
   const handleOpenDetailModal = (productId: number) => {
     const modal = {
@@ -71,6 +67,14 @@ const SellingItemsTable = () => {
         status: ProductStatus.SELLING,
         limit: rowsPage,
         page: page,
+        ...(selectedOption === labelOptions[0] &&
+          searchText !== "" && {
+            productName: searchText,
+          }),
+        ...(selectedOption === labelOptions[1] &&
+          searchText !== "" && {
+            productCode: searchText,
+          }),
       };
       const res = await adminProducts(token, query);
       if (res) {
@@ -97,9 +101,14 @@ const SellingItemsTable = () => {
   const handlePageChange = (page: number) => {
     setPage(page);
   };
+
   const handleRowPerPageChange = (e: any) => {
     setPage(Page);
     setRowsPage(parseInt(e.target.value));
+  };
+
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
   };
 
   return (
@@ -107,22 +116,30 @@ const SellingItemsTable = () => {
       {/* filter */}
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
-          <MySelect options={labelOptions} selected={labelOptions[0].value} />
-          <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
-          />
-        </div>
-        <div className="flex flex-row items-center gap-3">
-          <div>Danh mục</div>
           <MySelect
-            options={mainCategories}
-            selected={mainCategories[0].value}
+            options={labelOptions}
+            selected={selectedOption.value}
+            onSelectItem={(item: Item) => setSelectedOption(item)}
           />
+          <form
+            className="flex-1 text-slate-900 dark:text-slate-100"
+            onSubmit={(e) => {
+              setPage(1);
+              handleRefetch();
+              e.preventDefault();
+            }}
+          >
+            <MyTextField
+              id="searchItem"
+              endIcon={<SearchIcon />}
+              placeholder="Nhập nội dung tìm kiếm"
+              className="w-[300px]"
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </form>
         </div>
       </div>
+
       {/* table */}
       <div className="max-w-[100%] overflow-hidden rounded-[10px]">
         <div className="overflow-x-auto">

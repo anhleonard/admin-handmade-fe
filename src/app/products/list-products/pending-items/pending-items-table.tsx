@@ -3,12 +3,11 @@ import {
   AlertStatus,
   Page,
   ProductStatus,
-  mainCategories,
   rowsPerPage,
 } from "@/enum/constants";
 import { DetailIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
-import MySelect from "@/libs/select";
+import MySelect, { Item } from "@/libs/select";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
@@ -40,10 +39,12 @@ const labelOptions = [
 const PendingItemsTable = () => {
   const dispatch = useDispatch();
   const [products, setProducts] = useState<Product[]>([]);
-  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
   const [page, setPage] = useState(Page);
   const [rowsPage, setRowsPage] = useState(rowsPerPage);
   const [count, setCount] = useState(0);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [selectedOption, setSelectedOption] = useState<Item>(labelOptions[0]);
+  const [searchText, setSearchText] = useState<string>("");
 
   const handleOpenDetailModal = (productId: number) => {
     const modal = {
@@ -124,6 +125,16 @@ const PendingItemsTable = () => {
       const token = storage.getLocalAccessToken();
       const query = {
         status: ProductStatus.PENDING,
+        limit: rowsPage,
+        page: page,
+        ...(selectedOption === labelOptions[0] &&
+          searchText !== "" && {
+            productName: searchText,
+          }),
+        ...(selectedOption === labelOptions[1] &&
+          searchText !== "" && {
+            productCode: searchText,
+          }),
       };
       const res = await adminProducts(token, query);
       if (res) {
@@ -154,6 +165,7 @@ const PendingItemsTable = () => {
   const handlePageChange = (page: number) => {
     setPage(page);
   };
+
   const handleRowPerPageChange = (e: any) => {
     setPage(Page);
     setRowsPage(parseInt(e.target.value));
@@ -164,22 +176,30 @@ const PendingItemsTable = () => {
       {/* filter */}
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
-          <MySelect options={labelOptions} selected={labelOptions[0].value} />
-          <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
-          />
-        </div>
-        <div className="flex flex-row items-center gap-3">
-          <div>Danh mục</div>
           <MySelect
-            options={mainCategories}
-            selected={mainCategories[0].value}
+            options={labelOptions}
+            selected={selectedOption.value}
+            onSelectItem={(item: Item) => setSelectedOption(item)}
           />
+          <form
+            className="flex-1 text-slate-900 dark:text-slate-100"
+            onSubmit={(e) => {
+              setPage(1);
+              handleRefetch();
+              e.preventDefault();
+            }}
+          >
+            <MyTextField
+              id="searchItem"
+              endIcon={<SearchIcon />}
+              placeholder="Nhập nội dung tìm kiếm"
+              className="w-[300px]"
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </form>
         </div>
       </div>
+
       {/* table */}
       <div className="max-w-[100%] overflow-hidden rounded-[10px]">
         <div className="overflow-x-auto">

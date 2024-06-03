@@ -21,9 +21,8 @@ import MySelect from "@/libs/select";
 import MyLabel from "@/libs/label";
 import { Tooltip } from "@mui/material";
 import { COLORS } from "@/enum/colors";
-import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-import { OrderStatusValues } from "@/apis/types";
+import { UpdateOrderValues } from "@/apis/types";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -90,7 +89,7 @@ const ReadyOrdersTable = () => {
         try {
           dispatch(openLoading());
           const token = storage.getLocalAccessToken();
-          const variables: OrderStatusValues = {
+          const variables: UpdateOrderValues = {
             status: EnumOrderStatus.DELIVERED,
           };
           const res = await updateOrder(orderId, token, variables);

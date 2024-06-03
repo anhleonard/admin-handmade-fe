@@ -17,7 +17,7 @@ import {
 } from "@/apis/services/orders";
 import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
-import { OrderStatusValues } from "@/apis/types";
+import { UpdateOrderValues } from "@/apis/types";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
 import DetailOrderModal from "../../modals/detail-order-modal";
 import { openModal } from "@/redux/slices/modalSlice";
@@ -87,7 +87,7 @@ const TransportOrdersTable = () => {
         try {
           dispatch(openLoading());
           const token = storage.getLocalAccessToken();
-          const variables: OrderStatusValues = {
+          const variables: UpdateOrderValues = {
             status: EnumOrderStatus.SHIPPED,
           };
           const res = await updateOrder(orderId, token, variables);

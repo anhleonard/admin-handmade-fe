@@ -6,7 +6,12 @@ import storage from "@/apis/storage";
 import AdminDetailAuction from "@/components/auctions/admin-detail-auction";
 import NoItemCard from "@/components/no-item/no-item-card";
 import { COLORS } from "@/enum/colors";
-import { AlertStatus, AuctionStatus } from "@/enum/constants";
+import {
+  AlertStatus,
+  AuctionStatus,
+  EnumScore,
+  TypeScore,
+} from "@/enum/constants";
 import { AlertState, Auction, Bidder } from "@/enum/defined-type";
 import {
   calculateDaysAfterAccepted,
@@ -27,6 +32,8 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import { RootState } from "@/redux/store";
+import { StoreScoreValues } from "@/apis/types";
+import { updateScore } from "@/apis/services/stores";
 
 const DeliveryAuctionsTable = () => {
   const dispatch = useDispatch();
@@ -71,7 +78,7 @@ const DeliveryAuctionsTable = () => {
     dispatch(openModal(modal));
   };
 
-  const handleUpdateAuction = (auctionId: number) => {
+  const handleUpdateAuction = (auction: Auction) => {
     const confirm: any = {
       isOpen: true,
       title: "XÁC NHẬN GIAO HÀNG",
@@ -80,12 +87,26 @@ const DeliveryAuctionsTable = () => {
       onConfirm: async () => {
         try {
           dispatch(openLoading());
+
+          //update status for auction
           const variables = {
             status: AuctionStatus.COMPLETED,
           };
           const token = storage.getLocalAccessToken();
-          const res = await updateAuctionStatus(auctionId, variables, token);
-          if (res) {
+          const res = await updateAuctionStatus(auction?.id, variables, token);
+
+          //update score for store
+          const bidder = auction?.candidates?.filter(
+            (bidder) => bidder.isSelected === true,
+          )[0];
+          const params: StoreScoreValues = {
+            storeId: bidder?.store?.id,
+            type: TypeScore.PLUS,
+            amount: EnumScore.AUCTION_SUCCESS,
+          };
+          const res1 = await updateScore(params, token);
+
+          if (res && res1) {
             dispatch(closeConfirm());
             let alert: AlertState = {
               isOpen: true,
@@ -206,7 +227,7 @@ const DeliveryAuctionsTable = () => {
                         <Tooltip title="Xác nhận đã giao hàng">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleUpdateAuction(auction?.id)}
+                            onClick={() => handleUpdateAuction(auction)}
                           >
                             <CheckCircleOutlineRoundedIcon
                               sx={{ color: COLORS.purple.c800, fontSize: 20 }}

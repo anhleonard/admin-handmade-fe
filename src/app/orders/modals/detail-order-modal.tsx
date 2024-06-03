@@ -10,6 +10,7 @@ import {
   renderWhoCanceled,
 } from "@/enum/functions";
 import Button from "@/libs/button";
+import MyDefaultText from "@/libs/default-text";
 import MyLabel from "@/libs/label";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
@@ -251,6 +252,9 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
       {order?.orderProducts && (
         <OrderPackage orderProducts={order?.orderProducts} />
       )}
+      {order?.status === EnumOrderStatus.CENCELLED ? (
+        <MyDefaultText type="error">{order?.canceledReason}</MyDefaultText>
+      ) : null}
     </div>
   );
 };

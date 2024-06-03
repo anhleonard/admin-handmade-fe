@@ -1,28 +1,26 @@
-import {
-  DeleteIcon,
-  DetailIcon,
-  EditIcon,
-  OffIcon,
-  SearchIcon,
-} from "@/enum/icons";
+import { DetailIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import { Tooltip } from "@mui/material";
-import OutlinedFlagIcon from "@mui/icons-material/OutlinedFlag";
 import { COLORS } from "@/enum/colors";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ReasonCancelOrder from "@/components/orders/reason-cancel-order";
 import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { adminOrders, ordersByStatus } from "@/apis/services/orders";
-import { AlertStatus, EnumOrderStatus } from "@/enum/constants";
+import { adminOrders, updateOrder } from "@/apis/services/orders";
+import {
+  AlertStatus,
+  EnumOrderStatus,
+  EnumScore,
+  StoreStatus,
+  TypeScore,
+} from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
-import { OrderStatusValues } from "@/apis/types";
 import {
   formatCommonTime,
   formatCurrency,
@@ -30,6 +28,15 @@ import {
 } from "@/enum/functions";
 import DetailOrderModal from "../../modals/detail-order-modal";
 import { openModal } from "@/redux/slices/modalSlice";
+import ArrowCircleDownRoundedIcon from "@mui/icons-material/ArrowCircleDownRounded";
+import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { updateScore } from "@/apis/services/stores";
+import { StoreScoreValues, UpdateOrderValues } from "@/apis/types";
+import { RootState } from "@/redux/store";
+import { refetchComponent } from "@/redux/slices/refetchSlice";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import BannedStoreModal from "@/components/stores/banned-store-modal";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -39,6 +46,11 @@ const labelOptions = [
 const CancelOrdersTable = () => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
+  };
 
   const getAllOrders = async () => {
     try {
@@ -66,7 +78,7 @@ const CancelOrdersTable = () => {
 
   useEffect(() => {
     getAllOrders();
-  }, []);
+  }, [refetchQueries]);
 
   const handleOpenDetailModal = (orderId: number) => {
     const modal = {
@@ -85,6 +97,63 @@ const CancelOrdersTable = () => {
       isOpen: true,
       title: "Lí do hủy",
       content: <ReasonCancelOrder reason={reason} />,
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
+  };
+
+  const handleConfirmMinusPoint = (storeId: number, orderId: number) => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN TRỪ ĐIỂM UY TÍN",
+      message: "Bạn có xác nhận trừ điểm uy tín của nhà bán này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => handleMinusPoint(storeId, orderId),
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleMinusPoint = async (storeId: number, orderId: number) => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const variables: StoreScoreValues = {
+        storeId: storeId,
+        type: TypeScore.MINUS,
+        amount: EnumScore.ORDER_CANCELED,
+      };
+      const res1 = await updateScore(variables, token);
+
+      const params: UpdateOrderValues = {
+        isMinusPoint: true,
+      };
+
+      const res2 = await updateOrder(orderId, token, params);
+      if (res1 && res2) {
+        dispatch(closeConfirm());
+        handleRefetch();
+      }
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
+  const handleOpenBannedModal = (storeId: number) => {
+    const modal = {
+      isOpen: true,
+      title: "Nêu lý do cấm cửa hàng",
+      content: (
+        <BannedStoreModal storeId={storeId} handleRefetch={handleRefetch} />
+      ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -164,18 +233,65 @@ const CancelOrdersTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        <Tooltip title="Xem lý do hủy">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() =>
-                              handleOpenDetailReason(order?.canceledReason)
-                            }
-                          >
-                            <OutlinedFlagIcon
-                              sx={{ fontSize: 22, color: COLORS.support.c500 }}
-                            />
-                          </div>
-                        </Tooltip>
+                        {!order?.isMinusPoint ? (
+                          <Tooltip title="Trừ điểm uy tín">
+                            <div
+                              className="hover:cursor-pointer"
+                              onClick={() =>
+                                handleConfirmMinusPoint(
+                                  order?.store?.id,
+                                  order?.id,
+                                )
+                              }
+                            >
+                              <ArrowCircleDownRoundedIcon
+                                sx={{
+                                  fontSize: 20,
+                                  color: COLORS.support.c500,
+                                }}
+                              />
+                            </div>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Đã trừ điểm">
+                            <div className="hover:cursor-pointer">
+                              <CheckCircleOutlineRoundedIcon
+                                sx={{
+                                  fontSize: 20,
+                                  color: COLORS.purple.c900,
+                                }}
+                              />
+                            </div>
+                          </Tooltip>
+                        )}
+                        {!(order?.store?.status === StoreStatus.BANNED) ? (
+                          <Tooltip title="Cấm hoạt động của nhà bán">
+                            <div
+                              className="hover:cursor-pointer"
+                              onClick={() =>
+                                handleOpenBannedModal(order?.store?.id)
+                              }
+                            >
+                              <BlockRoundedIcon
+                                sx={{
+                                  fontSize: 19,
+                                  color: COLORS.support.c500,
+                                }}
+                              />
+                            </div>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Cửa hàng đã bị cấm">
+                            <div className="hover:cursor-pointer">
+                              <BlockRoundedIcon
+                                sx={{
+                                  fontSize: 19,
+                                  color: COLORS.blue.c900,
+                                }}
+                              />
+                            </div>
+                          </Tooltip>
+                        )}
                       </div>
                     </td>
                   </tr>

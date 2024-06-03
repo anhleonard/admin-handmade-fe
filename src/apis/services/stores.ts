@@ -1,6 +1,6 @@
 import axios from "axios";
 import { headerUrl } from "./authentication";
-import { StoreStatusValues } from "../types";
+import { StoreScoreValues, StoreStatusValues } from "../types";
 
 export const singleStore = async (storeId: number) => {
   const url = `${headerUrl}/stores/${storeId}`;
@@ -32,5 +32,19 @@ export const updateStoreStatus = async (
   };
 
   const url = `${headerUrl}/stores/update-store/${storeId}`;
+  return await axios.put(url, variables, config).then((res) => res.data);
+};
+
+export const updateScore = async (
+  variables: StoreScoreValues,
+  token: string,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const url = `${headerUrl}/stores/update-score`;
   return await axios.put(url, variables, config).then((res) => res.data);
 };

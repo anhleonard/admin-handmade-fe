@@ -1,35 +1,45 @@
 import { adminFilterStores } from "@/apis/services/stores";
 import storage from "@/apis/storage";
-import { AlertStatus, EnumOrderStatus, StoreStatus } from "@/enum/constants";
-import { AlertState, Order, Store } from "@/enum/defined-type";
+import { AlertStatus, Page, StoreStatus, rowsPerPage } from "@/enum/constants";
+import { AlertState, Store } from "@/enum/defined-type";
 import { DetailIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyLabel from "@/libs/label";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import { RootState } from "@/redux/store";
 import { Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import { COLORS } from "@/enum/colors";
-import { formatCurrency } from "@/enum/functions";
 import DetailStore from "@/components/stores/detail-store";
 import { openModal } from "@/redux/slices/modalSlice";
+import { RootState } from "@/redux/store";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
-import BannedStoreModal from "@/components/stores/banned-store-modal";
+import { MyPagination } from "@/libs/pagination";
 
 const AllStoresTable = () => {
   const dispatch = useDispatch();
   const [stores, setStores] = useState<Store[]>([]);
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
+  const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [searchText, setSearchText] = useState<string>("");
 
   const getAllStores = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const res = await adminFilterStores(token);
+      const query = {
+        limit: rowsPage,
+        page: page,
+        ...(searchText !== "" && {
+          storeName: searchText,
+        }),
+      };
+      const res = await adminFilterStores(token, query);
       if (res) {
+        setCount(res?.total ?? 0);
         setStores(res?.data);
       }
     } catch (error: any) {
@@ -47,7 +57,19 @@ const AllStoresTable = () => {
 
   useEffect(() => {
     getAllStores();
-  }, []);
+  }, [refetchQueries, page, rowsPage]);
+
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
+  };
+
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
+  };
 
   const handleOpenDetailModal = (storeId: number) => {
     const modal = {
@@ -64,12 +86,22 @@ const AllStoresTable = () => {
       {/* filter */}
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
-          <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập tên cửa hàng"
-            className="w-[300px]"
-          />
+          <form
+            className="flex-1 text-slate-900 dark:text-slate-100"
+            onSubmit={(e) => {
+              setPage(1);
+              handleRefetch();
+              e.preventDefault();
+            }}
+          >
+            <MyTextField
+              id="searchItem"
+              endIcon={<SearchIcon />}
+              placeholder="Nhập tên cửa hàng"
+              className="w-[300px]"
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </form>
         </div>
       </div>
 
@@ -84,6 +116,7 @@ const AllStoresTable = () => {
                 <th className="py-4 pl-3">Tên</th>
                 <th className="px-1 py-4">Chủ shop</th>
                 <th className="px-1 py-4">Hàng chủ lực</th>
+                <th className="px-1 py-4">Điểm uy tín</th>
                 <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
@@ -91,12 +124,6 @@ const AllStoresTable = () => {
 
             <tbody>
               {stores?.map((store, index) => {
-                if (
-                  store?.status === StoreStatus.INACTIVE &&
-                  store?.notApproveReason !== null
-                )
-                  return null;
-
                 return (
                   <tr
                     key={index}
@@ -107,13 +134,19 @@ const AllStoresTable = () => {
                     </td>
                     <td className="px-1 py-4">{store?.owner?.name}</td>
                     <td className="px-1 py-4">{store?.mainBusiness}</td>
+                    <td className="px-1 py-4">{store?.score}</td>
                     <td className="px-1 py-4">
                       {store?.status === StoreStatus.ACTIVE && (
                         <MyLabel type="success">Đang hoạt động</MyLabel>
                       )}
-                      {store?.status === StoreStatus.INACTIVE && (
-                        <MyLabel type="warning">Chờ duyệt</MyLabel>
-                      )}
+                      {store?.status === StoreStatus.INACTIVE &&
+                        store?.notApproveReason === null && (
+                          <MyLabel type="warning">Chờ duyệt</MyLabel>
+                        )}
+                      {store?.status === StoreStatus.INACTIVE &&
+                        store?.notApproveReason !== null && (
+                          <MyLabel type="delivery">Không được duyệt</MyLabel>
+                        )}
                       {store?.status === StoreStatus.BANNED && (
                         <MyLabel type="error">Đã cấm</MyLabel>
                       )}
@@ -137,6 +170,13 @@ const AllStoresTable = () => {
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };
