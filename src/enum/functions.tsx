@@ -1,13 +1,10 @@
 import moment from "moment";
-import {
-  Bidder,
-  Progress,
-  Shipping,
-  Variant,
-  VariantItem,
-} from "./defined-type";
+import { Bidder, Progress, Shipping, VariantItem } from "./defined-type";
 import { ProductStatus, Role } from "./constants";
 import storage from "@/apis/storage";
+import { COLORS } from "./colors";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 
 export function formatCurrency(price: number) {
   const formatter = new Intl.NumberFormat("vi", {
@@ -190,4 +187,24 @@ export function setLabelByStatus(status: ProductStatus) {
     case ProductStatus.OFF:
       return "Đã tắt";
   }
+}
+
+export function renderStatusPayment(value: boolean) {
+  return value ? (
+    <CheckRoundedIcon
+      style={{
+        color: COLORS.success.c900,
+        width: 24,
+        height: 24,
+      }}
+    />
+  ) : (
+    <RemoveRoundedIcon
+      style={{
+        color: COLORS.support.c500,
+        width: 24,
+        height: 24,
+      }}
+    />
+  );
 }

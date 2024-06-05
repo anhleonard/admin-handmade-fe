@@ -1,6 +1,12 @@
 import { adminFilterStores, updateStoreStatus } from "@/apis/services/stores";
 import storage from "@/apis/storage";
-import { AlertStatus, EnumOrderStatus, StoreStatus } from "@/enum/constants";
+import {
+  AlertStatus,
+  EnumOrderStatus,
+  Page,
+  StoreStatus,
+  rowsPerPage,
+} from "@/enum/constants";
 import { AlertState, Order, Store } from "@/enum/defined-type";
 import { DetailIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
@@ -22,11 +28,16 @@ import BannedStoreModal from "@/components/stores/banned-store-modal";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { StoreStatusValues } from "@/apis/types";
+import { MyPagination } from "@/libs/pagination";
 
 const ViolateStoresTable = () => {
   const dispatch = useDispatch();
   const [stores, setStores] = useState<Store[]>([]);
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [searchText, setSearchText] = useState<string>("");
 
   const getAllStores = async () => {
     try {
@@ -34,9 +45,15 @@ const ViolateStoresTable = () => {
       const token = storage.getLocalAccessToken();
       const query = {
         status: StoreStatus.BANNED,
+        limit: rowsPage,
+        page: page,
+        ...(searchText !== "" && {
+          storeName: searchText,
+        }),
       };
       const res = await adminFilterStores(token, query);
       if (res) {
+        setCount(res?.total ?? 0);
         setStores(res?.data);
       }
     } catch (error: any) {
@@ -54,7 +71,15 @@ const ViolateStoresTable = () => {
 
   useEffect(() => {
     getAllStores();
-  }, [refetchQueries]);
+  }, [refetchQueries, page, rowsPage]);
+
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
+  };
 
   const handleRefetch = () => {
     dispatch(refetchComponent());
@@ -118,12 +143,22 @@ const ViolateStoresTable = () => {
       {/* filter */}
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
-          <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập tên cửa hàng"
-            className="w-[300px]"
-          />
+          <form
+            className="flex-1 text-slate-900 dark:text-slate-100"
+            onSubmit={(e) => {
+              setPage(1);
+              handleRefetch();
+              e.preventDefault();
+            }}
+          >
+            <MyTextField
+              id="searchItem"
+              endIcon={<SearchIcon />}
+              placeholder="Nhập tên cửa hàng"
+              className="w-[300px]"
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </form>
         </div>
       </div>
 
@@ -194,6 +229,13 @@ const ViolateStoresTable = () => {
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };

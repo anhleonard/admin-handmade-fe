@@ -8,6 +8,7 @@ import {
   calculateAverageBidderMoney,
   formatCommonTime,
   formatCurrency,
+  renderStatusPayment,
 } from "@/enum/functions";
 import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
@@ -86,9 +87,10 @@ const AuctioningAuctionsTable = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Tên dự án</th>
                 <th className="py-4 pl-3">Khách hàng</th>
-                <th className="px-1 py-4">Số lượng yêu cầu</th>
+                <th className="px-1 py-4">Yêu cầu</th>
                 <th className="px-1 py-4">Ngân sách</th>
-                <th className="px-1 py-4">Đặt cọc</th>
+                <th className="px-1 py-4">Thanh toán cọc</th>
+                <th className="px-1 py-4">Thanh toán hết</th>
                 <th className="px-1 py-4">Ngày tạo</th>
                 <th className="px-1 py-4">Ngày đóng</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
@@ -109,8 +111,11 @@ const AuctioningAuctionsTable = () => {
                     <td className="px-1 py-4">
                       {formatCurrency(auction?.maxAmount)}
                     </td>
-                    <td className="px-1 py-4">
-                      {formatCurrency(auction?.deposit)}
+                    <td className="px-1 py-4 text-center">
+                      {renderStatusPayment(auction?.isPaymentDeposit)}
+                    </td>
+                    <td className="px-1 py-4 text-center">
+                      {renderStatusPayment(auction?.isPaymentFull)}
                     </td>
                     <td className="px-1 py-4">
                       {formatCommonTime(auction?.createdAt)}

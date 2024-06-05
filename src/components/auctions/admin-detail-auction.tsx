@@ -237,7 +237,7 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                 disablePadding
               >
                 <div className="flex flex-col gap-1">
-                  <div className="font-bold text-grey-c900">Đặt cọc</div>
+                  <div className="font-bold text-grey-c900">Tiền cọc</div>
                   <div className="font-medium text-primary-c900">
                     {auction?.deposit && formatCurrency(auction?.deposit)}
                   </div>
@@ -515,7 +515,8 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
 
             {auction?.status === AuctionStatus.PROGRESS ||
             auction?.status === AuctionStatus.DELIVERY ||
-            auction?.status === AuctionStatus.COMPLETED ? (
+            auction?.status === AuctionStatus.COMPLETED ||
+            (!auction?.status && auction?.isPaymentFull) ? (
               <ListItem>
                 <div className="flex flex-col gap-1">
                   <div className="font-bold text-grey-c900">

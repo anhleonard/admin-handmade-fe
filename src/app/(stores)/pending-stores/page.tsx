@@ -1,6 +1,6 @@
 import { adminFilterStores, updateStoreStatus } from "@/apis/services/stores";
 import storage from "@/apis/storage";
-import { AlertStatus, StoreStatus } from "@/enum/constants";
+import { AlertStatus, Page, StoreStatus, rowsPerPage } from "@/enum/constants";
 import { AlertState, Store } from "@/enum/defined-type";
 import { formatCommonTime } from "@/enum/functions";
 import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
@@ -21,11 +21,16 @@ import { openModal } from "@/redux/slices/modalSlice";
 import DetailStore from "@/components/stores/detail-store";
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import RejectStoreModal from "@/components/stores/reject-store-modal";
+import { MyPagination } from "@/libs/pagination";
 
 const PendingStoresTable = () => {
   const dispatch = useDispatch();
   const [stores, setStores] = useState<Store[]>([]);
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [searchText, setSearchText] = useState<string>("");
 
   const getAllStores = async () => {
     try {
@@ -33,9 +38,16 @@ const PendingStoresTable = () => {
       const token = storage.getLocalAccessToken();
       const query = {
         status: StoreStatus.INACTIVE,
+        notApproveReason: null,
+        limit: rowsPage,
+        page: page,
+        ...(searchText !== "" && {
+          storeName: searchText,
+        }),
       };
       const res = await adminFilterStores(token, query);
       if (res) {
+        setCount(res?.total ?? 0);
         setStores(res?.data);
       }
     } catch (error: any) {
@@ -53,7 +65,15 @@ const PendingStoresTable = () => {
 
   useEffect(() => {
     getAllStores();
-  }, [refetchQueries]);
+  }, [refetchQueries, page, rowsPage]);
+
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
+  };
 
   const handleRefetch = () => {
     dispatch(refetchComponent());
@@ -128,12 +148,22 @@ const PendingStoresTable = () => {
       {/* filter */}
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
-          <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập tên cửa hàng"
-            className="w-[300px]"
-          />
+          <form
+            className="flex-1 text-slate-900 dark:text-slate-100"
+            onSubmit={(e) => {
+              setPage(1);
+              handleRefetch();
+              e.preventDefault();
+            }}
+          >
+            <MyTextField
+              id="searchItem"
+              endIcon={<SearchIcon />}
+              placeholder="Nhập tên cửa hàng"
+              className="w-[300px]"
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </form>
         </div>
       </div>
 
@@ -219,6 +249,13 @@ const PendingStoresTable = () => {
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };
