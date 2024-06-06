@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { adminOrders } from "@/apis/services/orders";
+import { adminOrders, updateOrder } from "@/apis/services/orders";
 import {
   AlertStatus,
   EnumOrderStatus,
@@ -25,6 +25,10 @@ import { RootState } from "@/redux/store";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { MyPagination } from "@/libs/pagination";
+import RemoveCircleOutlineRoundedIcon from "@mui/icons-material/RemoveCircleOutlineRounded";
+import { COLORS } from "@/enum/colors";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { UpdateOrderValues } from "@/apis/types";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -109,6 +113,60 @@ const ProcessingOrdersTable = () => {
     dispatch(refetchComponent());
   };
 
+  const handleCancelOrderByAdmin = (order: Order, notOverdate: boolean) => {
+    if (notOverdate) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "KHÔNG THỂ HỦY",
+        message: "Đơn hàng chưa quá hạn, không thể hủy!",
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+      return;
+    }
+
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN HỦY ĐƠN HÀNG DO QUÁ HẠN",
+      message: "Bạn có hủy đơn hàng này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => handleCancelOrder(order),
+    };
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleCancelOrder = async (order: Order) => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const variables: UpdateOrderValues = {
+        status: EnumOrderStatus.OVERDATE,
+      };
+      const res = await updateOrder(order?.id, token, variables);
+      if (res) {
+        dispatch(closeConfirm());
+        let alert: AlertState = {
+          isOpen: true,
+          title: "THÀNH CÔNG",
+          message: "Đã hủy đơn hàng do quá hạn xác nhận thành công!",
+          type: AlertStatus.SUCCESS,
+        };
+        dispatch(openAlert(alert));
+        handleRefetch();
+      }
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -171,13 +229,18 @@ const ProcessingOrdersTable = () => {
                 <th className="px-1 py-4">Số lượng</th>
                 <th className="px-1 py-4">Khách trả</th>
                 <th className="px-1 py-4">Ngày đặt hàng</th>
-                <th className="px-1 py-4">Dự kiến giao hàng</th>
+                <th className="px-1 py-4">Hạn xử lý</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {orders?.map((order, index) => {
                 // if (!order?.orderProducts?.length) return null;
+                const now = Date.now();
+                const orderAt = new Date(order?.orderAt);
+                orderAt.setDate(orderAt.getDate() + 7);
+                const notOverdate = new Date(orderAt).getTime() > now;
+
                 return (
                   <tr
                     className="hover:bg-primary-c100 hover:text-grey-c700"
@@ -187,7 +250,11 @@ const ProcessingOrdersTable = () => {
                     <td className="px-1 py-4">{order?.client?.name}</td>
                     <td className="px-1 py-4">{order?.store?.name}</td>
                     <td className="px-1 py-4">
-                      <MyLabel type="progress">Đang xử lý</MyLabel>
+                      {notOverdate ? (
+                        <MyLabel type="progress">Đang xử lý</MyLabel>
+                      ) : (
+                        <MyLabel type="error">Quá hạn xác nhận</MyLabel>
+                      )}
                     </td>
                     <td className="px-1 py-4">
                       {order?.orderProducts?.length}
@@ -209,6 +276,18 @@ const ProcessingOrdersTable = () => {
                             onClick={() => handleOpenDetailModal(order?.id)}
                           >
                             <DetailIcon />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title="Hủy đơn hàng">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() =>
+                              handleCancelOrderByAdmin(order, notOverdate)
+                            }
+                          >
+                            <RemoveCircleOutlineRoundedIcon
+                              sx={{ fontSize: 20, color: COLORS.support.c500 }}
+                            />
                           </div>
                         </Tooltip>
                       </div>

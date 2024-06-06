@@ -117,7 +117,7 @@ const ReadyOrdersTable = () => {
   const handleConfirmDelivery = (orderId: number) => {
     const confirm: any = {
       isOpen: true,
-      title: "XÁC NHẬN VẬN CHUYỂN GIAO HÀNG",
+      title: "XÁC NHẬN VẬN CHUYỂN ĐƠN HÀNG",
       message: "Bạn có xác nhận vận chuyển đơn hàng này không?",
       feature: "CONFIRM_CONTACT_US",
       onConfirm: async () => {

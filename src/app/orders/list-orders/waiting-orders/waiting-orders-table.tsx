@@ -5,8 +5,6 @@ import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import { IconButton, Tooltip } from "@mui/material";
-import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
-import { COLORS } from "@/enum/colors";
 import DetailOrderModal from "../../modals/detail-order-modal";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
@@ -14,7 +12,7 @@ import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { adminOrders } from "@/apis/services/orders";
+import { adminOrders, updateOrder } from "@/apis/services/orders";
 import {
   AlertStatus,
   EnumOrderStatus,
@@ -23,11 +21,14 @@ import {
 } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
-import { openConfirm } from "@/redux/slices/confirmSlice";
 import { RootState } from "@/redux/store";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { MyPagination } from "@/libs/pagination";
+import RemoveCircleOutlineRoundedIcon from "@mui/icons-material/RemoveCircleOutlineRounded";
+import { COLORS } from "@/enum/colors";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { UpdateOrderValues } from "@/apis/types";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -64,12 +65,11 @@ const WaitingOrdersTable = () => {
         ...(orderAt !== "" && {
           orderAt: orderAt,
         }),
-        overDate: false,
       };
       const res = await adminOrders(token, query);
       if (res) {
+        setOrders(res?.data);
         setCount(res?.total ?? 0);
-        setOrders(res?.data?.reverse());
       }
     } catch (error: any) {
       let alert: AlertState = {
@@ -115,16 +115,58 @@ const WaitingOrdersTable = () => {
     dispatch(refetchComponent());
   };
 
-  const handleCancelOrderByAdmin = (orderId: number) => {
+  const handleCancelOrderByAdmin = (order: Order, notOverdate: boolean) => {
+    if (notOverdate) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "KHÔNG THỂ HỦY",
+        message: "Đơn hàng chưa quá hạn, không thể hủy!",
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+      return;
+    }
+
     const confirm: any = {
       isOpen: true,
-      title: "HỦY ĐƠN HÀNG",
-      message: "Bạn có chắc chắn hủy đơn hàng này không?",
+      title: "XÁC NHẬN HỦY ĐƠN HÀNG DO QUÁ HẠN",
+      message: "Bạn có hủy đơn hàng này không?",
       feature: "CONFIRM_CONTACT_US",
-      onConfirm: () => {},
+      onConfirm: () => handleCancelOrder(order),
     };
-
     dispatch(openConfirm(confirm));
+  };
+
+  const handleCancelOrder = async (order: Order) => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const variables: UpdateOrderValues = {
+        status: EnumOrderStatus.OVERDATE,
+      };
+      const res = await updateOrder(order?.id, token, variables);
+      if (res) {
+        dispatch(closeConfirm());
+        let alert: AlertState = {
+          isOpen: true,
+          title: "THÀNH CÔNG",
+          message: "Đã hủy đơn hàng do quá hạn xác nhận thành công!",
+          type: AlertStatus.SUCCESS,
+        };
+        dispatch(openAlert(alert));
+        handleRefetch();
+      }
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
   };
 
   return (
@@ -194,18 +236,29 @@ const WaitingOrdersTable = () => {
               </tr>
             </thead>
             <tbody>
-              {orders?.map((order, index) => {
+              {orders?.map((order) => {
                 // if (!order?.orderProducts?.length) return null;
+
+                //check xem đã quá hạn xác nhận chưa
+                const now = Date.now();
+                const orderAt = new Date(order?.orderAt);
+                orderAt.setDate(orderAt.getDate() + 7);
+                const notOverdate = new Date(orderAt).getTime() > now;
+
                 return (
                   <tr
-                    key={index}
+                    key={order?.id}
                     className="hover:bg-primary-c100 hover:text-grey-c700"
                   >
                     <td className="py-4 pl-3">{order?.code}</td>
                     <td className="px-1 py-4">{order?.client?.name}</td>
                     <td className="px-1 py-4">{order?.store?.name}</td>
                     <td className="px-1 py-4">
-                      <MyLabel type="warning">Chờ xác nhận</MyLabel>
+                      {notOverdate ? (
+                        <MyLabel type="warning">Chờ xác nhận</MyLabel>
+                      ) : (
+                        <MyLabel type="error">Quá hạn xác nhận</MyLabel>
+                      )}
                     </td>
                     <td className="px-1 py-4">
                       {order?.orderProducts?.length}
@@ -229,16 +282,18 @@ const WaitingOrdersTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        {/* <Tooltip title="Hủy">
+                        <Tooltip title="Hủy đơn hàng">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleCancelOrderByAdmin(order?.id)}
+                            onClick={() =>
+                              handleCancelOrderByAdmin(order, notOverdate)
+                            }
                           >
-                            <DoNotDisturbOnOutlinedIcon
+                            <RemoveCircleOutlineRoundedIcon
                               sx={{ fontSize: 20, color: COLORS.support.c500 }}
                             />
                           </div>
-                        </Tooltip> */}
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>

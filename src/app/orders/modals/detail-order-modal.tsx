@@ -160,6 +160,20 @@ const DetailOrderModal = ({ type, orderId }: DetailOrderModalProps) => {
             </div>
           </>
         );
+      case EnumOrderStatus.OVERDATE:
+        return (
+          <>
+            <div>
+              Hủy vào lúc:{" "}
+              <span className="font-semibold">
+                {order?.updatedAt && formatCommonTime(order?.updatedAt)}
+              </span>
+            </div>
+            <div className="flex flex-row items-center gap-1">
+              Trạng thái: <MyLabel type="error">Hủy do quá hạn</MyLabel>
+            </div>
+          </>
+        );
       case EnumOrderStatus.DELIVERED:
         return (
           <>

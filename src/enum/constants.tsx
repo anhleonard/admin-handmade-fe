@@ -1,12 +1,9 @@
-import AllOrdersTable from "@/app/orders/list-orders/all-orders/all-orders-table";
 import CancelOrdersTable from "@/app/orders/list-orders/cancel-orders/cancel-orders-table";
 import DoneOrdersTable from "@/app/orders/list-orders/done-orders/done-orders-table";
 import ProcessingOrdersTable from "@/app/orders/list-orders/processing-orders/processing-orders-table";
 import TransportOrdersTable from "@/app/orders/list-orders/transport-orders/transport-orders-table";
 import WaitingOrdersTable from "@/app/orders/list-orders/waiting-orders/waiting-orders-table";
 import AllItemsTable from "@/app/products/list-products/all-items/all-items-table";
-import NoItemsTable from "@/app/products/list-products/no-items/no-items-table";
-import OffItemsTable from "@/app/products/list-products/off-items/off-items-table";
 import PendingItemsTable from "@/app/products/list-products/pending-items/pending-items-table";
 import SellingItemsTable from "@/app/products/list-products/selling-items/selling-items-table";
 import ViolateItemsTable from "@/app/products/list-products/violate-items/violate-items-table";
@@ -22,7 +19,6 @@ import FourStarTable from "@/app/reviews/four-star/four-star-table";
 import ThreeStarTable from "@/app/reviews/three-star/three-star-table";
 import TwoStarTable from "@/app/reviews/two-star/two-star-table";
 import OneStarTable from "@/app/reviews/one-star/one-star-table";
-import AllAuctionsTab from "@/app/auctions/my-auctions/all-auctions/all-auctions-table";
 import ProcessingAuctionsTab from "@/app/auctions/my-auctions/processing-auctions/processing-auctions-table";
 import FinishedAuctionsTab from "@/app/auctions/my-auctions/finished-auctions/finished-auctions-table";
 import CanceledAuctionsTab from "@/app/auctions/my-auctions/canceled-auctions/canceled-auctions-table";
@@ -36,6 +32,7 @@ import ReadyAuctionsTab from "@/app/auctions/my-auctions/ready-auctions/ready-au
 import ActiveStoresTable from "@/app/(stores)/active-stores/page";
 import PendingStoresTable from "@/app/(stores)/pending-stores/page";
 import ViolateStoresTable from "@/app/(stores)/violate-stores/page";
+import OverdateOrdersTable from "@/app/orders/list-orders/overdate-orders/overdate-orders-table";
 
 export const Page = 1;
 export const Limit = 5;
@@ -205,6 +202,11 @@ export const orderTabs = [
     label: "Đã hủy",
     value: "6",
     content: <CancelOrdersTable />,
+  },
+  {
+    label: "Quá hạn xác nhận",
+    value: "7",
+    content: <OverdateOrdersTable />,
   },
 ];
 
@@ -385,6 +387,7 @@ export enum EnumOrderStatus {
   SHIPPED = "SHIPPED",
   DELIVERED = "DELIVERED",
   CENCELLED = "CENCELLED",
+  OVERDATE = "OVERDATE",
 }
 
 export enum Role {

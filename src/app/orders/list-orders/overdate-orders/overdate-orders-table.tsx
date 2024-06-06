@@ -2,47 +2,35 @@ import { DetailIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect, { Item } from "@/libs/select";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
-import { IconButton, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
+import DetailOrderModal from "../../modals/detail-order-modal";
 import { useDispatch, useSelector } from "react-redux";
+import { openModal } from "@/redux/slices/modalSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import {
-  adminOrders,
-  ordersByStatus,
-  updateOrder,
-} from "@/apis/services/orders";
+import { adminOrders } from "@/apis/services/orders";
 import {
   AlertStatus,
   EnumOrderStatus,
-  EnumScore,
   Page,
-  TypeScore,
   rowsPerPage,
 } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
-import { StoreScoreValues, UpdateOrderValues } from "@/apis/types";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
-import DetailOrderModal from "../../modals/detail-order-modal";
-import { openModal } from "@/redux/slices/modalSlice";
 import { RootState } from "@/redux/store";
-import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-import { COLORS } from "@/enum/colors";
-import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
-import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { MyPagination } from "@/libs/pagination";
-import { updateScore } from "@/apis/services/stores";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
   { label: "Tên khách hàng", value: "CLIENT_NAME" },
+  { label: "Tên cửa hàng", value: "STORE_NAME" },
 ];
 
-const TransportOrdersTable = () => {
+const OverdateOrdersTable = () => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
   const [page, setPage] = useState(Page);
@@ -51,14 +39,13 @@ const TransportOrdersTable = () => {
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
   const [searchText, setSearchText] = useState<string>("");
   const [selectedOption, setSelectedOption] = useState<Item>(labelOptions[0]);
-  const [orderAt, setOrderAt] = useState<string>("");
 
   const getAllOrders = async () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
       const query = {
-        status: EnumOrderStatus.DELIVERED,
+        status: EnumOrderStatus.OVERDATE,
         limit: rowsPage,
         page: page,
         ...(selectedOption === labelOptions[0] &&
@@ -69,9 +56,10 @@ const TransportOrdersTable = () => {
           searchText !== "" && {
             clientName: searchText,
           }),
-        ...(orderAt !== "" && {
-          orderAt: orderAt,
-        }),
+        ...(selectedOption === labelOptions[2] &&
+          searchText !== "" && {
+            storeName: searchText,
+          }),
       };
       const res = await adminOrders(token, query);
       if (res) {
@@ -93,61 +81,18 @@ const TransportOrdersTable = () => {
 
   useEffect(() => {
     getAllOrders();
-  }, [refetchQueries, page, rowsPage, orderAt]);
+  }, [refetchQueries, page, rowsPage]);
 
   const handleOpenDetailModal = (orderId: number) => {
     const modal = {
       isOpen: true,
       title: "Chi tiết đơn hàng",
       content: (
-        <DetailOrderModal type={EnumOrderStatus.DELIVERED} orderId={orderId} />
+        <DetailOrderModal type={EnumOrderStatus.OVERDATE} orderId={orderId} />
       ),
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
-  };
-
-  const handleConfirmShipped = (order: Order) => {
-    const confirm: any = {
-      isOpen: true,
-      title: "XÁC NHẬN GIAO HÀNG",
-      message: "Bạn có xác nhận vận chuyển đơn hàng này không?",
-      feature: "CONFIRM_CONTACT_US",
-      onConfirm: async () => {
-        try {
-          dispatch(openLoading());
-          const token = storage.getLocalAccessToken();
-          const variables: UpdateOrderValues = {
-            status: EnumOrderStatus.SHIPPED,
-          };
-          const res = await updateOrder(order?.id, token, variables); //trong update này đã cộng điểm cho store rồi
-
-          if (res) {
-            dispatch(closeConfirm());
-            let alert: AlertState = {
-              isOpen: true,
-              title: "THÀNH CÔNG",
-              message: "Đã cập nhật giao hàng thành công!",
-              type: AlertStatus.SUCCESS,
-            };
-            dispatch(openAlert(alert));
-            handleRefetch();
-          }
-        } catch (error: any) {
-          let alert: AlertState = {
-            isOpen: true,
-            title: "LỖI",
-            message: error?.response?.data?.message,
-            type: AlertStatus.ERROR,
-          };
-          dispatch(openAlert(alert));
-        } finally {
-          dispatch(closeLoading());
-        }
-      },
-    };
-
-    dispatch(openConfirm(confirm));
   };
 
   const handlePageChange = (page: number) => {
@@ -189,24 +134,6 @@ const TransportOrdersTable = () => {
             />
           </form>
         </div>
-        <div className="flex flex-row items-center justify-center gap-4">
-          <div>Ngày đặt hàng</div>
-
-          <div className="flex flex-row items-center gap-1">
-            <MyDatePicker
-              id="order-at"
-              name="order-at"
-              className="flex-1"
-              onChange={(value) => setOrderAt(value[0].toString())}
-            />
-
-            {orderAt !== "" ? (
-              <IconButton onClick={() => setOrderAt("")}>
-                <ClearRoundedIcon style={{ width: 16, height: 16 }} />
-              </IconButton>
-            ) : null}
-          </div>
-        </div>
       </div>
 
       {/* table */}
@@ -223,12 +150,13 @@ const TransportOrdersTable = () => {
                 <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Số lượng</th>
                 <th className="px-1 py-4">Khách trả</th>
-                <th className="px-1 py-4">Dự kiến giao hàng</th>
+                <th className="px-1 py-4">Ngày hủy</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {orders?.map((order, index) => {
+                // if (!order?.orderProducts?.length) return null;
                 return (
                   <tr
                     key={index}
@@ -238,7 +166,7 @@ const TransportOrdersTable = () => {
                     <td className="px-1 py-4">{order?.client?.name}</td>
                     <td className="px-1 py-4">{order?.store?.name}</td>
                     <td className="px-1 py-4">
-                      <MyLabel type="delivery">Đang vận chuyển</MyLabel>
+                      <MyLabel type="error">Quá hạn</MyLabel>
                     </td>
                     <td className="px-1 py-4">
                       {order?.orderProducts?.length}
@@ -246,9 +174,8 @@ const TransportOrdersTable = () => {
                     <td className="px-1 py-4">
                       {formatCurrency(order?.totalPayment)}
                     </td>
-                    {/* tính thêm 7 ngày từ ngày giao hàng cho shipper */}
                     <td className="px-1 py-4">
-                      {formatCommonTime(order?.deliveredAt, 7)}
+                      {formatCommonTime(order?.updatedAt)}
                     </td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
@@ -260,16 +187,16 @@ const TransportOrdersTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        <Tooltip title="Xác nhận giao hàng">
+                        {/* <Tooltip title="Hủy">
                           <div
                             className="hover:cursor-pointer"
-                            onClick={() => handleConfirmShipped(order)}
+                            onClick={() => handleCancelOrderByAdmin(order?.id)}
                           >
-                            <CheckCircleOutlineRoundedIcon
-                              sx={{ fontSize: 20, color: COLORS.blue.c900 }}
+                            <DoNotDisturbOnOutlinedIcon
+                              sx={{ fontSize: 20, color: COLORS.support.c500 }}
                             />
                           </div>
-                        </Tooltip>
+                        </Tooltip> */}
                       </div>
                     </td>
                   </tr>
@@ -290,4 +217,4 @@ const TransportOrdersTable = () => {
   );
 };
 
-export default TransportOrdersTable;
+export default OverdateOrdersTable;
