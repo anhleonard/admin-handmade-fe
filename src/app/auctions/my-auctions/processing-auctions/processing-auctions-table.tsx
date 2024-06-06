@@ -9,9 +9,8 @@ import {
   findMaxPercentage,
   formatCurrency,
 } from "@/enum/functions";
-import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import MyLabel from "@/libs/label";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
@@ -19,10 +18,13 @@ import { openModal } from "@/redux/slices/modalSlice";
 import { Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import { COLORS } from "@/enum/colors";
 
 const ProcessingAuctionsTab = () => {
   const dispatch = useDispatch();
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [title, setTitle] = useState<string>("");
 
   const getAllAuctions = async () => {
     try {
@@ -31,6 +33,9 @@ const ProcessingAuctionsTab = () => {
       const query = {
         status: AuctionStatus.PROGRESS,
         readyToLaunch: false,
+        ...(title !== "" && {
+          auctionName: title,
+        }),
       };
       const res = await adminFilterAuctions(token, query);
       if (res) {
@@ -66,15 +71,21 @@ const ProcessingAuctionsTab = () => {
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-1">
+      <div className="grid grid-cols-3">
+        <form
+          className="col-span-1 flex-1 text-slate-900 dark:text-slate-100"
+          onSubmit={(e) => {
+            getAllAuctions();
+            e.preventDefault();
+          }}
+        >
           <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
+            id="auction-search-field"
+            placeholder="Nhập keyword mà bạn muốn tìm kiếm"
+            onChange={(event) => setTitle(event.target.value)}
+            endIcon={<SearchRoundedIcon sx={{ color: COLORS.grey.c400 }} />}
           />
-        </div>
+        </form>
       </div>
 
       {/* table */}

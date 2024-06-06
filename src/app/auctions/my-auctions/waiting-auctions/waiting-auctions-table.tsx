@@ -5,7 +5,7 @@ import NoItemCard from "@/components/no-item/no-item-card";
 import { COLORS } from "@/enum/colors";
 import { AlertStatus, AuctionStatus } from "@/enum/constants";
 import { AlertState, Auction } from "@/enum/defined-type";
-import { DetailIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
@@ -26,11 +26,13 @@ import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import { RootState } from "@/redux/store";
 import RejectAuctionModal from "@/components/auctions/reject-auction-modal";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 
 const WaitingAuctionsTab = () => {
   const dispatch = useDispatch();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [title, setTitle] = useState<string>("");
 
   const getAllAuctions = async () => {
     try {
@@ -38,6 +40,10 @@ const WaitingAuctionsTab = () => {
       const token = storage.getLocalAccessToken();
       const query = {
         status: null,
+        overDate: false,
+        ...(title !== "" && {
+          auctionName: title,
+        }),
       };
       const res = await adminFilterAuctions(token, query);
       if (res) {
@@ -139,15 +145,21 @@ const WaitingAuctionsTab = () => {
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-1">
+      <div className="grid grid-cols-3">
+        <form
+          className="col-span-1 flex-1 text-slate-900 dark:text-slate-100"
+          onSubmit={(e) => {
+            getAllAuctions();
+            e.preventDefault();
+          }}
+        >
           <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
+            id="auction-search-field"
+            placeholder="Nhập keyword mà bạn muốn tìm kiếm"
+            onChange={(event) => setTitle(event.target.value)}
+            endIcon={<SearchRoundedIcon sx={{ color: COLORS.grey.c400 }} />}
           />
-        </div>
+        </form>
       </div>
 
       {/* table */}
@@ -165,6 +177,7 @@ const WaitingAuctionsTab = () => {
                 <th className="px-1 py-4">Thanh toán cọc</th>
                 <th className="px-1 py-4">Thanh toán hết</th>
                 <th className="px-1 py-4">Ngày tạo</th>
+                <th className="px-1 py-4">Thời hạn duyệt</th>
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
@@ -191,6 +204,9 @@ const WaitingAuctionsTab = () => {
                     </td>
                     <td className="px-1 py-4">
                       {formatCommonTime(auction?.createdAt)}
+                    </td>
+                    <td className="px-1 py-4">
+                      {formatCommonTime(auction?.createdAt, 7)}
                     </td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">

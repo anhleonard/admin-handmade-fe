@@ -154,8 +154,8 @@ const AllItemsTable = () => {
               {products?.map((product: Product, index: number) => {
                 return (
                   <tr
-                    className="hover:bg-primary-c100 hover:text-grey-c700"
                     key={index}
+                    className="hover:bg-primary-c100 hover:text-grey-c700"
                   >
                     <td className="py-4 pl-3">{product?.productCode}</td>
                     <td className="px-1 py-4">

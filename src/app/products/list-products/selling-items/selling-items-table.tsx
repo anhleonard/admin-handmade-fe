@@ -27,6 +27,7 @@ import { COLORS } from "@/enum/colors";
 import HighlightOffRoundedIcon from "@mui/icons-material/HighlightOffRounded";
 import { MyPagination } from "@/libs/pagination";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
+import ReportProductModal from "@/components/products/modals/report-product-modal";
 
 const labelOptions = [
   { label: "Tên sản phẩm", value: "ITEM_NAME" },
@@ -109,6 +110,18 @@ const SellingItemsTable = () => {
 
   const handleRefetch = () => {
     dispatch(refetchComponent());
+  };
+
+  const handleReportProduct = async (product: Product) => {
+    const modal = {
+      isOpen: true,
+      title: "Báo cáo vi phạm",
+      content: (
+        <ReportProductModal product={product} handleRefetch={handleRefetch} />
+      ),
+      screen: SCREEN.BASE,
+    };
+    dispatch(openModal(modal));
   };
 
   return (
@@ -220,7 +233,10 @@ const SellingItemsTable = () => {
                           </div>
                         </Tooltip>
                         <Tooltip title="Báo cáo vi phạm">
-                          <div className="hover:cursor-pointer">
+                          <div
+                            className="hover:cursor-pointer"
+                            onClick={() => handleReportProduct(product)}
+                          >
                             <HighlightOffRoundedIcon
                               sx={{ color: COLORS.support.c600, fontSize: 21 }}
                             />

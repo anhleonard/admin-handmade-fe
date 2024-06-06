@@ -1,24 +1,20 @@
-import {
-  adminFilterAuctions,
-  allSellerAuctions,
-  updateAuction,
-} from "@/apis/services/auctions";
+import { adminFilterAuctions, updateAuction } from "@/apis/services/auctions";
 import { updateScore } from "@/apis/services/stores";
 import storage from "@/apis/storage";
 import { StoreScoreValues } from "@/apis/types";
 import AdminDetailAuction from "@/components/auctions/admin-detail-auction";
-import SellerAunctionCard from "@/components/auctions/seller-auctions/seller-auctions-card";
 import NoItemCard from "@/components/no-item/no-item-card";
 import {
   AlertStatus,
   AuctionStatus,
   EnumScore,
+  Role,
   StoreStatus,
   TypeScore,
 } from "@/enum/constants";
 import { AlertState, Auction } from "@/enum/defined-type";
 import { formatCurrency } from "@/enum/functions";
-import { DetailIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
@@ -35,11 +31,13 @@ import { COLORS } from "@/enum/colors";
 import ArrowCircleDownRoundedIcon from "@mui/icons-material/ArrowCircleDownRounded";
 import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
 import BannedStoreModal from "@/components/stores/banned-store-modal";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 
 const CanceledAuctionsTab = () => {
   const dispatch = useDispatch();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [title, setTitle] = useState<string>("");
 
   const handleRefetch = () => {
     dispatch(refetchComponent());
@@ -51,6 +49,9 @@ const CanceledAuctionsTab = () => {
       const token = storage.getLocalAccessToken();
       const query = {
         status: AuctionStatus.CANCELED,
+        ...(title !== "" && {
+          auctionName: title,
+        }),
       };
       const res = await adminFilterAuctions(token, query);
       if (res) {
@@ -140,18 +141,35 @@ const CanceledAuctionsTab = () => {
     dispatch(openModal(modal));
   };
 
+  const renderCanceledUser = (role: Role) => {
+    switch (role) {
+      case Role.ADMIN:
+        return "Ban quản trị";
+      case Role.SELLER:
+        return "Nhà bán";
+      case Role.USER:
+        return "Khách hàng";
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-1">
+      <div className="grid grid-cols-3">
+        <form
+          className="col-span-1 flex-1 text-slate-900 dark:text-slate-100"
+          onSubmit={(e) => {
+            getAllAuctions();
+            e.preventDefault();
+          }}
+        >
           <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
+            id="auction-search-field"
+            placeholder="Nhập keyword mà bạn muốn tìm kiếm"
+            onChange={(event) => setTitle(event.target.value)}
+            endIcon={<SearchRoundedIcon sx={{ color: COLORS.grey.c400 }} />}
           />
-        </div>
+        </form>
       </div>
 
       {/* table */}
@@ -189,7 +207,9 @@ const CanceledAuctionsTab = () => {
                     <td className="px-1 py-4">
                       {formatCurrency(auction?.maxAmount)}
                     </td>
-                    <td className="px-1 py-4">{auction?.canceledBy?.name}</td>
+                    <td className="px-1 py-4">
+                      {renderCanceledUser(auction?.canceledBy?.role as Role)}{" "}
+                    </td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
                         <Tooltip title="Xem chi tiết">

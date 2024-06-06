@@ -9,6 +9,7 @@ import {
 import Button from "@/libs/button";
 import { useRouter } from "next/navigation";
 import { Auction } from "@/enum/defined-type";
+import { AuctionStatus } from "@/enum/constants";
 
 type Props = {
   auction: Auction;
@@ -27,16 +28,19 @@ const AunctionCard = ({ auction }: Props) => {
             <div className="text-base font-semibold text-primary-c900">
               {auction?.name}
             </div>
-            <MyLabel type="warning">
-              Còn {calculateRemainingDays(auction?.closedDate)} ngày
-            </MyLabel>
+            {auction?.status === AuctionStatus.AUCTIONING ? (
+              calculateRemainingDays(auction?.closedDate) > 0 ? (
+                <MyLabel type="warning">
+                  Còn {calculateRemainingDays(auction?.closedDate)} ngày
+                </MyLabel>
+              ) : (
+                <MyLabel type="error">Quá hạn đấu giá</MyLabel>
+              )
+            ) : null}
           </div>
           <div className="flex flex-row items-center gap-3">
             <MyLabel type="success">
               Max: {formatCurrency(auction?.maxAmount)}
-            </MyLabel>
-            <MyLabel type="success">
-              Dự kiến làm: {auction?.maxDays} ngày
             </MyLabel>
           </div>
         </div>

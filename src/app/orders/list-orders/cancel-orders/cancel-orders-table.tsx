@@ -1,13 +1,12 @@
 import { DetailIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
-import MySelect from "@/libs/select";
+import MySelect, { Item } from "@/libs/select";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
-import { Tooltip } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { COLORS } from "@/enum/colors";
 import { useDispatch, useSelector } from "react-redux";
-import ReasonCancelOrder from "@/components/orders/reason-cancel-order";
 import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
@@ -17,8 +16,10 @@ import {
   AlertStatus,
   EnumOrderStatus,
   EnumScore,
+  Page,
   StoreStatus,
   TypeScore,
+  rowsPerPage,
 } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
 import {
@@ -37,6 +38,8 @@ import { RootState } from "@/redux/store";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import BannedStoreModal from "@/components/stores/banned-store-modal";
+import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
+import { MyPagination } from "@/libs/pagination";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -46,11 +49,13 @@ const labelOptions = [
 const CancelOrdersTable = () => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [page, setPage] = useState(Page);
+  const [rowsPage, setRowsPage] = useState(rowsPerPage);
+  const [count, setCount] = useState(0);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
-
-  const handleRefetch = () => {
-    dispatch(refetchComponent());
-  };
+  const [searchText, setSearchText] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<Item>(labelOptions[0]);
+  const [orderAt, setOrderAt] = useState<string>("");
 
   const getAllOrders = async () => {
     try {
@@ -58,9 +63,23 @@ const CancelOrdersTable = () => {
       const token = storage.getLocalAccessToken();
       const query = {
         status: EnumOrderStatus.CENCELLED,
+        limit: rowsPage,
+        page: page,
+        ...(selectedOption === labelOptions[0] &&
+          searchText !== "" && {
+            code: searchText,
+          }),
+        ...(selectedOption === labelOptions[1] &&
+          searchText !== "" && {
+            clientName: searchText,
+          }),
+        ...(orderAt !== "" && {
+          orderAt: orderAt,
+        }),
       };
       const res = await adminOrders(token, query);
       if (res) {
+        setCount(res?.total ?? 0);
         setOrders(res?.data?.reverse());
       }
     } catch (error: any) {
@@ -78,7 +97,7 @@ const CancelOrdersTable = () => {
 
   useEffect(() => {
     getAllOrders();
-  }, [refetchQueries]);
+  }, [refetchQueries, page, rowsPage, orderAt]);
 
   const handleOpenDetailModal = (orderId: number) => {
     const modal = {
@@ -87,16 +106,6 @@ const CancelOrdersTable = () => {
       content: (
         <DetailOrderModal type={EnumOrderStatus.CENCELLED} orderId={orderId} />
       ),
-      screen: SCREEN.BASE,
-    };
-    dispatch(openModal(modal));
-  };
-
-  const handleOpenDetailReason = (reason: string) => {
-    const modal = {
-      isOpen: true,
-      title: "Lí do hủy",
-      content: <ReasonCancelOrder reason={reason} />,
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
@@ -159,24 +168,65 @@ const CancelOrdersTable = () => {
     dispatch(openModal(modal));
   };
 
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
+  const handleRowPerPageChange = (e: any) => {
+    setPage(Page);
+    setRowsPage(parseInt(e.target.value));
+  };
+
+  const handleRefetch = () => {
+    dispatch(refetchComponent());
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
       <div className="flex flex-row items-end justify-between">
         <div className="flex flex-row items-center gap-1">
-          <MySelect options={labelOptions} selected={labelOptions[0].value} />
-          <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
+          <MySelect
+            options={labelOptions}
+            selected={labelOptions[0].value}
+            onSelectItem={(item: Item) => setSelectedOption(item)}
           />
+          <form
+            className="flex-1 text-slate-900 dark:text-slate-100"
+            onSubmit={(e) => {
+              setPage(1);
+              handleRefetch();
+              e.preventDefault();
+            }}
+          >
+            <MyTextField
+              id="searchItem"
+              endIcon={<SearchIcon />}
+              placeholder="Nhập nội dung tìm kiếm"
+              className="w-[300px]"
+              onChange={(event) => setSearchText(event.target.value)}
+            />
+          </form>
         </div>
-        <div className="flex flex-row items-center justify-center gap-3">
-          <div>Ngày hủy</div>
-          <MyDatePicker id="" className="flex-1" />
+        <div className="flex flex-row items-center justify-center gap-4">
+          <div>Ngày đặt hàng</div>
+
+          <div className="flex flex-row items-center gap-1">
+            <MyDatePicker
+              id="order-at"
+              name="order-at"
+              className="flex-1"
+              onChange={(value) => setOrderAt(value[0].toString())}
+            />
+
+            {orderAt !== "" ? (
+              <IconButton onClick={() => setOrderAt("")}>
+                <ClearRoundedIcon style={{ width: 16, height: 16 }} />
+              </IconButton>
+            ) : null}
+          </div>
         </div>
       </div>
+
       {/* table */}
       <div className="max-w-[100%] overflow-hidden rounded-[10px]">
         <div className="overflow-x-auto">
@@ -198,7 +248,7 @@ const CancelOrdersTable = () => {
             </thead>
             <tbody>
               {orders?.map((order, index) => {
-                if (!order?.orderProducts?.length) return null;
+                // if (!order?.orderProducts?.length) return null;
                 return (
                   <tr
                     key={index}
@@ -301,6 +351,13 @@ const CancelOrdersTable = () => {
           </table>
         </div>
       </div>
+      <MyPagination
+        page={page}
+        handlePageChange={handlePageChange}
+        handleRowPerPageChange={handleRowPerPageChange}
+        total={count}
+        rowsPerPage={rowsPage}
+      />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import {
   EnumOrderStatus,
   EnumScore,
+  ProductStatus,
   StoreStatus,
   TypeScore,
 } from "@/enum/constants";
@@ -70,4 +71,10 @@ export type StoreScoreValues = {
   storeId: number;
   type: TypeScore;
   amount: EnumScore;
+};
+
+export type ReportProductValues = {
+  status: ProductStatus;
+  rejectReason: string;
+  editHint: string;
 };

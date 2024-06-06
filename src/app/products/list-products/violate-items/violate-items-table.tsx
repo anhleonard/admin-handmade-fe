@@ -28,12 +28,16 @@ import { COLORS } from "@/enum/colors";
 import DetailProductModal from "../../modals/detail-product-modal";
 import EditProductModal from "../../modals/edit-product-modal";
 import EditViolateProductModal from "../../modals/edit-violate-product";
-import { openConfirm } from "@/redux/slices/confirmSlice";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Product } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { adminProducts, getViolateProducts } from "@/apis/services/product";
+import {
+  adminProducts,
+  deleteProduct,
+  getViolateProducts,
+} from "@/apis/services/product";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { headerUrl } from "@/apis/services/authentication";
 import { formatDate } from "@/enum/functions";
@@ -71,18 +75,6 @@ const ViolateItemsTable = () => {
       screen: SCREEN.BASE,
     };
     dispatch(openModal(modal));
-  };
-
-  const handleConfirmDeleteItem = () => {
-    const confirm: any = {
-      isOpen: true,
-      title: "XÓA SẢN PHẨM",
-      message: "Bạn có chắc chắn xóa sản phẩm này không?",
-      feature: "CONFIRM_CONTACT_US",
-      onConfirm: () => {},
-    };
-
-    dispatch(openConfirm(confirm));
   };
 
   // get all violate products by seller token
@@ -180,14 +172,16 @@ const ViolateItemsTable = () => {
                 <th className="px-1 py-4">Trạng thái</th>
                 <th className="px-1 py-4">Ngày vi phạm</th>
                 <th className="px-1 py-4">Lý do</th>
-                {/* <th className="px-1 py-4">Gợi ý chỉnh sửa</th> */}
                 <th className="px-1 py-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {products?.map((product: Product, index: number) => {
                 return (
-                  <tr className="hover:bg-primary-c100 hover:text-grey-c700">
+                  <tr
+                    key={index}
+                    className="hover:bg-primary-c100 hover:text-grey-c700"
+                  >
                     <td className="py-4 pl-3">{product?.productCode}</td>
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-start gap-2">
@@ -216,7 +210,6 @@ const ViolateItemsTable = () => {
                     <td className="max-w-[300px] px-1 py-4 align-top">
                       {product?.rejectReason}
                     </td>
-                    {/* <td className="px-1 py-4 align-top">{product?.editHint}</td> */}
                     <td className="px-1 py-4">
                       <div className="flex flex-row items-center justify-center gap-2">
                         <Tooltip title="Xem chi tiết lỗi">
@@ -227,14 +220,6 @@ const ViolateItemsTable = () => {
                             <ErrorOutlineIcon
                               sx={{ color: COLORS.primary.c700, fontSize: 22 }}
                             />
-                          </div>
-                        </Tooltip>
-                        <Tooltip title="Xóa">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() => handleConfirmDeleteItem()}
-                          >
-                            <DeleteIcon />
                           </div>
                         </Tooltip>
                       </div>

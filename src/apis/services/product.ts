@@ -1,5 +1,6 @@
 import axios from "axios";
 import { headerUrl } from "./authentication";
+import { ReportProductValues } from "../types";
 
 export const uploadImages = async (files: any) => {
   return await axios
@@ -145,6 +146,22 @@ export const adminApproveProduct = async (
   };
 
   const url = `${headerUrl}/products/update-approve/${id}`;
+
+  return await axios.put(url, variables, config).then((res) => res.data);
+};
+
+export const reportProduct = async (
+  id: number,
+  variables: ReportProductValues,
+  token: string,
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const url = `${headerUrl}/products/report-product/${id}`;
 
   return await axios.put(url, variables, config).then((res) => res.data);
 };

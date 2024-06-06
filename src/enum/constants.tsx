@@ -49,7 +49,7 @@ export enum ColorState {
   warning = "bg-primary-c100 text-primary-c900 text-xs font-medium",
   progress = "bg-blue-c50 text-blue-c900 text-xs font-medium",
   delivery = "bg-purple-c10 text-purple-c900 text-xs font-medium",
-  grey = "bg-grey-c50 text-grey-c900 text-xs font-medium",
+  grey = "bg-grey-c100 text-grey-c900 text-xs font-medium",
 }
 
 export const itemStatuses = [

@@ -11,23 +11,21 @@ import MyLabel from "@/libs/label";
 import { Collapse, List, ListItem } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import MyDisplayImage from "@/libs/display-image";
-import Button from "@/libs/button";
 import { AlertState, Auction, Bidder } from "@/enum/defined-type";
 import { AlertStatus, AuctionStatus } from "@/enum/constants";
 import { useDispatch } from "react-redux";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import { singleAuction, updateAuction } from "@/apis/services/auctions";
+import { singleAuction } from "@/apis/services/auctions";
 import ListSellerPrice from "@/screens/auctions/list-seller-price";
 import { headerUrl } from "@/apis/services/authentication";
 
 type Props = {
-  type?: "client" | "seller";
   auctionId: number;
   bidder?: Bidder;
 };
 
-const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
+const AdminDetailAuction = ({ auctionId, bidder }: Props) => {
   const [auction, setAuction] = useState<Auction>();
   const [minMax, setMinMax] = useState<number[]>([0, 0]);
   const dispatch = useDispatch();
@@ -61,6 +59,28 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
     getSingleAuction();
   }, []);
 
+  const renderAuctionStatus = (status: AuctionStatus) => {
+    switch (status) {
+      case AuctionStatus.AUCTIONING:
+        return <MyLabel type="warning">Đang đấu giá</MyLabel>;
+
+      case AuctionStatus.PROGRESS:
+        return <MyLabel type="progress">Đang tiến hành</MyLabel>;
+
+      case AuctionStatus.DELIVERY:
+        return <MyLabel type="delivery">Đang vận chuyển</MyLabel>;
+
+      case AuctionStatus.COMPLETED:
+        return <MyLabel type="success">Đã hoàn thành</MyLabel>;
+
+      case AuctionStatus.CANCELED:
+        return <MyLabel type="error">Đã hủy</MyLabel>;
+
+      default:
+        return <MyLabel type="grey">Chờ duyệt</MyLabel>;
+    }
+  };
+
   return (
     <div className="space-y-8 py-4">
       <div className="rounded-2xl border-[2px] border-grey-c50">
@@ -81,33 +101,19 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                   ngày
                 </MyLabel>
               )}
-              {type === "seller" &&
-                auction?.status !== AuctionStatus.CANCELED && (
-                  <MyLabel type="success">
-                    Đạt tiến độ:{" "}
-                    {auction?.progresses &&
-                      findMaxPercentage(auction?.progresses)}
-                    %
-                  </MyLabel>
-                )}
+              {auction?.status === AuctionStatus.PROGRESS && (
+                <MyLabel type="success">
+                  Đạt tiến độ:{" "}
+                  {auction?.progresses &&
+                    findMaxPercentage(auction?.progresses)}
+                  %
+                </MyLabel>
+              )}
+              {renderAuctionStatus(auction?.status as AuctionStatus)}
             </div>
-            {type === "seller" ? (
-              <>
-                {auction?.status === AuctionStatus.PROGRESS && (
-                  <MyLabel type="progress">Đang tiến hành</MyLabel>
-                )}
-                {auction?.status === AuctionStatus.COMPLETED && (
-                  <MyLabel type="success">Đã hoàn thành</MyLabel>
-                )}
-                {auction?.status === AuctionStatus.CANCELED && (
-                  <MyLabel type="error">Đã hủy</MyLabel>
-                )}
-              </>
-            ) : (
-              <MyLabel type="success">
-                Max: {auction?.maxAmount && formatCurrency(auction?.maxAmount)}
-              </MyLabel>
-            )}
+            <MyLabel type="success">
+              Max: {auction?.maxAmount && formatCurrency(auction?.maxAmount)}
+            </MyLabel>
           </div>
         </ListItem>
         <Collapse in>
@@ -125,27 +131,29 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
               </div>
             </ListItem>
             {/* hình ảnh */}
-            <ListItem
-              className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
-              disablePadding
-            >
-              <div className="flex flex-col gap-2">
-                <div className="font-bold text-grey-c900">Hình ảnh ví dụ</div>
-                <div className="flex flex-row gap-5">
-                  {auction?.images?.length
-                    ? auction?.images?.map((image, index) => {
-                        return (
-                          <MyDisplayImage
-                            key={index}
-                            src={`${headerUrl}/products/${image}`}
-                            alt="example-image"
-                          />
-                        );
-                      })
-                    : null}
+            {auction?.images?.length ? (
+              <ListItem
+                className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
+                disablePadding
+              >
+                <div className="flex flex-col gap-2">
+                  <div className="font-bold text-grey-c900">Hình ảnh ví dụ</div>
+                  <div className="flex flex-row gap-5">
+                    {auction?.images?.length
+                      ? auction?.images?.map((image, index) => {
+                          return (
+                            <MyDisplayImage
+                              key={index}
+                              src={`${headerUrl}/products/${image}`}
+                              alt="example-image"
+                            />
+                          );
+                        })
+                      : null}
+                  </div>
                 </div>
-              </div>
-            </ListItem>
+              </ListItem>
+            ) : null}
 
             <ListItem
               className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
@@ -231,13 +239,13 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
               </ListItem>
             )}
 
-            {!auction?.status && (
+            {!auction?.status && !auction?.isPaymentFull && (
               <ListItem
                 className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
                 disablePadding
               >
                 <div className="flex flex-col gap-1">
-                  <div className="font-bold text-grey-c900">Tiền cọc</div>
+                  <div className="font-bold text-grey-c900">Tiền đã cọc</div>
                   <div className="font-medium text-primary-c900">
                     {auction?.deposit && formatCurrency(auction?.deposit)}
                   </div>
@@ -278,15 +286,13 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
               </ListItem>
             )}
 
-            {auction?.status === AuctionStatus.AUCTIONING && (
+            {!auction?.status && (
               <ListItem
                 className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
                 disablePadding
               >
                 <div className="flex flex-col gap-1">
-                  <div className="font-bold text-grey-c900">
-                    Ngày đóng đặt giá dự án
-                  </div>
+                  <div className="font-bold text-grey-c900">Thời hạn duyệt</div>
                   <div className="font-medium text-primary-c900">
                     {auction?.createdAt &&
                       formatCommonTime(auction?.createdAt, 7)}
@@ -321,22 +327,6 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                   </div>
                   <div className="font-medium text-primary-c900">
                     {auction?.candidates?.length}
-                  </div>
-                </div>
-              </ListItem>
-            )}
-
-            {(auction?.status === AuctionStatus.PROGRESS ||
-              auction?.status === AuctionStatus.DELIVERY ||
-              auction?.status === AuctionStatus.COMPLETED) && (
-              <ListItem
-                className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
-                disablePadding
-              >
-                <div className="flex flex-col gap-1">
-                  <div className="font-bold text-grey-c900">Giá chốt</div>
-                  <div className="font-medium text-primary-c900">
-                    {bidder?.bidderMoney && formatCurrency(bidder?.bidderMoney)}
                   </div>
                 </div>
               </ListItem>
@@ -438,30 +428,18 @@ const AdminDetailAuction = ({ type = "client", auctionId, bidder }: Props) => {
                 className="block w-full border-b-[2px] border-grey-c50 px-4 py-4"
                 disablePadding
               >
-                {type === "client" && (
-                  <div className="flex flex-col gap-1">
-                    <div className="font-bold text-grey-c900">
-                      Giá đặt trung bình
-                    </div>
-                    <div className="font-medium text-primary-c900">
-                      {formatCurrency(
-                        auction?.candidates?.length
-                          ? calculateAverageBidderMoney(auction?.candidates)
-                          : 0,
-                      )}
-                    </div>
+                <div className="flex flex-col gap-1">
+                  <div className="font-bold text-grey-c900">
+                    Giá đặt trung bình
                   </div>
-                )}
-                {type === "seller" && (
-                  <div className="flex flex-col gap-1">
-                    <div className="font-bold text-grey-c900">
-                      Làm trong vòng
-                    </div>
-                    <div className="font-medium text-primary-c900">
-                      {bidder?.estimatedDay} ngày
-                    </div>
+                  <div className="font-medium text-primary-c900">
+                    {formatCurrency(
+                      auction?.candidates?.length
+                        ? calculateAverageBidderMoney(auction?.candidates)
+                        : 0,
+                    )}
                   </div>
-                )}
+                </div>
               </ListItem>
             )}
             {auction?.status !== AuctionStatus.CANCELED &&

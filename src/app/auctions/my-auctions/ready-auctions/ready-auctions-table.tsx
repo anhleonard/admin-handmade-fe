@@ -5,7 +5,6 @@ import {
 import storage from "@/apis/storage";
 import AdminDetailAuction from "@/components/auctions/admin-detail-auction";
 import NoItemCard from "@/components/no-item/no-item-card";
-import { COLORS } from "@/enum/colors";
 import { AlertStatus, AuctionStatus } from "@/enum/constants";
 import { AlertState, Auction, Bidder } from "@/enum/defined-type";
 import {
@@ -27,11 +26,14 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import { RootState } from "@/redux/store";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import { COLORS } from "@/enum/colors";
 
 const ReadyAuctionsTab = () => {
   const dispatch = useDispatch();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const refetchQueries = useSelector((state: RootState) => state.refetch.time);
+  const [title, setTitle] = useState<string>("");
 
   const getAllAuctions = async () => {
     try {
@@ -40,6 +42,9 @@ const ReadyAuctionsTab = () => {
       const query = {
         status: AuctionStatus.PROGRESS,
         readyToLaunch: true,
+        ...(title !== "" && {
+          auctionName: title,
+        }),
       };
       const res = await adminFilterAuctions(token, query);
       if (res) {
@@ -121,15 +126,21 @@ const ReadyAuctionsTab = () => {
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-1">
+      <div className="grid grid-cols-3">
+        <form
+          className="col-span-1 flex-1 text-slate-900 dark:text-slate-100"
+          onSubmit={(e) => {
+            getAllAuctions();
+            e.preventDefault();
+          }}
+        >
           <MyTextField
-            id="searchItem"
-            endIcon={<SearchIcon />}
-            placeholder="Nhập nội dung tìm kiếm"
-            className="w-[300px]"
+            id="auction-search-field"
+            placeholder="Nhập keyword mà bạn muốn tìm kiếm"
+            onChange={(event) => setTitle(event.target.value)}
+            endIcon={<SearchRoundedIcon sx={{ color: COLORS.grey.c400 }} />}
           />
-        </div>
+        </form>
       </div>
 
       {/* table */}
@@ -142,7 +153,7 @@ const ReadyAuctionsTab = () => {
               <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
                 <th className="py-4 pl-3">Tên dự án</th>
                 <th className="py-4 pl-3">Khách hàng</th>
-                <th className="px-1 py-4">Số lượng yêu cầu</th>
+                <th className="px-1 py-4">Yêu cầu</th>
                 <th className="px-1 py-4">Handmader</th>
                 <th className="px-1 py-4">Giá chốt</th>
                 <th className="px-1 py-4">Làm trong</th>
