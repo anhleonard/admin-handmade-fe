@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import * as yup from "yup";
 import { Form, Formik, getIn } from "formik";
-import { AlertStatus } from "@/enum/constants";
+import { AlertStatus, Role } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
 import storage from "@/apis/storage";
 import { useRouter } from "next/navigation";
@@ -39,6 +39,18 @@ const SignIn = () => {
         password: values.password,
       };
       const responseLogin = await loginUser(variables);
+
+      if (responseLogin?.user?.role !== Role.ADMIN) {
+        let alert: AlertState = {
+          isOpen: true,
+          title: "LỖI",
+          message: "Vui lòng đăng nhập account của admin!",
+          type: AlertStatus.ERROR,
+        };
+        dispatch(openAlert(alert));
+        return;
+      }
+
       const user = JSON.stringify(responseLogin?.user);
       storage.updateLocalUserId(responseLogin?.user?.id);
       storage.updateLocalAccessToken(responseLogin?.accessToken);

@@ -33,6 +33,8 @@ import ActiveStoresTable from "@/app/(stores)/active-stores/page";
 import PendingStoresTable from "@/app/(stores)/pending-stores/page";
 import ViolateStoresTable from "@/app/(stores)/violate-stores/page";
 import OverdateOrdersTable from "@/app/orders/list-orders/overdate-orders/overdate-orders-table";
+import ListClientsTable from "@/app/(users)/clients/page";
+import ListSellersTable from "@/app/(users)/sellers/page";
 
 export const Page = 1;
 export const Limit = 5;
@@ -163,6 +165,20 @@ export const storeTabs = [
     label: "Bị cấm",
     value: "4",
     content: <ViolateStoresTable />,
+  },
+];
+
+// user tabs
+export const userTabs = [
+  {
+    label: "Khách hàng",
+    value: "1",
+    content: <ListClientsTable />,
+  },
+  {
+    label: "Người bán",
+    value: "2",
+    content: <ListSellersTable />,
   },
 ];
 

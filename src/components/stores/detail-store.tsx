@@ -1,10 +1,9 @@
-import { List, ListItem } from "@mui/material";
+import { List } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import DetailStoreItem from "./detail-store-item";
 import { FontFamily, FontSize } from "@/enum/setting";
 import { useDispatch } from "react-redux";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import storage from "@/apis/storage";
 import { AlertState, Order, Store } from "@/enum/defined-type";
 import { singleStore } from "@/apis/services/stores";
 import { AlertStatus, EnumOrderStatus, StoreStatus } from "@/enum/constants";

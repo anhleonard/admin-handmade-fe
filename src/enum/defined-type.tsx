@@ -158,6 +158,7 @@ export type Store = {
   orders: Order[];
   bannedReason: string;
   notApproveReason: string;
+  address: string;
   status: StoreStatus;
 };
 
@@ -223,6 +224,10 @@ export type User = {
   role: Role;
   frontCard: string;
   backCard: string;
+  address: string;
+  hasStore: boolean;
+  store: Store;
+  shippings: Shipping[];
 };
 
 export type FilterTime = {
