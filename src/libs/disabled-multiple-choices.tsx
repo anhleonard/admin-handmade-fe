@@ -1,9 +1,6 @@
-import { ClassifiedClass, Variant } from "@/enum/defined-type";
-import React, { useState } from "react";
+import { Variant } from "@/enum/defined-type";
+import React from "react";
 import MyLabel from "./label";
-import Button from "./button";
-import MyTextField from "./text-field";
-import MyTextAction from "./text-action";
 import MyDisplayImage from "./display-image";
 import MyPrimaryTextField from "./primary-text-field";
 import MyDefaultText from "./default-text";
@@ -25,13 +22,12 @@ const MyDisabledMultipleChoices = ({
     <div className="flex w-full flex-col gap-8 border-b-2 border-t-2 border-grey-c50 pb-8 pt-5">
       {variants.map((variant: Variant, index: number) => {
         const className = formatVariant(variant.variantItems);
-        console.log({ className });
         return (
           <div
             key={index}
             className={`flex flex-col gap-4 ${variants.length - 1 != index && "border-b-2 border-dashed border-grey-c100 pb-8"}`}
           >
-            <MyLabel children={`Phân loại ${index + 1}`} type="warning" />
+            <MyLabel type="warning">{`Phân loại ${index + 1}`}</MyLabel>
             <MyPrimaryTextField
               id={`${variant.id}`}
               title="Tên phân loại"

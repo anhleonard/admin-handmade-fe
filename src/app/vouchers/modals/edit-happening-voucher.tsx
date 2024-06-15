@@ -19,6 +19,7 @@ const EditHappeningVoucher = () => {
         color={COLORS.support.c900}
       />
       <MyDatePicker
+        id="end-date"
         label="Ngày kết thúc"
         placeholder="-- Lựa chọn --"
         defaultDate={"2024/26/04"}

@@ -3,41 +3,23 @@ import {
   AlertStatus,
   Page,
   ProductStatus,
-  mainCategories,
   rowsPerPage,
 } from "@/enum/constants";
-import {
-  DeleteIcon,
-  DetailIcon,
-  EditIcon,
-  OffIcon,
-  SearchIcon,
-} from "@/enum/icons";
+import { SearchIcon } from "@/enum/icons";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
 import MyTextField from "@/libs/text-field";
 import MySelect, { Item } from "@/libs/select";
-import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";
-import { Tooltip, Typography } from "@mui/material";
-import MyTextAction from "@/libs/text-action";
-import MyCutOffText from "@/libs/cutoff-text";
+import { Tooltip } from "@mui/material";
 import { COLORS } from "@/enum/colors";
 import DetailProductModal from "../../modals/detail-product-modal";
-import EditProductModal from "../../modals/edit-product-modal";
-import EditViolateProductModal from "../../modals/edit-violate-product";
-import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Product } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import {
-  adminProducts,
-  deleteProduct,
-  getViolateProducts,
-} from "@/apis/services/product";
+import { adminProducts } from "@/apis/services/product";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { headerUrl } from "@/apis/services/authentication";
 import { formatDate } from "@/enum/functions";

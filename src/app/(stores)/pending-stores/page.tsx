@@ -1,3 +1,4 @@
+"use client";
 import { adminFilterStores, updateStoreStatus } from "@/apis/services/stores";
 import storage from "@/apis/storage";
 import { AlertStatus, Page, StoreStatus, rowsPerPage } from "@/enum/constants";

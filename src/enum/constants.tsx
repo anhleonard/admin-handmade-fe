@@ -23,18 +23,55 @@ import ProcessingAuctionsTab from "@/app/auctions/my-auctions/processing-auction
 import FinishedAuctionsTab from "@/app/auctions/my-auctions/finished-auctions/finished-auctions-table";
 import CanceledAuctionsTab from "@/app/auctions/my-auctions/canceled-auctions/canceled-auctions-table";
 import { FilterTime } from "./defined-type";
-import AllStoresTable from "@/app/(stores)/all-stores/page";
 import ReadyOrdersTable from "@/app/orders/list-orders/ready-orders/ready-orders-table";
 import WaitingAuctionsTable from "@/app/auctions/my-auctions/waiting-auctions/waiting-auctions-table";
 import DeliveryAuctionsTable from "@/app/auctions/my-auctions/delivery-auctions/delivery-auctions-table";
 import AuctioningAuctionsTable from "@/app/auctions/my-auctions/auctioning-auctions/auctioning-auctions-table";
 import ReadyAuctionsTab from "@/app/auctions/my-auctions/ready-auctions/ready-auctions-table";
-import ActiveStoresTable from "@/app/(stores)/active-stores/page";
-import PendingStoresTable from "@/app/(stores)/pending-stores/page";
-import ViolateStoresTable from "@/app/(stores)/violate-stores/page";
 import OverdateOrdersTable from "@/app/orders/list-orders/overdate-orders/overdate-orders-table";
-import ListClientsTable from "@/app/(users)/clients/page";
-import ListSellersTable from "@/app/(users)/sellers/page";
+import dynamic from "next/dynamic";
+
+const ActiveStoresTable = dynamic(
+  () => {
+    return import("@/app/(stores)/active-stores/page");
+  },
+  { ssr: false },
+);
+
+const ListSellersTable = dynamic(
+  () => {
+    return import("@/app/(users)/sellers/page");
+  },
+  { ssr: false },
+);
+
+const ListClientsTable = dynamic(
+  () => {
+    return import("@/app/(users)/clients/page");
+  },
+  { ssr: false },
+);
+
+const AllStoresTable = dynamic(
+  () => {
+    return import("@/app/(stores)/all-stores/page");
+  },
+  { ssr: false },
+);
+
+const PendingStoresTable = dynamic(
+  () => {
+    return import("@/app/(stores)/pending-stores/page");
+  },
+  { ssr: false },
+);
+
+const ViolateStoresTable = dynamic(
+  () => {
+    return import("@/app/(stores)/violate-stores/page");
+  },
+  { ssr: false },
+);
 
 export const Page = 1;
 export const Limit = 5;

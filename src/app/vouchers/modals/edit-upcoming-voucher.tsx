@@ -51,6 +51,7 @@ const EditUpcomingVoucher = () => {
         </div>
         <div className="flex flex-row items-center gap-8">
           <MyDatePicker
+            id="start-date"
             label="Ngày bắt đầu"
             placeholder="-- Lựa chọn --"
             isRequired
@@ -59,6 +60,7 @@ const EditUpcomingVoucher = () => {
             disabled
           />
           <MyDatePicker
+            id="end-date"
             label="Ngày kết thúc"
             placeholder="-- Lựa chọn --"
             isRequired
@@ -92,8 +94,8 @@ const EditUpcomingVoucher = () => {
               maxNumber={30000000}
               isRequired
               defaultValue={discountMoney}
-              onChange={(value) => {
-                setDiscountMoney(value as number);
+              onChange={(e) => {
+                setDiscountMoney(parseInt(e.target.value));
               }}
               endIcon={
                 <span className="pl-2 text-xs font-bold text-primary-c900">
@@ -113,8 +115,8 @@ const EditUpcomingVoucher = () => {
                 maxNumber={99}
                 isRequired
                 defaultValue={percentageDiscount}
-                onChange={(value) => {
-                  setPercentageDiscount(value as number);
+                onChange={(e) => {
+                  setPercentageDiscount(parseInt(e.target.value));
                 }}
                 endIcon={
                   <span className="pl-2 text-xs font-bold text-primary-c900">
@@ -159,8 +161,8 @@ const EditUpcomingVoucher = () => {
               minNumber={1}
               isRequired
               defaultValue={450000}
-              onChange={(value) => {
-                setMinOrderValue(value as number);
+              onChange={(e) => {
+                setMinOrderValue(parseInt(e.target.value));
               }}
               endIcon={
                 <span className="pl-2 text-xs font-bold text-primary-c900">

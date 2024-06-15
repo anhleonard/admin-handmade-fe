@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import MySelect, { Item } from "@/libs/select";
 import { AlertStatus, Page, Role, rowsPerPage } from "@/enum/constants";
@@ -16,8 +17,6 @@ import { adminFilterUsers } from "@/apis/services/users";
 import { AlertState, User } from "@/enum/defined-type";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { headerUrl } from "@/apis/services/authentication";
-import BlockIcon from "@mui/icons-material/Block";
-import { COLORS } from "@/enum/colors";
 import { openModal } from "@/redux/slices/modalSlice";
 import DetailUser from "@/components/users/detail-user";
 

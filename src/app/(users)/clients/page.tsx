@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import MySelect, { Item } from "@/libs/select";
 import { AlertStatus, Page, Role, rowsPerPage } from "@/enum/constants";

@@ -59,6 +59,7 @@ const DetailVoucherModal = ({ type = "ALL" }: DetailVoucherModalProps) => {
         </div>
         <div className="flex flex-row items-center gap-8">
           <MyDatePicker
+            id="start-date"
             label="Ngày bắt đầu"
             placeholder="-- Lựa chọn --"
             className="w-full"
@@ -66,6 +67,7 @@ const DetailVoucherModal = ({ type = "ALL" }: DetailVoucherModalProps) => {
             disabled
           />
           <MyDatePicker
+            id="end-date"
             label="Ngày kết thúc"
             placeholder="-- Lựa chọn --"
             className="w-full"

@@ -48,12 +48,14 @@ const CreateVoucherScreen = () => {
           </div>
           <div className="flex flex-row items-center gap-8">
             <MyDatePicker
+              id="start-date"
               label="Ngày bắt đầu"
               placeholder="-- Lựa chọn --"
               isRequired
               className="w-full"
             />
             <MyDatePicker
+              id="end-date"
               label="Ngày kết thúc"
               placeholder="-- Lựa chọn --"
               isRequired

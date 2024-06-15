@@ -1,8 +1,9 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { COLORS } from "@/enum/colors";
 import DetailAuction from "@/components/auctions/detail-auction";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import SellerAuctionInformation from "@/components/auctions/seller-auction-information";
 import ListSellerPrice from "./list-seller-price";
 import { useDispatch, useSelector } from "react-redux";

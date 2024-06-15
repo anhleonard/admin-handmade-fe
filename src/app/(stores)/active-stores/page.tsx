@@ -1,3 +1,4 @@
+"use client";
 import { adminFilterStores } from "@/apis/services/stores";
 import storage from "@/apis/storage";
 import {

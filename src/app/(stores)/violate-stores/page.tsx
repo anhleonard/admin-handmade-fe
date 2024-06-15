@@ -1,13 +1,8 @@
+"use client";
 import { adminFilterStores, updateStoreStatus } from "@/apis/services/stores";
 import storage from "@/apis/storage";
-import {
-  AlertStatus,
-  EnumOrderStatus,
-  Page,
-  StoreStatus,
-  rowsPerPage,
-} from "@/enum/constants";
-import { AlertState, Order, Store } from "@/enum/defined-type";
+import { AlertStatus, Page, StoreStatus, rowsPerPage } from "@/enum/constants";
+import { AlertState, Store } from "@/enum/defined-type";
 import { DetailIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyLabel from "@/libs/label";
@@ -18,13 +13,10 @@ import { RootState } from "@/redux/store";
 import { Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { COLORS } from "@/enum/colors";
-import { formatCurrency } from "@/enum/functions";
 import DetailStore from "@/components/stores/detail-store";
 import { openModal } from "@/redux/slices/modalSlice";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
-import BannedStoreModal from "@/components/stores/banned-store-modal";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { StoreStatusValues } from "@/apis/types";
