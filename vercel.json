@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/users/signin",
+      "destination": "http://14.225.204.170:3002/users/signin"
+    }
+  ]
+}
