@@ -150,14 +150,6 @@ const SignIn = () => {
                       <Button
                         type="submit"
                         className="!w-full !py-3"
-                        onClick={() => {
-                          if (
-                            getIn(formik.touched, "email") &&
-                            Boolean(getIn(formik.errors, "email"))
-                          ) {
-                            console.log(formik.errors.email);
-                          }
-                        }}
                       >
                         Đăng nhập
                       </Button>
