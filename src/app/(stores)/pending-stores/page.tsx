@@ -23,7 +23,6 @@ import DetailStore from "@/components/stores/detail-store";
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import RejectStoreModal from "@/components/stores/reject-store-modal";
 import { MyPagination } from "@/libs/pagination";
-import { createStoreEmbedding } from "@/apis/services/embedding";
 
 const PendingStoresTable = () => {
   const dispatch = useDispatch();
@@ -105,9 +104,8 @@ const PendingStoresTable = () => {
           };
           const token = storage.getLocalAccessToken();
           const res = await updateStoreStatus(storeId, variables, token);
-          const storeEmbed = await createStoreEmbedding(storeId);
 
-          if (res & storeEmbed) {
+          if (res) {
             dispatch(closeConfirm());
             let alert: AlertState = {
               isOpen: true,
