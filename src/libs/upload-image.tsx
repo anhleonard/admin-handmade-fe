@@ -51,10 +51,16 @@ const UploadImage: React.FC<Props> = ({ fileList, setFileList }: Props) => {
     </button>
   );
 
+  const dummyRequest = ({ file, onSuccess }: any) => {
+    setTimeout(() => {
+      onSuccess("ok");
+    }, 0);
+  };
+
   return (
     <>
       <Upload
-        // action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+        customRequest={dummyRequest}
         listType="picture-card"
         fileList={fileList}
         onPreview={handlePreview}
