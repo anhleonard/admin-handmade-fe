@@ -25,6 +25,25 @@ export function formatCurrency(price: number) {
   return formattedPrice + "đ";
 }
 
+export function adminFormatCurrency(price: number) {
+  const formatter = new Intl.NumberFormat("vi", {
+    style: "currency",
+    currency: "VND",
+    currencyDisplay: "symbol",
+  });
+
+  const parts = formatter.formatToParts(price);
+
+  let formattedPrice = "";
+  parts.forEach((part) => {
+    if (part.type !== "currency") {
+      formattedPrice += part.value;
+    }
+  });
+
+  return formattedPrice;
+}
+
 export function formatVariant(data: Array<VariantItem>) {
   const names = data.map((variantItem: VariantItem) => variantItem?.name);
   const result = names.join(" - ");

@@ -87,10 +87,10 @@ const AunctionCard = ({ auction }: Props) => {
                   </div>
                 </div>
                 <Button
-                  className="!w-fit !px-3 !py-1.5"
+                  className="!w-fit !px-3 !py-1.5 !text-xs !font-medium"
                   onClick={() => router.push(`/auctions/${auction?.id}`)}
                 >
-                  <span className="text-xs font-medium">Đặt giá ngay</span>
+                  Xem chi tiết
                 </Button>
               </div>
             </div>

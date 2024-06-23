@@ -88,3 +88,10 @@ export const updateOrder = async (
     .put(`${headerUrl}/orders/update/${orderId}`, variables, config)
     .then((res) => res.data);
 };
+
+//admin
+export const adminOrderSales = async () => {
+  return await axios
+    .get(`${headerUrl}/orders/order-sales`)
+    .then((res) => res.data);
+};

@@ -12,6 +12,14 @@ type Props = {
 const SellerPriceCard = ({ bidder }: Props) => {
   const [open, setOpen] = useState(false);
 
+  const renderStar = (score: number) => {
+    if (score < 200) return 1.0;
+    else if (200 <= score && score < 500) return 2.0;
+    else if (500 <= score && score < 800) return 3.0;
+    else if (800 <= score && score < 1200) return 4.0;
+    else if (score >= 1200) return 5.0;
+  };
+
   return (
     <div className="flex flex-row items-start gap-[30px]">
       <div>
@@ -41,17 +49,21 @@ const SellerPriceCard = ({ bidder }: Props) => {
           </div>
           <div>
             Điểm uy tín:{" "}
-            <span className="font-bold text-success-c900">1020</span>
+            <span className="font-bold text-success-c900">
+              {bidder?.store?.score}
+            </span>
           </div>
           <div className="flex flex-row items-center gap-3">
             <Rating
               name="read-only"
-              value={5.0}
+              value={renderStar(bidder?.store?.score)}
               readOnly
               precision={0.5}
               size="small"
             />
-            <span className="font-bold text-success-c900">5.0 sao</span>
+            <span className="font-bold text-success-c900">
+              {`${renderStar(bidder?.store?.score)}`} sao
+            </span>
           </div>
         </div>
       </div>

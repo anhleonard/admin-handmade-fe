@@ -79,12 +79,12 @@ const DetailAuctionsScreen = ({ auctionId }: Props) => {
                 handleRefetch={handleRefetch}
               />
             )}
-            {auction && (
+            {/* {auction && (
               <SellerAuctionInformation
                 auction={auction}
                 handleRefetch={handleRefetch}
               />
-            )}
+            )} */}
             {auction && <ListSellerPrice auction={auction} />}
           </div>
           <div className="flex flex-col gap-4 md:col-span-1">

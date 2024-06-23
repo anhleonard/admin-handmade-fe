@@ -2,13 +2,29 @@ import Image from "next/image";
 import ExitToAppRoundedIcon from "@mui/icons-material/ExitToAppRounded";
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 
 const DropdownUser = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
     localStorage.clear();
     router.push("/auth/signin");
+    dispatch(closeConfirm());
+  };
+
+  const handleOpenConfirm = () => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN ĐĂNG XUẤT",
+      message: "Bạn có chắc chắn đăng xuất không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => handleLogout(),
+    };
+
+    dispatch(openConfirm(confirm));
   };
 
   return (
@@ -34,7 +50,7 @@ const DropdownUser = () => {
         <Tooltip title="Đăng xuất">
           <div
             className="cursor-pointer text-grey-c600"
-            onClick={() => handleLogout()}
+            onClick={() => handleOpenConfirm()}
           >
             <ExitToAppRoundedIcon style={{ width: 27, height: 27 }} />
           </div>
