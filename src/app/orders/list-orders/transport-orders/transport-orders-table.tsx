@@ -10,21 +10,15 @@ import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import {
-  adminOrders,
-  ordersByStatus,
-  updateOrder,
-} from "@/apis/services/orders";
+import { adminOrders, updateOrder } from "@/apis/services/orders";
 import {
   AlertStatus,
   EnumOrderStatus,
-  EnumScore,
   Page,
-  TypeScore,
   rowsPerPage,
 } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
-import { StoreScoreValues, UpdateOrderValues } from "@/apis/types";
+import { UpdateOrderValues } from "@/apis/types";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
 import DetailOrderModal from "../../modals/detail-order-modal";
 import { openModal } from "@/redux/slices/modalSlice";
@@ -35,7 +29,6 @@ import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { MyPagination } from "@/libs/pagination";
-import { updateScore } from "@/apis/services/stores";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },

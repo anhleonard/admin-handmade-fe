@@ -9,7 +9,7 @@ import {
   findMaxPercentage,
   formatCurrency,
 } from "@/enum/functions";
-import { DetailIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";

@@ -133,7 +133,8 @@ const NewOrdersTable = () => {
                                         {orderProduct?.product?.productName}
                                       </div>
 
-                                      {orderProduct?.variant ? (
+                                      {orderProduct?.variant?.variantItems
+                                        ?.length ? (
                                         <div>
                                           <span className="text-[12px]">
                                             Phân loại

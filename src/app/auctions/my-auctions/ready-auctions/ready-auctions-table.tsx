@@ -12,9 +12,8 @@ import {
   findMaxPercentage,
   formatCurrency,
 } from "@/enum/functions";
-import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
-import MyLabel from "@/libs/label";
 import MyTextField from "@/libs/text-field";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";

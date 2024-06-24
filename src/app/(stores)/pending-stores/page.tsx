@@ -4,7 +4,7 @@ import storage from "@/apis/storage";
 import { AlertStatus, Page, StoreStatus, rowsPerPage } from "@/enum/constants";
 import { AlertState, Store } from "@/enum/defined-type";
 import { formatCommonTime } from "@/enum/functions";
-import { DetailIcon, EditIcon, OffIcon, SearchIcon } from "@/enum/icons";
+import { DetailIcon, SearchIcon } from "@/enum/icons";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyLabel from "@/libs/label";
 import MyTextField from "@/libs/text-field";

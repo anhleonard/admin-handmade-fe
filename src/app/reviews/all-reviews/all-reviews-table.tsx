@@ -1,4 +1,4 @@
-import { DetailIcon, SearchIcon } from "@/enum/icons";
+import { SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";

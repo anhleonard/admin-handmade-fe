@@ -1,6 +1,5 @@
 "use client";
 import storage from "@/apis/storage";
-// import HomePage from "@/components/dashboard/home-page";
 import DefaultLayout from "@/components/layouts/default-layout";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";

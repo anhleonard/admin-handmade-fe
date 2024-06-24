@@ -1,17 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MyPrimaryTextField from "@/libs/primary-text-field";
 import { AlertStatus } from "@/enum/constants";
-import MyDatePicker from "@/libs/date-picker";
 import Button from "@/libs/button";
 import { useDispatch } from "react-redux";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import * as yup from "yup";
 import { SignUpFormValues } from "@/apis/types";
 import { Form, Formik, getIn } from "formik";
-import moment from "moment";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { AlertState } from "@/enum/defined-type";
 import InputPassword from "@/libs/input-password";

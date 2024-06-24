@@ -6,7 +6,6 @@ import CategoryProductsList from "@/components/categories/category-products";
 import CreateCategoryModal from "@/components/categories/create-category-modal";
 import EditCategoryModal from "@/components/categories/edit-category-modal";
 import DefaultLayout from "@/components/layouts/default-layout";
-import CreateVariantCategoriesModal from "@/components/products/create-variant-categories";
 import { AlertStatus } from "@/enum/constants";
 import { AlertState, Category } from "@/enum/defined-type";
 import { DetailIcon, EditIcon } from "@/enum/icons";

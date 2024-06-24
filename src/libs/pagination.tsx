@@ -55,7 +55,7 @@ export const MyPagination = ({
             onClick={() => handlePageChange(page - 1)}
             disabled={page === Page}
           >
-            Previous
+            Trước
           </Button>
           <Button
             className={`w-[82px]
@@ -70,12 +70,12 @@ export const MyPagination = ({
             onClick={() => handlePageChange(page + 1)}
             disabled={page === totalPages}
           >
-            Next
+            Sau
           </Button>
         </div>
         {/* Giao diện cho màn sm trở lên */}
         <div className="flex-row items-center justify-center gap-2 xs:hidden md:flex">
-          <div>Rows per page:</div>
+          <div>Số hàng:</div>
           <select
             className=" rounded-md border border-primary-c800 active:border-grey-c400"
             value={rowsPerPage}
@@ -115,18 +115,18 @@ export const MyPagination = ({
               </span>
             </Tooltip>
             <div className="xs:hidden sm:block">
-              Showing
+              Hiển thị
               <span className="font-bold text-primary-c700">
                 {" "}
                 {total !== 0 && page}{" "}
               </span>
-              to
+              tới
               <span className="font-bold text-primary-c700">
                 {" "}
                 {` ${total % rowsPerPage === 0 ? Math.floor(total / rowsPerPage) : Math.floor(total / rowsPerPage) + 1} `}
               </span>
-              of <span className="font-bold text-primary-c700"> {total} </span>{" "}
-              results
+              của <span className="font-bold text-primary-c700"> {total} </span>{" "}
+              kết quả
             </div>
             {/* Next button */}
             <Tooltip title="Next">

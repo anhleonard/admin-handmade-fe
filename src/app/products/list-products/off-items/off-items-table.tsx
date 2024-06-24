@@ -4,13 +4,11 @@ import {
   DeleteIcon,
   DetailIcon,
   EditIcon,
-  OffIcon,
   SearchIcon,
   TurnOnIcon,
 } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
-import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "@/redux/slices/modalSlice";

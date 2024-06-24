@@ -114,7 +114,7 @@ const NewCanceledOrders = () => {
                         className="hover:bg-primary-c100 hover:text-grey-c700"
                       >
                         <td className="py-4 pl-3">{order?.client?.name}</td>
-                        <td className="px-1 py-4">
+                        <td className="min-w-[300px] px-1 py-4">
                           <div className="flex flex-col gap-2">
                             {order?.orderProducts?.map(
                               (orderProduct, index) => {
@@ -128,17 +128,18 @@ const NewCanceledOrders = () => {
                                       alt="product-image"
                                       className="h-13 w-13 rounded-lg object-cover"
                                     />
-                                    <div className="flex flex-col justify-start gap-2">
+                                    <div className="flex flex-col justify-start">
                                       <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
                                         {orderProduct?.product?.productName}
                                       </div>
 
-                                      {orderProduct?.variant ? (
+                                      {orderProduct?.variant?.variantItems
+                                        ?.length ? (
                                         <div>
-                                          <span className="text-[12px]">
-                                            Phân loại
+                                          <span className="text-[11px]">
+                                            Phân loại:
                                           </span>{" "}
-                                          <span className="text-sm font-bold text-primary-c900">
+                                          <span className="text-[11px] font-bold text-primary-c900">
                                             {formatVariant(
                                               orderProduct?.variant
                                                 ?.variantItems,
@@ -148,10 +149,10 @@ const NewCanceledOrders = () => {
                                       ) : null}
 
                                       <div>
-                                        <span className="text-[12px]">
+                                        <span className="text-[11px]">
                                           Số lượng mua:
                                         </span>{" "}
-                                        <span className="text-sm font-bold text-primary-c900">
+                                        <span className="text-[11px] font-bold text-primary-c900">
                                           {orderProduct?.productQuantity}
                                         </span>
                                       </div>
