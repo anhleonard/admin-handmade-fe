@@ -128,7 +128,7 @@ const NewOrdersTable = () => {
                                       alt="product-image"
                                       className="h-13 w-13 rounded-lg object-cover"
                                     />
-                                    <div className="flex flex-col justify-start gap-2">
+                                    <div className="flex flex-col justify-start">
                                       <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
                                         {orderProduct?.product?.productName}
                                       </div>
