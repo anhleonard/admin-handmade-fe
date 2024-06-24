@@ -1,24 +1,13 @@
-import {
-  DeleteIcon,
-  DetailIcon,
-  EditIcon,
-  OffIcon,
-  SearchIcon,
-} from "@/enum/icons";
+import { DetailIcon, SearchIcon } from "@/enum/icons";
 import MyTextField from "@/libs/text-field";
 import MySelect from "@/libs/select";
-import Image from "next/image";
 import { FontFamily, FontSize, SCREEN } from "@/enum/setting";
 import MyDatePicker from "@/libs/date-picker";
 import MyLabel from "@/libs/label";
 import { Tooltip } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
-import { COLORS } from "@/enum/colors";
 import { useDispatch } from "react-redux";
 import DetailOrderModal from "../../modals/detail-order-modal";
 import { openModal } from "@/redux/slices/modalSlice";
-import { openConfirm } from "@/redux/slices/confirmSlice";
 import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";

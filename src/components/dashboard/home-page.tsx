@@ -2,19 +2,31 @@
 import React, { useEffect, useState } from "react";
 import CardDataStats from "../CardDataStats";
 import LineChart from "../Charts/line-chart/line-chart";
-import {
-  lineChartDataTotalSpent,
-  lineChartOptionsTotalSpent,
-} from "../Charts/line-chart/data";
 import MyLabel from "@/libs/label";
 import { FontFamily, FontSize } from "@/enum/setting";
-import { AlertState } from "@/enum/defined-type";
-import { AlertStatus } from "@/enum/constants";
+import { AlertState, Order } from "@/enum/defined-type";
+import {
+  AlertStatus,
+  EnumOrderStatus,
+  Page,
+  rowsPerPage,
+} from "@/enum/constants";
 import { useDispatch } from "react-redux";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
-import { adminOrderSales } from "@/apis/services/orders";
-import { adminFormatCurrency } from "@/enum/functions";
+import { adminOrderSales, adminOrders } from "@/apis/services/orders";
+import {
+  adminFormatCurrency,
+  formatCommonTime,
+  formatCurrency,
+} from "@/enum/functions";
+import storage from "@/apis/storage";
+import { MyPagination } from "@/libs/pagination";
+import { headerUrl } from "@/apis/services/authentication";
+import NorthEastRoundedIcon from "@mui/icons-material/NorthEastRounded";
+import { COLORS } from "@/enum/colors";
+import NewOrdersTable from "./new-orders-table";
+import NewCanceledOrders from "./new-canceled-orders";
 
 type RevenueByDay = {
   revenue: number;
@@ -37,9 +49,8 @@ type LineChartData = {
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const [orderSales, setOrderSales] = useState<OrderSalesType>();
-  const [lineChartDataTotalSpent, setLineChartDataTotalSpent] = useState<
-    LineChartData[]
-  >([]);
+  const [lineChartData, setLineChartData] = useState<LineChartData[]>([]);
+  const [lineChartOptions, setLineChartOptions] = useState<any>();
 
   const getOrderSales = async () => {
     try {
@@ -53,6 +64,10 @@ const HomePage: React.FC = () => {
         (item) => item.revenue * 0.2,
       );
 
+      const orderDates = orderSales?.revenueSevenDays?.map(
+        (item) => item.orderDate,
+      );
+
       const data: LineChartData[] = [
         {
           name: "Doanh thu",
@@ -64,7 +79,81 @@ const HomePage: React.FC = () => {
         },
       ];
 
-      setLineChartDataTotalSpent(data);
+      const option = {
+        chart: {
+          toolbar: {
+            show: false,
+          },
+          dropShadow: {
+            enabled: true,
+            top: 13,
+            left: 0,
+            blur: 10,
+            opacity: 0.1,
+            color: "#4318FF",
+          },
+        },
+        colors: ["#4318FF", "#39B8FF"],
+        markers: {
+          size: 0,
+          colors: "white",
+          strokeColors: "#7551FF",
+          strokeWidth: 3,
+          strokeOpacity: 0.9,
+          strokeDashArray: 0,
+          fillOpacity: 1,
+          discrete: [],
+          shape: "circle",
+          radius: 2,
+          offsetX: 0,
+          offsetY: 0,
+          showNullDataPoints: true,
+        },
+        tooltip: {
+          theme: "dark",
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        stroke: {
+          curve: "smooth",
+          type: "line",
+        },
+        xaxis: {
+          type: "numeric",
+          categories: orderDates,
+          labels: {
+            style: {
+              colors: "#A3AED0",
+              fontSize: "12px",
+              fontWeight: "500",
+            },
+          },
+          axisBorder: {
+            show: false,
+          },
+          axisTicks: {
+            show: false,
+          },
+        },
+        yaxis: {
+          show: false,
+        },
+        legend: {
+          show: false,
+        },
+        grid: {
+          show: false,
+          column: {
+            color: ["#7551FF", "#39B8FF"],
+            opacity: 0.5,
+          },
+        },
+        color: ["#7551FF", "#39B8FF"],
+      };
+
+      setLineChartData(data);
+      setLineChartOptions(option);
       setOrderSales(orderSales);
     } catch (error: any) {
       let alert: AlertState = {
@@ -253,50 +342,18 @@ const HomePage: React.FC = () => {
           </svg>
         </CardDataStats>
       </div>
-
       <div className="mb-6 mt-6 grid min-h-[300px] grid-cols-4 rounded-xl border border-stroke bg-white px-7.5 py-6 shadow-default">
-        <div className="col-span-3 font-semibold">
+        <div className="col-span-3 mb-4 font-semibold">
           <div>Doanh thu và lợi nhuận theo ngày</div>
           <LineChart
-            chartData={lineChartDataTotalSpent}
-            chartOptions={lineChartOptionsTotalSpent}
+            chartData={lineChartData}
+            chartOptions={lineChartOptions}
           />
         </div>
       </div>
 
-      {/* table */}
-      <div className="max-w-[100%] overflow-hidden rounded-[10px]">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] table-auto text-left text-sm">
-            <thead
-              className={`bg-primary-c200 uppercase text-grey-c700 ${FontFamily.BOLD} ${FontSize.BASE}`}
-            >
-              <tr className="hover:bg-secondary-c100 hover:text-grey-c700">
-                <th className="py-4 pl-3">Tên khách</th>
-                <th className="px-1 py-4">Sản phẩm mua</th>
-                <th className="px-1 py-4">Số lượng</th>
-                <th className="px-1 py-4">Trạng thái</th>
-                <th className="px-1 py-4">Số tiền</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="hover:bg-primary-c100 hover:text-grey-c700">
-                <td className="py-4 pl-3">Nguyễn Mai Anh</td>
-                <td className="px-1 py-4">
-                  <div className="max-w-[200px]">
-                    Voucher giảm 59K cho đơn hàng từ 500K
-                  </div>
-                </td>
-                <td className="px-1 py-4">Tất cả sản phẩm</td>
-                <td className="px-1 py-4">59.000</td>
-                <td className="px-1 py-4">
-                  <MyLabel type="delivery">Đang diễn ra</MyLabel>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <NewOrdersTable />
+      <NewCanceledOrders />
     </>
   );
 };
