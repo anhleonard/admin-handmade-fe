@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import CardDataStats from "../CardDataStats";
-import LineChart from "../Charts/line-chart/line-chart";
+import LineChart from "../Charts/line-chart";
 import MyLabel from "@/libs/label";
 import { FontFamily, FontSize } from "@/enum/setting";
 import { AlertState, Order } from "@/enum/defined-type";
@@ -27,6 +27,7 @@ import NorthEastRoundedIcon from "@mui/icons-material/NorthEastRounded";
 import { COLORS } from "@/enum/colors";
 import NewOrdersTable from "./new-orders-table";
 import NewCanceledOrders from "./new-canceled-orders";
+import RadialChart, { RadialData } from "../Charts/radial-chart";
 
 type RevenueByDay = {
   revenue: number;
@@ -39,6 +40,9 @@ type OrderSalesType = {
   savedMoney: number;
   totalOrder: number;
   revenueSevenDays: RevenueByDay[];
+  allOrdersNumber: number;
+  rateShippedOrder: number;
+  rateCanceledOrder: number;
 };
 
 type LineChartData = {
@@ -51,6 +55,7 @@ const HomePage: React.FC = () => {
   const [orderSales, setOrderSales] = useState<OrderSalesType>();
   const [lineChartData, setLineChartData] = useState<LineChartData[]>([]);
   const [lineChartOptions, setLineChartOptions] = useState<any>();
+  const [radialData, setRadialData] = useState<RadialData>();
 
   const getOrderSales = async () => {
     try {
@@ -67,6 +72,13 @@ const HomePage: React.FC = () => {
       const orderDates = orderSales?.revenueSevenDays?.map(
         (item) => item.orderDate,
       );
+
+      const radialData: RadialData = {
+        total: orderSales?.allOrdersNumber,
+        shipped: orderSales?.rateShippedOrder,
+        canceled: orderSales?.rateCanceledOrder,
+      };
+      setRadialData(radialData);
 
       const data: LineChartData[] = [
         {
@@ -342,13 +354,18 @@ const HomePage: React.FC = () => {
           </svg>
         </CardDataStats>
       </div>
-      <div className="mb-6 mt-6 grid min-h-[300px] grid-cols-4 rounded-xl border border-stroke bg-white px-7.5 py-6 shadow-default">
-        <div className="col-span-3 mb-4 font-semibold">
-          <div>Doanh thu và lợi nhuận theo ngày</div>
-          <LineChart
-            chartData={lineChartData}
-            chartOptions={lineChartOptions}
-          />
+      <div className="mb-6 mt-6 grid gap-6 md:grid-cols-5">
+        <div className="rounded-xl border border-stroke bg-white px-7.5 py-6 shadow-default md:col-span-3">
+          <div className="mb-4 font-semibold">
+            <div>Doanh thu và lợi nhuận theo ngày</div>
+            <LineChart
+              chartData={lineChartData}
+              chartOptions={lineChartOptions}
+            />
+          </div>
+        </div>
+        <div className="rounded-xl border border-stroke bg-white px-7.5 py-6 shadow-default md:col-span-2">
+          {radialData ? <RadialChart data={radialData} /> : null}
         </div>
       </div>
 
