@@ -136,10 +136,10 @@ const NewOrdersTable = () => {
                                       {orderProduct?.variant?.variantItems
                                         ?.length ? (
                                         <div>
-                                          <span className="text-[12px]">
+                                          <span className="text-[11px]">
                                             Phân loại
                                           </span>{" "}
-                                          <span className="text-sm font-bold text-primary-c900">
+                                          <span className="text-[11px] font-bold text-primary-c900">
                                             {formatVariant(
                                               orderProduct?.variant
                                                 ?.variantItems,
@@ -149,10 +149,10 @@ const NewOrdersTable = () => {
                                       ) : null}
 
                                       <div>
-                                        <span className="text-[12px]">
+                                        <span className="text-[11px]">
                                           Số lượng mua:
                                         </span>{" "}
-                                        <span className="text-sm font-bold text-primary-c900">
+                                        <span className="text-[11px] font-bold text-primary-c900">
                                           {orderProduct?.productQuantity}
                                         </span>
                                       </div>
