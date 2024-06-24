@@ -124,10 +124,24 @@ const NewOrdersTable = () => {
                                       alt="product-image"
                                       className="h-13 w-13 rounded-lg object-cover"
                                     />
-                                    <div className="flex flex-col justify-start">
+                                    <div className="flex flex-col justify-start gap-2">
                                       <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
                                         {orderProduct?.product?.productName}
                                       </div>
+
+                                      {orderProduct?.variant ? (
+                                        <div>
+                                          <span className="text-[12px]">
+                                            Phân loại
+                                          </span>{" "}
+                                          <span className="text-sm font-bold text-primary-c900">
+                                            {formatVariant(
+                                              orderProduct?.variant
+                                                ?.variantItems,
+                                            )}
+                                          </span>
+                                        </div>
+                                      ) : null}
 
                                       <div>
                                         <span className="text-[12px]">

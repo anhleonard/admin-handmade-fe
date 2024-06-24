@@ -12,7 +12,11 @@ import { useDispatch } from "react-redux";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import { adminOrders } from "@/apis/services/orders";
-import { formatCommonTime, formatCurrency } from "@/enum/functions";
+import {
+  formatCommonTime,
+  formatCurrency,
+  formatVariant,
+} from "@/enum/functions";
 import storage from "@/apis/storage";
 import { MyPagination } from "@/libs/pagination";
 import { headerUrl } from "@/apis/services/authentication";
@@ -84,7 +88,7 @@ const NewCanceledOrders = () => {
 
   return (
     <div className="mb-6 mt-6 rounded-xl border border-stroke bg-white px-7.5 py-6 shadow-default">
-      <div className="mb-4 font-semibold">Đơn hàng mới đặt</div>
+      <div className="mb-4 font-semibold">Đơn hàng mới hủy</div>
       {/* table */}
       <div className="max-w-[100%] overflow-hidden rounded-[4px]">
         <div className="overflow-x-auto">
@@ -124,10 +128,24 @@ const NewCanceledOrders = () => {
                                       alt="product-image"
                                       className="h-13 w-13 rounded-lg object-cover"
                                     />
-                                    <div className="flex flex-col justify-start">
+                                    <div className="flex flex-col justify-start gap-2">
                                       <div className="w-[160px] overflow-ellipsis break-words md:w-[200px]">
                                         {orderProduct?.product?.productName}
                                       </div>
+
+                                      {orderProduct?.variant ? (
+                                        <div>
+                                          <span className="text-[12px]">
+                                            Phân loại
+                                          </span>{" "}
+                                          <span className="text-sm font-bold text-primary-c900">
+                                            {formatVariant(
+                                              orderProduct?.variant
+                                                ?.variantItems,
+                                            )}
+                                          </span>
+                                        </div>
+                                      ) : null}
 
                                       <div>
                                         <span className="text-[12px]">
