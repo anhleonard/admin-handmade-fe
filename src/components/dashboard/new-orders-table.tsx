@@ -12,7 +12,11 @@ import { useDispatch } from "react-redux";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import { adminOrders } from "@/apis/services/orders";
-import { formatCommonTime, formatCurrency } from "@/enum/functions";
+import {
+  formatCommonTime,
+  formatCurrency,
+  formatVariant,
+} from "@/enum/functions";
 import storage from "@/apis/storage";
 import { MyPagination } from "@/libs/pagination";
 import { headerUrl } from "@/apis/services/authentication";
