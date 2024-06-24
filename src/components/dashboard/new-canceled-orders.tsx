@@ -111,7 +111,7 @@ const NewCanceledOrders = () => {
                       >
                         <td className="py-4 pl-3">{order?.client?.name}</td>
                         <td className="px-1 py-4">
-                          <div>
+                          <div className="flex flex-col gap-2">
                             {order?.orderProducts?.map(
                               (orderProduct, index) => {
                                 return (
