@@ -83,3 +83,9 @@ export const updateAuctionStatus = async (
     .put(`${headerUrl}/auctions/update-status/${id}`, variables, config)
     .then((res) => res.data);
 };
+
+export const randomAuctions = async () => {
+  return await axios
+    .get(`${headerUrl}/auctions/random`)
+    .then((res) => res.data);
+};
