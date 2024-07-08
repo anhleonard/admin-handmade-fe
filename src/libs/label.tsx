@@ -54,7 +54,8 @@ const MyLabel: React.FC<MyLabelProps> = ({
 
   return (
     <div
-      className={`flex font-semibold ${width ?? "w-fit "} ${height ?? "h-fit "} ${px ?? "px-3"} ${py ?? "py-1"} ${type ? setColorByType(type) : bgColor ? bgColor : "bg-primary-c800"} items-center justify-center rounded-full`}
+      style={{ whiteSpace: "nowrap" }}
+      className={`font-semibold ${width ?? "w-fit "} ${height ?? "h-fit "} ${px ?? "px-3"} ${py ?? "py-1"} ${type ? setColorByType(type) : bgColor ? bgColor : "bg-primary-c800"} items-center justify-center rounded-full`}
     >
       {children}
     </div>

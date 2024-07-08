@@ -11,18 +11,26 @@ import { useEffect, useState } from "react";
 import { AlertState, Order } from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
-import { adminOrders } from "@/apis/services/orders";
+import { adminOrders, updateOrder } from "@/apis/services/orders";
 import {
   AlertStatus,
   EnumOrderStatus,
+  EnumScore,
   Page,
   rowsPerPage,
+  TypeScore,
 } from "@/enum/constants";
 import { openAlert } from "@/redux/slices/alertSlice";
 import { formatCommonTime, formatCurrency } from "@/enum/functions";
 import { RootState } from "@/redux/store";
 import { refetchComponent } from "@/redux/slices/refetchSlice";
 import { MyPagination } from "@/libs/pagination";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import ArrowCircleDownRoundedIcon from "@mui/icons-material/ArrowCircleDownRounded";
+import { COLORS } from "@/enum/colors";
+import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
+import { StoreScoreValues, UpdateOrderValues } from "@/apis/types";
+import { updateScore } from "@/apis/services/stores";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -107,6 +115,51 @@ const OverdateOrdersTable = () => {
     dispatch(refetchComponent());
   };
 
+  const handleConfirmMinusPoint = (storeId: number, orderId: number) => {
+    const confirm: any = {
+      isOpen: true,
+      title: "XÁC NHẬN TRỪ ĐIỂM UY TÍN",
+      message: "Bạn có xác nhận trừ điểm uy tín của nhà bán này không?",
+      feature: "CONFIRM_CONTACT_US",
+      onConfirm: () => handleMinusPoint(storeId, orderId),
+    };
+
+    dispatch(openConfirm(confirm));
+  };
+
+  const handleMinusPoint = async (storeId: number, orderId: number) => {
+    try {
+      dispatch(openLoading());
+      const token = storage.getLocalAccessToken();
+      const variables: StoreScoreValues = {
+        storeId: storeId,
+        type: TypeScore.MINUS,
+        amount: EnumScore.ORDER_CANCELED,
+      };
+      const res1 = await updateScore(variables, token);
+
+      const params: UpdateOrderValues = {
+        isMinusPoint: true,
+      };
+
+      const res2 = await updateOrder(orderId, token, params);
+      if (res1 && res2) {
+        dispatch(closeConfirm());
+        handleRefetch();
+      }
+    } catch (error: any) {
+      let alert: AlertState = {
+        isOpen: true,
+        title: "LỖI",
+        message: error?.response?.data?.message,
+        type: AlertStatus.ERROR,
+      };
+      dispatch(openAlert(alert));
+    } finally {
+      dispatch(closeLoading());
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* filter */}
@@ -187,16 +240,37 @@ const OverdateOrdersTable = () => {
                             <DetailIcon />
                           </div>
                         </Tooltip>
-                        {/* <Tooltip title="Hủy">
-                          <div
-                            className="hover:cursor-pointer"
-                            onClick={() => handleCancelOrderByAdmin(order?.id)}
-                          >
-                            <DoNotDisturbOnOutlinedIcon
-                              sx={{ fontSize: 20, color: COLORS.support.c500 }}
-                            />
-                          </div>
-                        </Tooltip> */}
+                        {!order?.isMinusPoint ? (
+                          <Tooltip title="Trừ điểm uy tín">
+                            <div
+                              className="hover:cursor-pointer"
+                              onClick={() =>
+                                handleConfirmMinusPoint(
+                                  order?.store?.id,
+                                  order?.id,
+                                )
+                              }
+                            >
+                              <ArrowCircleDownRoundedIcon
+                                sx={{
+                                  fontSize: 20,
+                                  color: COLORS.support.c500,
+                                }}
+                              />
+                            </div>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Đã trừ điểm">
+                            <div className="hover:cursor-pointer">
+                              <CheckCircleOutlineRoundedIcon
+                                sx={{
+                                  fontSize: 20,
+                                  color: COLORS.purple.c900,
+                                }}
+                              />
+                            </div>
+                          </Tooltip>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -260,7 +260,7 @@ const WaitingOrdersTable = () => {
                         <MyLabel type="error">Quá hạn xác nhận</MyLabel>
                       )}
                     </td>
-                    <td className="px-1 py-4">
+                    <td className="px-1 py-4 text-center">
                       {order?.orderProducts?.length}
                     </td>
                     <td className="px-1 py-4">

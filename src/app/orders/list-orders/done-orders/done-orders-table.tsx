@@ -188,7 +188,7 @@ const DoneOrdersTable = () => {
                     <td className="px-1 py-4">
                       <MyLabel type="success">Đã hoàn thành</MyLabel>
                     </td>
-                    <td className="px-1 py-4">
+                    <td className="px-1 py-4 text-center">
                       {order?.orderProducts?.length}
                     </td>
                     <td className="px-1 py-4">

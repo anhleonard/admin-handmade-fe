@@ -89,3 +89,7 @@ export const randomAuctions = async () => {
     .get(`${headerUrl}/auctions/random`)
     .then((res) => res.data);
 };
+
+export const getAuctionSales = async () => {
+  return await axios.get(`${headerUrl}/auctions/sales`).then((res) => res.data);
+};

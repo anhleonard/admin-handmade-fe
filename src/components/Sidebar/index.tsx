@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import MenuIcon from "@mui/icons-material/Menu";
-import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
-import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import { COLORS } from "@/enum/colors";
 import SidebarLinkGroup from "./sidebar-link-group";
+import PeopleOutlineRoundedIcon from "@mui/icons-material/PeopleOutlineRounded";
+import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -403,7 +403,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             : setSidebarExpanded(true);
                         }}
                       >
-                        <PostAddRoundedIcon />
+                        <PeopleOutlineRoundedIcon />
                         <div className="text-sm">Quản lý người dùng</div>
                         <svg
                           className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
@@ -474,7 +474,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             : setSidebarExpanded(true);
                         }}
                       >
-                        <PriceCheckIcon />
+                        <EditNoteRoundedIcon />
                         <div className="text-sm">Dự án handmade</div>
                         <svg
                           className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
