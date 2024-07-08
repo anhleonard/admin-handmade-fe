@@ -198,7 +198,7 @@ const HomePage: React.FC = () => {
 
         {orderSales?.savedMoney ? (
           <CardDataStats
-            title="Doanh số handmade thu về"
+            title="Số tiền Handmade thu về"
             total={adminFormatCurrency(orderSales?.savedMoney)}
           >
             <TrendingUpRoundedIcon
@@ -218,7 +218,7 @@ const HomePage: React.FC = () => {
           </CardDataStats>
         ) : null}
 
-        {auctionSales?.totalMoney ? (
+        {auctionSales?.totalMoney || auctionSales?.totalMoney === 0 ? (
           <CardDataStats
             title="Doanh thu dự án handmade"
             total={adminFormatCurrency(auctionSales?.totalMoney)}
@@ -229,9 +229,9 @@ const HomePage: React.FC = () => {
           </CardDataStats>
         ) : null}
 
-        {auctionSales?.totalMoney ? (
+        {auctionSales?.totalMoney || auctionSales?.totalMoney === 0 ? (
           <CardDataStats
-            title="Doanh số Handmade thu về"
+            title="Số tiền Handmade thu về"
             total={adminFormatCurrency(auctionSales?.totalMoney * 0.2)}
           >
             <TrendingUpRoundedIcon
@@ -240,7 +240,8 @@ const HomePage: React.FC = () => {
           </CardDataStats>
         ) : null}
 
-        {auctionSales?.totalCompletedAuction ? (
+        {auctionSales?.totalCompletedAuction ||
+        auctionSales?.totalCompletedAuction === 0 ? (
           <CardDataStats
             title="Tổng số dự án handmade hoàn thành"
             total={auctionSales?.totalCompletedAuction?.toString()}
