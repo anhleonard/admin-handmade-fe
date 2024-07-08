@@ -1,6 +1,6 @@
 "use client";
 import { COLORS } from "@/enum/colors";
-import { orderTabs, productTabs } from "@/enum/constants";
+import { orderTabs } from "@/enum/constants";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Box, Tab } from "@mui/material";
 import { useState } from "react";

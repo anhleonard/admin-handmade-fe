@@ -7,7 +7,11 @@ import MyLabel from "@/libs/label";
 import { IconButton, Tooltip } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { AlertState, Order } from "@/enum/defined-type";
+import {
+  AlertState,
+  CreateRefundPaymentValues,
+  Order,
+} from "@/enum/defined-type";
 import { closeLoading, openLoading } from "@/redux/slices/loadingSlice";
 import storage from "@/apis/storage";
 import { adminOrders, updateOrder } from "@/apis/services/orders";
@@ -29,6 +33,7 @@ import RemoveCircleOutlineRoundedIcon from "@mui/icons-material/RemoveCircleOutl
 import { COLORS } from "@/enum/colors";
 import { closeConfirm, openConfirm } from "@/redux/slices/confirmSlice";
 import { UpdateOrderValues } from "@/apis/types";
+import { createRefundPayment } from "@/apis/services/payment";
 
 const labelOptions = [
   { label: "Mã đơn hàng", value: "ORDER_CODE" },
@@ -139,20 +144,66 @@ const ProcessingOrdersTable = () => {
     try {
       dispatch(openLoading());
       const token = storage.getLocalAccessToken();
-      const variables: UpdateOrderValues = {
-        status: EnumOrderStatus.OVERDATE,
-      };
-      const res = await updateOrder(order?.id, token, variables);
-      if (res) {
-        dispatch(closeConfirm());
-        let alert: AlertState = {
-          isOpen: true,
-          title: "THÀNH CÔNG",
-          message: "Đã hủy đơn hàng do quá hạn xác nhận thành công!",
-          type: AlertStatus.SUCCESS,
+
+      //create refund for order
+      if (order?.isPaid) {
+        //ĐƠN BỊ HỦY ĐÃ THANH TOÁN
+
+        const variables: CreateRefundPaymentValues = {
+          zp_trans_id: order?.zp_trans_id,
+          amount: order.totalPayment,
         };
-        dispatch(openAlert(alert));
-        handleRefetch();
+        const refundResult = await createRefundPayment(variables);
+        if (refundResult?.return_code === 2) {
+          let alert: AlertState = {
+            isOpen: true,
+            title: "LỖI",
+            message: "Hoàn tiền không thành công!",
+            type: AlertStatus.ERROR,
+          };
+          dispatch(openAlert(alert));
+          return;
+        } else if (refundResult?.return_code === 1) {
+          const variables: UpdateOrderValues = {
+            status: EnumOrderStatus.OVERDATE,
+          };
+
+          //update status overdate for order
+          const updatedOrder = await updateOrder(order?.id, token, variables);
+
+          if (updatedOrder) {
+            dispatch(closeConfirm());
+            let alert: AlertState = {
+              isOpen: true,
+              title: "THÀNH CÔNG",
+              message: "Đã hủy đơn hàng và hoàn tiền thành công!",
+              type: AlertStatus.SUCCESS,
+            };
+            dispatch(openAlert(alert));
+            handleRefetch();
+          }
+        }
+      } else {
+        //ORDER BỊ HỦY CHƯA ĐƯỢC THANH TOÁN
+
+        const variables: UpdateOrderValues = {
+          status: EnumOrderStatus.OVERDATE,
+        };
+
+        //update status overdate for order
+        const updatedOrder = await updateOrder(order?.id, token, variables);
+
+        if (updatedOrder) {
+          dispatch(closeConfirm());
+          let alert: AlertState = {
+            isOpen: true,
+            title: "THÀNH CÔNG",
+            message: "Đã hủy đơn hàng thành công!",
+            type: AlertStatus.SUCCESS,
+          };
+          dispatch(openAlert(alert));
+          handleRefetch();
+        }
       }
     } catch (error: any) {
       let alert: AlertState = {

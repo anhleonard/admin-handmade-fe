@@ -211,6 +211,7 @@ export type Order = {
   updatedBy: User;
   isReadyDelivery: boolean;
   isMinusPoint: boolean;
+  zp_trans_id: string;
 };
 
 export type User = {
@@ -290,4 +291,10 @@ export type Progress = {
   createdAt: Date;
   updatedAt: Date;
   user: User;
+};
+
+//refund money
+export type CreateRefundPaymentValues = {
+  zp_trans_id?: string;
+  amount?: number;
 };
