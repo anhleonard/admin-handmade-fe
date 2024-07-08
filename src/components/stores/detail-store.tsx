@@ -100,6 +100,10 @@ const DetailStore = ({ storeId }: Props) => {
               <DetailStoreItem title="Tên cửa hàng" desc={store?.name} />
               <DetailStoreItem title="Tên chủ shop" desc={store?.owner?.name} />
               <DetailStoreItem
+                title="Tài khoản ngân hàng"
+                desc={`${store?.owner?.bankName ?? "--"} - ${store?.owner?.accountNumber ?? "--"}`}
+              />
+              <DetailStoreItem
                 title="Ngành hàng chủ lực"
                 desc={store?.mainBusiness}
               />

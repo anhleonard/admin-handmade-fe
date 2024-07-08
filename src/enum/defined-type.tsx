@@ -229,6 +229,8 @@ export type User = {
   hasStore: boolean;
   store: Store;
   shippings: Shipping[];
+  bankName: string;
+  accountNumber: string;
 };
 
 export type FilterTime = {

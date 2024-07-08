@@ -2,8 +2,8 @@ import { ListItem } from "@mui/material";
 import React from "react";
 
 type Props = {
-  title: string;
-  desc: string | number;
+  title?: string;
+  desc?: string | number;
   hasBorder?: boolean;
 };
 
